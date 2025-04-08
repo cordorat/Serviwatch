@@ -1,7 +1,6 @@
 from django import forms
 from core.models import Cliente
 from django.core.validators import EmailValidator
-import re
 
 
 class ClienteForm(forms.ModelForm):
@@ -20,3 +19,4 @@ class ClienteForm(forms.ModelForm):
             raise forms.ValidationError(
                 "El correo debe tener un formato válido, como nombre@dominio.com"
             )
+        return email
