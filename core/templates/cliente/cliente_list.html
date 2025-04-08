@@ -2,7 +2,7 @@
 <a href="{% url 'cliente_create' %}">Agregar nuevo cliente</a>
 <ul>
   {% for cliente in clientes %}
-    <li>{{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.email }}</li>
+    <li>{{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.telefono }}</li>
   {% empty %}
     <li>No hay clientes registrados.</li>
   {% endfor %}

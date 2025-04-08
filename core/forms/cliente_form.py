@@ -1,22 +1,25 @@
 from django import forms
 from core.models import Cliente
-from django.core.validators import EmailValidator
-
 
 class ClienteForm(forms.ModelForm):
-    email = forms.CharField(
-        label="Correo electrónico",
-        required=True
+    telefono = forms.CharField(
+        label="Teléfono",
+        required=True,
+        max_length=10,
+        min_length=10
     )
 
     class Meta:
         model = Cliente
-        fields = ['nombre', 'apellido', 'email', 'telefono']
+        fields = ['nombre', 'apellido', 'telefono']
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if '@' not in email or not email.endswith('.com'):
-            raise forms.ValidationError(
-                "El correo debe tener un formato válido, como nombre@dominio.com"
-            )
-        return email
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+
+        if not telefono.isdigit():
+            raise forms.ValidationError("El número de teléfono solo debe contener números.")
+
+        if len(telefono) != 10:
+            raise forms.ValidationError("El número de teléfono debe tener exactamente 10 dígitos.")
+
+        return telefono
