@@ -5,10 +5,12 @@
         branches:
           - main
           - development
+          - DCordoba
       pull_request:
         branches:
           - main
           - development
+          - DCordoba
     jobs:
       build:
         runs-on: ubuntu-latest
