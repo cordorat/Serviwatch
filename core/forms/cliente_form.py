@@ -6,12 +6,26 @@ class ClienteForm(forms.ModelForm):
         label="Teléfono",
         required=True,
         max_length=10,
-        min_length=10
+        min_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'validate',
+            'placeholder': 'Ingresa el número de teléfono'
+        })
     )
 
     class Meta:
         model = Cliente
         fields = ['nombre', 'apellido', 'telefono']
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'validate',
+                'placeholder': 'Ingresa el nombre'
+            }),
+            'apellido': forms.TextInput(attrs={
+                'class': 'validate',
+                'placeholder': 'Ingresa el apellido'
+            }),
+        }
 
     def clean_telefono(self):
         telefono = self.cleaned_data.get('telefono')
