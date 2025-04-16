@@ -15,13 +15,6 @@
       <a href="{% url 'cliente_create' %}" class="btn btn-success">+ Agregar Cliente</a>
     </div>
 
-    <!-- Campo de búsqueda -->
-    <form method="GET" class="mb-4">
-      <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Buscar cliente..." value="{{ request.GET.q }}">
-        <button class="btn btn-outline-primary" type="submit">Buscar</button>
-      </div>
-    </form>
 
     {% if clientes %}
       <div class="table-responsive">
@@ -40,10 +33,6 @@
                 <td>{{ cliente.nombre }}</td>
                 <td>{{ cliente.apellido }}</td>
                 <td>{{ cliente.telefono }}</td>
-                <td class="text-end">
-                  <a href="{% url 'cliente_update' cliente.id %}" class="btn btn-sm btn-outline-warning">Editar</a>
-                  <a href="{% url 'cliente_delete' cliente.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-                </td>
               </tr>
             {% endfor %}
           </tbody>
