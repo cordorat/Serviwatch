@@ -10,6 +10,7 @@
         branches:
           - main
           - development
+          - DCordoba
     jobs:
       build:
         runs-on: ubuntu-latest
@@ -48,3 +49,4 @@
               # exit-zero treats all errors as warnings
     
               flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
