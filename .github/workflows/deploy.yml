@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - DCordoba  # o la rama que usas para producción
+      - DCordoba  
 
 jobs:
   deploy:
