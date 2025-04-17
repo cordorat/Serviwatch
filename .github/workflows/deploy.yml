@@ -3,24 +3,43 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - DCordoba  
+      - DCordoba  # Cambia por tu rama si es otra
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Connect and Deploy
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ubuntu/Serviwatch
-          git pull origin DCordoba
-          source /home/ubuntu/Serviwatch/venv/bin/activate
-          pip install -r requirements.txt
-          python manage.py migrate
-          python manage.py collectstatic --noinput
-          sudo systemctl restart nginx
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # Asegúrate de tener este secreto
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@18.220.91.252 << 'EOF'
+            cd ~/Serviwatch
+
+            # Verifica si la carpeta existe, si no la crea
+            if [ ! -d "venv" ]; then
+              sudo apt update
+              sudo apt install -y python3-venv python3-pip
+              python3 -m venv venv
+            fi
+
+            source venv/bin/activate
+
+            git fetch origin
+            git reset --hard origin/DCordoba
+
+            pip install --upgrade pip
+            pip install -r requirements.txt
+
+            python manage.py migrate
+            python manage.py collectstatic --noinput
+
+            sudo systemctl restart nginx
+          EOF
