@@ -1,57 +1,18 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="es">
+{% extends 'base.html' %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Agregar Cliente</title>
-  <!-- Materialize CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-  <!-- Tu CSS personalizado -->
-  <link rel="stylesheet" href="{% static 'styles.css' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
+{% block title %}Agregar Cliente{% endblock %}
 
-<body>
+{% block content %}
+  <h2>AGREGAR CLIENTE</h2>
+  <h4>DATOS PERSONALES</h4>
 
-  <div class="container custom-form-container z-depth-1">
-    <h1 class="center-align">Agregar Cliente</h1>
-    <form method="post">
-      {% csrf_token %}
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-buttons">
+      <button class="btn save" type="submit">GUARDAR</button>
+      <a href="#" class="btn cancel">CANCELAR</a>
+    </div>
+  </form>
 
-      <div class="input-field">
-        {{ form.nombre.label_tag }}
-        {{ form.nombre }}
-        {% if form.nombre.errors %}
-        <span class="red-text">{{ form.nombre.errors.0 }}</span>
-        {% endif %}
-      </div>
-
-      <div class="input-field">
-        {{ form.apellido.label_tag }}
-        {{ form.apellido }}
-        {% if form.apellido.errors %}
-        <span class="red-text">{{ form.apellido.errors.0 }}</span>
-        {% endif %}
-      </div>
-
-      <div class="input-field">
-        {{ form.telefono.label_tag }}
-        {{ form.telefono }}
-        {% if form.telefono.errors %}
-        <span class="red-text">{{ form.telefono.errors.0 }}</span>
-        {% endif %}
-      </div>
-
-      <div class="center-align">
-        <button type="submit" class="btn waves-effect waves-light blue">Guardar</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Materialize JS (necesario para algunos componentes) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
-</body>
-
-</html>
+{% endblock %}
