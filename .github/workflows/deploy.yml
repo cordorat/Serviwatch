@@ -20,7 +20,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@3.15.14.198 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@18.116.15.134  << 'EOF'
             cd ~/Serviwatch
 
             # Verifica si la carpeta existe, si no la crea
