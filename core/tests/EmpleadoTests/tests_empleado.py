@@ -1,8 +1,11 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from core.models.empleado import Empleado
 from core.forms.empleado_form import EmpleadoForm
 from core.services.empleado_service import crear_empleado, get_all_empleados
+from django.contrib.messages import get_messages
+
 
 
 
@@ -244,4 +247,98 @@ class EmpleadoServiceTest(TestCase):
         )
         self.assertEqual(empleados.count(), 1)
         self.assertEqual(empleados[0].nombre, 'Juan')
+        
+class EmpleadoViewsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        # Crear empleados de prueba
+        self.empleado1 = Empleado.objects.create(
+            cedula='1234567890',
+            nombre='Juan',
+            apellidos='Pérez',
+            fecha_ingreso='2023-01-01',
+            fecha_nacimiento='1990-01-01',
+            celular='3001234567',
+            cargo='Técnico',
+            salario='2500000',
+            estado='Activo'
 
+        self.empleado2 = Empleado.objects.create(
+            cedula='0987654321',
+            nombre='María',
+            apellidos='López',
+            fecha_ingreso='2023-02-01',
+            fecha_nacimiento='1992-01-01',
+            celular='3007654321',
+            cargo='Secretario/a',
+            salario='2000000',
+            estado='Inactivo'
+        )
+
+    def test_empleado_list_view_sin_filtros(self):
+        response = self.client.get(reverse('empleado_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'empleado/empleado_list.html')
+        self.assertEqual(len(response.context['page_obj']), 2)
+
+    def test_empleado_list_view_con_filtro_estado(self):
+        response = self.client.get(reverse('empleado_list'), {'estado': 'Activo'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['page_obj']), 1)
+        self.assertEqual(response.context['page_obj'][0].estado, 'Activo')
+
+    def test_empleado_list_view_con_busqueda_cedula(self):
+        response = self.client.get(reverse('empleado_list'), {'cedula': '123'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['page_obj']), 1)
+        self.assertEqual(response.context['page_obj'][0].cedula, '1234567890')
+
+    def test_empleado_list_view_paginacion(self):
+        # Crear más empleados para probar paginación
+        for i in range(10):
+            Empleado.objects.create(
+                cedula=f'11111111{i}',
+                nombre=f'Test{i}',
+                apellidos='Apellido',
+                fecha_ingreso='2023-01-01',
+                fecha_nacimiento='1990-01-01',
+                celular=f'30012345{i}',
+                cargo='Técnico',
+                salario='2500000',
+                estado='Activo'
+            )
+        response = self.client.get(reverse('empleado_list'))
+        self.assertEqual(len(response.context['page_obj']), 6)  # 6 por página
+
+    def test_empleado_create_view_get(self):
+        response = self.client.get(reverse('empleado_create'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'empleado/empleado_form.html')
+
+    def test_empleado_create_view_post_success(self):
+        data = {
+            'cedula': '1111111111',
+            'nombre': 'Pedro',
+            'apellidos': 'Gómez',
+            'fecha_ingreso': '2024-01-01',
+            'fecha_nacimiento': '1995-01-01',
+            'celular': '3009876543',
+            'cargo': 'Técnico',
+            'salario': '3000000',
+            'estado': 'Activo'
+        }
+
+        response = self.client.post(reverse('empleado_create'), data)
+        self.assertRedirects(response, reverse('empleado_list'))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Empleado creado exitosamente.')
+
+    def test_empleado_create_view_post_invalid_form(self):
+        data = {
+            'cedula': 'invalid',  # Cédula inválida
+            'nombre': 'Pedro'
+            # Faltan campos requeridos
+        }
+        response = self.client.post(reverse('empleado_create'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'empleado/empleado_form.html')
