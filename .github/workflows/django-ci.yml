@@ -16,6 +16,9 @@
               - 3.13
         steps:
           - uses: actions/checkout@v3
+            with:
+              fetch-depth: 0
+              
           - name: Set up Python ${{ matrix.python-version }}
             uses: actions/setup-python@v4
             with:
@@ -51,7 +54,7 @@
            #   flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
           - name: SonarQube Scan
             if: github.event.pull_request.base.ref == 'development' || github.event_name == 'push'
-            uses: SonarSource/sonarcloud-github-action@master
+            uses: SonarSource/sonarqube-scan-action@v5
             env:
               SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             with:
@@ -62,6 +65,4 @@
                 -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**
                 -Dsonar.host.url=https://sonarcloud.io
                 -Dsonar.organization=Desprogramadores
-                -Dsonar.branch.name=cordorat_Serviwatch  
-
-    
+                -Dsonar.branch.name=cordorat_Serviwatch
