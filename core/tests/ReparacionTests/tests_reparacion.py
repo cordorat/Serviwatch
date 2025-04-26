@@ -2,6 +2,7 @@ from django.test import TestCase
 from core.models import Reparacion, Cliente, Empleado
 from datetime import date
 
+
 class ReparacionModelTest(TestCase):
     def test_crear_reparacion(self):
         cliente = Cliente.objects.create(
@@ -11,8 +12,15 @@ class ReparacionModelTest(TestCase):
         )
 
         tecnico = Empleado.objects.create(
-            nombre="Luisa",
-            apellido="Martínez"
+            cedula=1234567890,
+            nombre="Juan",
+            apellidos="Pérez",
+            fecha_ingreso=date(2024, 1, 10),
+            fecha_nacimiento=date(1990, 5, 20),
+            celular=3216549870,
+            cargo="técnico",  
+            salario=2500000,
+            estado="Activo"  
         )
 
         reparacion = Reparacion.objects.create(
