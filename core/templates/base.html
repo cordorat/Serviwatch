@@ -5,14 +5,24 @@
   <meta charset="UTF-8">
   <title>{% block title %}Servi-Watch{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/formularios.css' %}">
 </head>
 <body>
   <!-- Barra superior -->
-  <header class="topbar">
-    <div class="topbar-left">SERVI-WATCH</div>
-    <div class="topbar-right">
-      <span class="icon-bell">🔔</span>
-      <span class="icon-logout">⏏️</span>
+  <header class="header">
+    <div class="logo-container">
+      <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo">
+    </div>
+
+    <div class="header-icons">
+      {% if not user.is_superuser %}
+      <a href="" class="icon-container">
+        <img src="{% static 'images/campana-nuevo.png' %}" alt="Notificaciones" class="icon-container">
+      </a>
+      {% endif %}
+      <a href="" class="icon-container">
+        <img src="{% static 'images/salida.png' %}" alt="Salir" class="icon-container">
+      </a>
     </div>
   </header>
 
@@ -20,13 +30,80 @@
   <div class="main-container">
     <!-- Sidebar izquierda -->
     <aside class="sidebar">
-      <div class="user">USUARIO</div>
-      <nav>
+      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} user-active {% endif %}">
+        <div class="user-avatar">
+          <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
+        </div>
+        {% if user.is_superuser %}
+        <h2>ADMIN</h2>
+        {% else %}
+        <h2>USUARIO</h2>
+        {% endif %}
+      </div>
+
+      <div class="nav-header">
+        Navegación Principal
+      </div>
+
+      <nav class="main-nav">
         <ul>
-          <li class="active">Gestión de clientes</li>
-          <li>Gestión de productos</li>
-          <li>Gestión de servicios</li>
-          <li>Gestión de egresos</li>
+          {% if user.is_superuser %}
+          <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
+            <a href="{% url 'cliente_list' %}">
+              <span>
+                <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
+              </span>
+              Gestión de productos
+            </a>
+          </li>
+          <li class="{% if '/empleados/' in request.path or request.path == '/empleados' %} active {% endif %}">
+            <span>
+              <img src="{% static 'images/clientes.png' %}" alt="Empleados" class="icon">
+            </span>
+            Gestión de empleados
+          </li>
+          <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
+            <span>
+              <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
+            </span>
+            Gestión de usuarios
+          </li>
+          <li class="{% if '/reportes/' in request.path or request.path == '/reportes' %} active {% endif %}">
+            <span>
+              <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
+            </span>
+            Gestión de ingresos/egresos
+          </li>
+
+          {% else %}
+
+          <li class="{% if '/clientes/' in request.path or request.path == '/clientes' %} active {% endif %}">
+            <a href="{% url 'cliente_list' %}">
+              <span>
+                <img src="{% static 'images/clientes.png' %}" alt="Clientes" class="icon">
+              </span>
+              Gestión de clientes
+            </a>
+          </li>
+          <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
+            <span>
+              <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
+            </span>
+            Gestión de productos
+          </li>
+          <li class="{% if '/servicios/' in request.path or request.path == '/servicios' %} active {% endif %}">
+            <span>
+              <img src="{% static 'images/reloj 1.png' %}" alt="Servicios" class="icon">
+            </span>
+            Gestión de servicios
+          </li>
+          <li class="{% if '/egresos/' in request.path or request.path == '/egresos' %} active {% endif %}">
+            <span>
+              <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
+            </span>
+            Gestión de egresos
+          </li>
+          {% endif %}
         </ul>
       </nav>
     </aside>
