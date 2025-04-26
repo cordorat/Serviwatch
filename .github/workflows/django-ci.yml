@@ -64,5 +64,5 @@
                 -Dsonar.sources=.
                 -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**
                 -Dsonar.host.url=https://sonarcloud.io
-                -Dsonar.organization=Desprogramadores
-                -Dsonar.branch.name=cordorat_Serviwatch
+                -Dsonar.organization=desprogramadores
+                -Dsonar.branch.name=development
