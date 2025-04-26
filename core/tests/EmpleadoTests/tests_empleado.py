@@ -178,7 +178,6 @@ class EmpleadoFormTest(TestCase):
         self.assertEqual(form.errors['salario'][0], "El salario no puede tener más de 8 dígitos.")
 
 
-
 class EmpleadoServiceTest(TestCase):
     def setUp(self):
         # Crear algunos empleados de prueba
