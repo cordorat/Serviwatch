@@ -1,32 +1,32 @@
-# from django.test import TestCase
-# from core.models import Reparacion, Cliente, Tecnico
-# from datetime import date
+from django.test import TestCase
+from core.models import Reparacion, Cliente, Empleado
+from datetime import date
 
-# class ReparacionModelTest(TestCase):
-#     def test_crear_reparacion(self):
-#         cliente = Cliente.objects.create(
-#             nombre="Carlos",
-#             apellido="Ramírez",
-#             telefono="3123456789"
-#         )
+class ReparacionModelTest(TestCase):
+    def test_crear_reparacion(self):
+        cliente = Cliente.objects.create(
+            nombre="Carlos",
+            apellido="Ramírez",
+            telefono="3123456789"
+        )
 
-#         tecnico = Tecnico.objects.create(
-#             nombre="Luisa",
-#             apellido="Martínez"
-#         )
+        tecnico = Empleado.objects.create(
+            nombre="Luisa",
+            apellido="Martínez"
+        )
 
-#         reparacion = Reparacion.objects.create(
-#             cliente=cliente,
-#             marca_reloj="Casio",
-#             descripcion="Cambio de batería",
-#             codigo_orden=1001,
-#             fecha_entrega_estimada=date.today(),
-#             precio=45000,
-#             espacio_fisico="A1",
-#             estado="cotización",
-#             tecnico=tecnico
-#         )
+        reparacion = Reparacion.objects.create(
+            cliente=cliente,
+            marca_reloj="Casio",
+            descripcion="Cambio de batería",
+            codigo_orden=1001,
+            fecha_entrega_estimada=date.today(),
+            precio=45000,
+            espacio_fisico="A1",
+            estado="cotización",
+            tecnico=tecnico
+        )
 
-#         self.assertIsNotNone(reparacion.id)
-#         self.assertEqual(reparacion.marca_reloj, "Casio")
-#         self.assertEqual(reparacion.cliente.nombre, "Carlos")
+        self.assertIsNotNone(reparacion.id)
+        self.assertEqual(reparacion.marca_reloj, "Casio")
+        self.assertEqual(reparacion.cliente.nombre, "Carlos")
