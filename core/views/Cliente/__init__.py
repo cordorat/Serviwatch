@@ -1,1 +1,0 @@
-from .cliente_view import cliente_create_view, cliente_list_view
