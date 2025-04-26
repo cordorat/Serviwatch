@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from core.forms import ClienteForm
+from core.forms.cliente_form import ClienteForm
 from core.services.cliente_service import get_all_clientes, crear_cliente
 
 
