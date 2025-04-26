@@ -3,5 +3,5 @@ from core.views.Cliente.cliente_view import cliente_create_view, cliente_list_vi
 
 urlpatterns = [
     path('clientes/', cliente_list_view, name='cliente_list'),
-    path('clientes/nuevo/', cliente_create_view, name='cliente_create'),
+    path('clientes/agregar/', cliente_create_view, name='cliente_create'),
 ]
