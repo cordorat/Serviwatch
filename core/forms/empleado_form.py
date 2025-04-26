@@ -6,6 +6,9 @@ class EmpleadoForm(forms.ModelForm):
         label="Cédula",
         required=True,
         max_length=15,
+        error_messages={
+            'max_length': "La cédula no puede tener más de 15 dígitos."
+        },
         widget=forms.TextInput(attrs={
             'class': 'validate',
             'placeholder': 'Ingresa la cédula'
@@ -16,6 +19,10 @@ class EmpleadoForm(forms.ModelForm):
         required=True,
         max_length=10,
         min_length=10,
+        error_messages={
+            'max_length': "El celular debe tener exactamente 10 dígitos.",
+            'min_length': "El celular debe tener exactamente 10 dígitos."
+        },
         widget=forms.TextInput(attrs={
             'class': 'validate',
             'placeholder': 'Ingresa el número de celular'
@@ -25,6 +32,9 @@ class EmpleadoForm(forms.ModelForm):
         label="Salario",
         required=True,
         max_length=8,
+        error_messages={
+            'max_length': "El salario no puede tener más de 8 dígitos."
+        },
         widget=forms.TextInput(attrs={
             'class': 'validate',
             'placeholder': 'Ingresa el salario'
