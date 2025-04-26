@@ -3,8 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from core.forms.reparacion_form import ReparacionForm
 from core.models.reparacion import Reparacion
+from django.views.decorators.http import require_http_methods
+
+
 
 @login_required
+@require_http_methods(["GET"])
 def reparacion_list_view(request):
     reparaciones = Reparacion.objects.all().order_by('estado')
     return render(request, 'reparacion/reparacion_list.html', {'reparaciones': reparaciones})
