@@ -56,12 +56,12 @@
               SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             with:
               args: >
-                -Dsonar.projectKey=Serviwatch
+                -Dsonar.projectKey=viwatch
                 -Dsonar.python.coverage.reportPaths=coverage.xml
                 -Dsonar.sources=.
                 -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**
                 -Dsonar.host.url=https://sonarcloud.io
                 -Dsonar.organization=Desprogramadores
-                -Dsonar.branch.name=development             
+                -Dsonar.branch.name=cordorat_Serviwatch  
 
     
