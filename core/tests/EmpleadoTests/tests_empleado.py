@@ -8,6 +8,7 @@ from django.contrib.messages import get_messages
 
 
 
+
 class EmpleadoModelTest(TestCase):
 
     def test_crear_empleado_valido(self):
@@ -261,7 +262,7 @@ class EmpleadoViewsTest(TestCase):
             cargo='Técnico',
             salario='2500000',
             estado='Activo'
-        )
+
         self.empleado2 = Empleado.objects.create(
             cedula='0987654321',
             nombre='María',
@@ -326,6 +327,7 @@ class EmpleadoViewsTest(TestCase):
             'salario': '3000000',
             'estado': 'Activo'
         }
+
         response = self.client.post(reverse('empleado_create'), data)
         self.assertRedirects(response, reverse('empleado_list'))
         messages = list(get_messages(response.wsgi_request))
