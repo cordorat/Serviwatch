@@ -56,7 +56,7 @@
               SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             with:
               args: >
-                -Dsonar.projectKey=Serviwatch
+                -Dsonar.projectKey=cordorat_Serviwatch
                 -Dsonar.python.coverage.reportPaths=coverage.xml
                 -Dsonar.sources=.
                 -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**
