@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Servi-Watch{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="topbar-left">SERVI-WATCH</div>
+    <div class="topbar-right">
+      <span class="icon-bell">🔔</span>
+      <span class="icon-logout">⏏️</span>
+    </div>
+  </header>
+
+  <!-- Contenedor principal debajo de la topbar -->
+  <div class="main-container">
+    <!-- Sidebar izquierda -->
+    <aside class="sidebar">
+      <div class="user">USUARIO</div>
+      <nav>
+        <ul>
+          <li class="active">Gestión de clientes</li>
+          <li>Gestión de productos</li>
+          <li>Gestión de servicios</li>
+          <li>Gestión de egresos</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <section class="content">
+      {% block content %}
+      {% endblock %}
+    </section>
+  </div>
+</body>
+</html>

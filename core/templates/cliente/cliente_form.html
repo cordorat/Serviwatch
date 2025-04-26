@@ -1,98 +1,18 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="es">
+{% extends 'base.html' %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Agregar Cliente</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Tu CSS personalizado (si tienes) -->
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* Estilos personalizados si los necesitas */
-    .form-container {
-      background-color: #f9f9f9;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+{% block title %}Agregar Cliente{% endblock %}
 
-    .form-container h1 {
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
+{% block content %}
+  <h2>AGREGAR CLIENTE</h2>
+  <h4>DATOS PERSONALES</h4>
 
-    .form-group label {
-      font-weight: bold;
-    }
-
-    .btn-custom {
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      width: 100%;
-    }
-
-    .btn-custom:hover {
-      background-color: #0056b3;
-    }
-
-    @media (max-width: 576px) {
-      .form-container {
-        padding: 20px;
-      }
-    }
-  </style>
-</head>
-
-<body class="bg-light">
-
-  <div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="form-container col-md-6 col-lg-4">
-      <h1 class="text-center">Agregar Cliente</h1>
-      <form method="post">
-        {% csrf_token %}
-
-        <div class="form-group">
-          <label for="id_nombre">{{ form.nombre.label }}</label>
-          {{ form.nombre }}
-          {% if form.nombre.errors %}
-          <div class="text-danger">{{ form.nombre.errors.0 }}</div>
-          {% endif %}
-        </div>
-
-        <div class="form-group">
-          <label for="id_apellido">{{ form.apellido.label }}</label>
-          {{ form.apellido }}
-          {% if form.apellido.errors %}
-          <div class="text-danger">{{ form.apellido.errors.0 }}</div>
-          {% endif %}
-        </div>
-
-        <div class="form-group">
-          <label for="id_telefono">{{ form.telefono.label }}</label>
-          {{ form.telefono }}
-          {% if form.telefono.errors %}
-          <div class="text-danger">{{ form.telefono.errors.0 }}</div>
-          {% endif %}
-        </div>
-
-        <div class="text-center">
-          <button type="submit" class="btn btn-custom">Guardar</button>
-        </div>
-      </form>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-buttons">
+      <button class="btn save" type="submit">GUARDAR</button>
+      <a href="#" class="btn cancel">CANCELAR</a>
     </div>
-  </div>
+  </form>
 
-  <!-- Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-</body>
-
-</html>
+{% endblock %}
