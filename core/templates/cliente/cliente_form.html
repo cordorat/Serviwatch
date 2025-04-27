@@ -1,18 +1,27 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% block title %}Agregar Cliente{% endblock %}
 
 {% block content %}
   <h2>AGREGAR CLIENTE</h2>
   <h4>DATOS PERSONALES</h4>
 
-  <form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="form-buttons">
-      <button class="btn save" type="submit">GUARDAR</button>
-      <button href="#" class="btn cancel">CANCELAR</button>
-    </div>
-  </form>
+  <div>
+    <div class="left-column">
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="form-buttons">
+        <button class="btn save" type="submit">GUARDAR</button>
+        <button href="#" class="btn cancel">CANCELAR</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="right-column">
+    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
+  </div>
+  </div>
 
 {% endblock %}
