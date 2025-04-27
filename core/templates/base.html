@@ -30,7 +30,7 @@
   <div class="main-container">
     <!-- Sidebar izquierda -->
     <aside class="sidebar">
-      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} user-active {% endif %}">
+      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} user-active {% endif %}" href="#">
         <div class="user-avatar">
           <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
         </div>
@@ -49,7 +49,7 @@
         <ul>
           {% if user.is_superuser %}
           <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
-            <a href="{% url 'cliente_list' %}">
+            <a href="#">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
               </span>
@@ -57,22 +57,28 @@
             </a>
           </li>
           <li class="{% if '/empleados/' in request.path or request.path == '/empleados' %} active {% endif %}">
-            <span>
+            <a href="#">
               <img src="{% static 'images/clientes.png' %}" alt="Empleados" class="icon">
             </span>
             Gestión de empleados
+            </a>
+            <span>
           </li>
           <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
-            <span>
-              <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
-            </span>
-            Gestión de usuarios
+            <a href="#">
+              <span>
+                <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
+              </span>
+              Gestión de usuarios
+            </a>
           </li>
           <li class="{% if '/reportes/' in request.path or request.path == '/reportes' %} active {% endif %}">
-            <span>
-              <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
-            </span>
-            Gestión de ingresos/egresos
+            <a href="#">
+              <span>
+                <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
+              </span>
+              Gestión de ingresos/egresos
+            </a>
           </li>
 
           {% else %}
@@ -86,22 +92,27 @@
             </a>
           </li>
           <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
+            <a href="#"></a>
             <span>
               <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
             </span>
             Gestión de productos
           </li>
           <li class="{% if '/servicios/' in request.path or request.path == '/servicios' %} active {% endif %}">
-            <span>
-              <img src="{% static 'images/reloj 1.png' %}" alt="Servicios" class="icon">
-            </span>
-            Gestión de servicios
+            <a href="#">
+              <span>
+                <img src="{% static 'images/reloj 1.png' %}" alt="Servicios" class="icon">
+              </span>
+              Gestión de servicios
+            </a>
           </li>
           <li class="{% if '/egresos/' in request.path or request.path == '/egresos' %} active {% endif %}">
-            <span>
-              <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
-            </span>
-            Gestión de egresos
+            <a href="#">
+              <span>
+                <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
+              </span>
+              Gestión de egresos
+            </a>
           </li>
           {% endif %}
         </ul>
