@@ -7,8 +7,6 @@ from core.services.empleado_service import crear_empleado, get_all_empleados
 from django.contrib.messages import get_messages
 
 
-
-
 class EmpleadoModelTest(TestCase):
 
     def test_crear_empleado_valido(self):
@@ -262,7 +260,7 @@ class EmpleadoViewsTest(TestCase):
             cargo='Técnico',
             salario='2500000',
             estado='Activo'
-
+        )
         self.empleado2 = Empleado.objects.create(
             cedula='0987654321',
             nombre='María',
