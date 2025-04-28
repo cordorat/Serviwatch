@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERVI-WATCH - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="brand-section">
+            <div class="brand-logo">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="white" stroke="#9b9" stroke-width="2"/>
+                    <line x1="50" y1="10" x2="50" y2="20" stroke="black" stroke-width="2"/>
+                    <line x1="50" y1="80" x2="50" y2="90" stroke="black" stroke-width="2"/>
+                    <line x1="10" y1="50" x2="20" y2="50" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="50" x2="90" y2="50" stroke="black" stroke-width="2"/>
+                    <line x1="26" y1="26" x2="33" y2="33" stroke="black" stroke-width="2"/>
+                    <line x1="26" y1="74" x2="33" y2="67" stroke="black" stroke-width="2"/>
+                    <line x1="74" y1="26" x2="67" y2="33" stroke="black" stroke-width="2"/>
+                    <line x1="74" y1="74" x2="67" y2="67" stroke="black" stroke-width="2"/>
+                    <text x="50" y="40" text-anchor="middle" font-size="12" font-weight="bold">XII</text>
+                    <text x="50" y="65" text-anchor="middle" font-size="12" font-weight="bold">VI</text>
+                    <text x="30" y="53" text-anchor="middle" font-size="12" font-weight="bold">IX</text>
+                    <text x="70" y="53" text-anchor="middle" font-size="12" font-weight="bold">III</text>
+                    <line x1="50" y1="50" x2="50" y2="30" stroke="black" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="65" y2="50" stroke="black" stroke-width="2"/>
+                </svg>
+            </div>
+            <div class="brand-name-container">
+                <div class="brand-name">SERVI-WATCH</div>
+                <div class="brand-underline"></div>
+            </div>
+            <div class="brand-tagline">REPARACIÓN TÉCNICA DE RELOJES<br>Servicio a Domicilio</div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="login-section">
+            <h1 class="login-header">LOGIN</h1>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+                
+                <div class="input-group">
+                    <i class="icon fas fa-user"></i>
+                    <input type="text" name="usuario" placeholder="USUARIO" class="form-control {% if usuario_error %}input-error{% endif %}" value="{{ request.POST.usuario|default:'' }}">
+                </div>
+                
+                <div class="input-group">
+                    <i class="icon fas fa-lock"></i>
+                    <input type="password" name="contraseña" placeholder="CONTRASEÑA" class="form-control {% if contraseña_error %}input-error{% endif %}">
+                    <i class="toggle-password fas fa-eye" id="togglePassword"></i>
+                </div>
+                
+                <button type="submit" class="login-button">ENTRAR</button>
+                
+                <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const contraseñaInput = document.querySelector('input[name="contraseña"]');
+            
+            if (togglePassword && contraseñaInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = contraseñaInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    contraseñaInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
