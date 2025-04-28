@@ -1,18 +1,56 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% block title %}Agregar Cliente{% endblock %}
 
 {% block content %}
-  <h2>AGREGAR CLIENTE</h2>
+  <h2 class="titulo">AGREGAR CLIENTE</h2>
   <h4>DATOS PERSONALES</h4>
 
-  <form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="form-buttons">
-      <button class="btn save" type="submit">GUARDAR</button>
-      <a href="#" class="btn cancel">CANCELAR</a>
-    </div>
-  </form>
+  <div>
+    <div class="left-column">
+    <form method="POST" class="custom-form">
+      {% csrf_token %}
+
+      <div class="input-group mb-3">
+        <span class="input-group-text form-span" id="basic-addon1">
+          <i class="bi bi-person-fill fs-4 text-secondary"></i>
+        </span>
+        {{ form.nombre }}
+      </div>
+
+      <div class="input-group mb-3">
+        <span class="input-group-text form-span" id="basic-addon1">
+          <i class="bi bi-person-fill fs-4 text-secondary"></i>     
+        </span>
+        {{ form.apellido }}
+      </div>
+
+      <div class="input-group mb-3">
+        <span class="input-group-text form-span" id="basic-addon1">
+          <i class="bi bi-telephone-fill fs-4 text-secondary"></i>
+        </span>
+        {{ form.telefono }}
+
+      </div>
+
+      <div class="form-buttons">
+        <button class="btn save" type="submit">GUARDAR</button>
+        <a href="{% url 'cliente_list' %}">
+          <button type="button" class="btn cancel">CANCELAR</button>
+        </a>
+    
+      </div>
+
+    </form>
+  </div>
+
+  <div class="right-column">
+    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
+  </div>
+
+  
+  </div>
+  
 
 {% endblock %}
