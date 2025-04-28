@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from core.forms.cliente_form import ClienteForm
 from core.services.cliente_service import get_all_clientes, crear_cliente
+from django.contrib import messages
 
 
 def cliente_list_view(request):
@@ -13,6 +14,7 @@ def cliente_create_view(request):
         form = ClienteForm(request.POST)
         if form.is_valid():
             crear_cliente(form)
+            messages.success(request, 'Cliente creado exitosamente.')
             return redirect('cliente_list')
     else:
         form = ClienteForm()

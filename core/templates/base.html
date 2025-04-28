@@ -59,7 +59,7 @@
         <ul>
           {% if user.is_superuser %}
           <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/productos/' in request.path or request.path == '/productos' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
               </span>
@@ -67,7 +67,7 @@
             </a>
           </li>
           <li class="{% if '/empleados/' in request.path or request.path == '/empleados' %} active {% endif %}">
-            <a href="#">
+            <a href="{% url 'empleado_list' %}" class="{% if not '/empleados/' in request.path or request.path == '/empleados' %} menu-link {% endif %}">
             <span>
               <img src="{% static 'images/clientes.png' %}" alt="Empleados" class="icon">
             </span>
@@ -76,7 +76,7 @@
             
           </li>
           <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/usuarios/' in request.path or request.path == '/usuarios' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
               </span>
@@ -84,7 +84,7 @@
             </a>
           </li>
           <li class="{% if '/reportes/' in request.path or request.path == '/reportes' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/reportes/' in request.path or request.path == '/reportes' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
               </span>

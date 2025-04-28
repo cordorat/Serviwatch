@@ -9,7 +9,7 @@
 
   <div>
     <div class="left-column">
-    <form method="POST" class="custom-form">
+    <form method="POST" class="custom-form" id="clienteForm">
       {% csrf_token %}
 
       <div class="input-group mb-3">
@@ -35,7 +35,7 @@
       </div>
 
       <div class="form-buttons">
-        <button class="btn save" type="submit">GUARDAR</button>
+        <button class="btn save" type="submit">GUARDAR</button> 
         <a href="{% url 'cliente_list' %}">
           <button type="button" class="btn cancel">CANCELAR</button>
         </a>
@@ -43,14 +43,13 @@
       </div>
 
     </form>
-  </div>
+   </div>
 
-  <div class="right-column">
-    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
-  </div>
+    <div class="right-column">
+      <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
+    </div>
 
-  
-  </div>
-  
+  </div>  
+
 
 {% endblock %}
