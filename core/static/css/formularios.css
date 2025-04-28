@@ -15,9 +15,20 @@ form {
   max-width: 300px;
 }
 
-input {
+.custom-form input {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #626E15;
+  border-radius: 4px;
+  text-transform: uppercase;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-span {
+  border: 1px solid #626E15; /* tu color personalizado */
   border-radius: 4px;
 }
 
@@ -80,9 +91,9 @@ body {
 
 .left-column {
   float: left;
-  width: 500px;
+  width: 800px;
   padding-right: 10px;
-  padding-left: 40px;
+  padding-left: 50px;
 }
 
 .right-column {

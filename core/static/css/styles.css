@@ -63,7 +63,8 @@ body {
 .user-info {
   display: flex;
   align-items: center;
-  padding: 20px;
+  width: 100%;
+  padding: 36px;
   border-bottom: 2px solid #C7C7C7;
 }
 
@@ -124,7 +125,6 @@ body {
   cursor: pointer;
   color: #333;
   font-size: 16px;
-  border-bottom: 5px solid #C7C7C7; 
   text-decoration: none;
   font-weight: bold;
 }

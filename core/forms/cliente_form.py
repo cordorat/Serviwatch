@@ -8,7 +8,7 @@ class ClienteForm(forms.ModelForm):
         max_length=10,
         min_length=10,
         widget=forms.TextInput(attrs={
-            'class': 'validate',
+            'class': 'validate form-control',
             'placeholder': 'Telefono',
         })
     )
@@ -18,11 +18,11 @@ class ClienteForm(forms.ModelForm):
         fields = ['nombre', 'apellido', 'telefono']
         widgets = {
             'nombre': forms.TextInput(attrs={
-                'class': 'validate',
+                'class': 'validate form-control',
                 'placeholder': 'Nombre'
             }),
             'apellido': forms.TextInput(attrs={
-                'class': 'validate',
+                'class': 'validate form-control',
                 'placeholder': 'Apellido'
             }),
         }
