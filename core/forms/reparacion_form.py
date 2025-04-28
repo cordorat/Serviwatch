@@ -2,6 +2,42 @@ from django import forms
 from core.models import Reparacion, Cliente
 
 class ReparacionForm(forms.ModelForm):
+    descripcion = forms.CharField(
+        max_length=500,
+        required=True,
+        error_messages={
+            'max_length': "La descripción no puede superar los 500 caracteres."
+        },
+        widget=forms.Textarea(attrs={
+            'class': 'validate',
+            'placeholder': 'Descripción de la reparación'
+        })
+    )
+    
+    espacio_fisico = forms.CharField(
+        max_length=15,
+        required=True,
+        error_messages={
+            'max_length': "El espacio físico no puede tener más de 15 caracteres."
+        },
+        widget=forms.Textarea(attrs={
+            'class': 'validate',
+            'placeholder': 'Espacio físico'
+        })
+    )
+    
+    marca_reloj = forms.CharField(
+        max_length=30,
+        required=True,
+        error_messages={
+            'max_length': "La marca del reloj no puede superar los 30 caracteres."
+        },
+        widget=forms.Textarea(attrs={
+            'class': 'validate',
+            'placeholder': 'Marca del reloj'
+        })
+    )
+    
     cliente_nombre = forms.CharField(
         max_length=50,
         required=True,
@@ -20,6 +56,19 @@ class ReparacionForm(forms.ModelForm):
             'class': 'validate',
             'placeholder': 'Número de contacto'
         })
+    )
+    
+    precio = forms.IntegerField(
+        min_value=1,
+        required=True,
+        widget=forms.NumberInput(attrs={
+            'class': 'validate',
+            'placeholder': 'Ingrese el precio'
+        }),
+        error_messages={
+            'invalid': 'El precio debe ser un número entero.',
+            'min_value': 'El precio debe ser mayor a 0.',
+        }
     )
 
     class Meta:
