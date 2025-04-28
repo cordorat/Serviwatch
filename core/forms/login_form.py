@@ -46,7 +46,7 @@ class LoginForm(forms.Form):
         if not re.search(r'\d', contraseña):
             raise forms.ValidationError('La contraseña debe tener al menos un numero')
         
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', contraseña):
+        if not re.search(r'[!@#$%^&*?]', contraseña):
             raise forms.ValidationError('La contraseña debe tener al menos un caracter especial')
         
         return contraseña
