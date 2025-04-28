@@ -34,6 +34,14 @@
 
       </div>
 
+      <div class="form-buttons">
+        <button class="btn save" type="submit">GUARDAR</button>
+        <a href="{% url 'cliente_list' %}">
+          <button type="button" class="btn cancel">CANCELAR</button>
+        </a>
+    
+      </div>
+
     </form>
   </div>
 
@@ -43,12 +51,6 @@
 
   
   </div>
-  <div class="form-buttons">
-    <button class="btn save" type="submit">GUARDAR</button>
-    <a href="{% url 'cliente_list' %}">
-      <button type="button" class="btn cancel">CANCELAR</button>
-    </a>
-
-  </div>
+  
 
 {% endblock %}
