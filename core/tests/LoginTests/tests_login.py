@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 class LoginFormTest(TestCase):
     def test_loginform_valido(self):
         form = LoginForm(data={
-            'usuario': 'lucasPrueba1',
+            'usuario': 'lucasPrueba',
             'contraseña': 'lucasPrueba1@'
         })
         self.assertTrue(form.is_valid())
@@ -19,7 +19,7 @@ class LoginFormTest(TestCase):
 
     def test_loginform_contraseñaSinNumero(self):
         form = LoginForm(data={
-            'usuario': 'lucasPrueba1',
+            'usuario': 'lucasPrueba',
             'contraseña': 'pruebaaa@'
         })
         self.assertFalse(form.is_valid())
@@ -27,7 +27,7 @@ class LoginFormTest(TestCase):
 
     def test_loginform_contraseñaSinLetras(self):
         form = LoginForm(data={
-            'usuario': 'lucasPrueba1',
+            'usuario': 'lucasPrueba',
             'contraseña': '12345678@'
         })
         self.assertFalse(form.is_valid())
@@ -35,7 +35,7 @@ class LoginFormTest(TestCase):
 
     def test_loginform_contraseñaSinCaracterEspecial(self):
         form = LoginForm(data={
-            'usuario': 'lucasPrueba1',
+            'usuario': 'lucasPrueba',
             'contraseña': 'prueba1234'
         })
         self.assertFalse(form.is_valid())
