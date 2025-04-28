@@ -4,24 +4,48 @@
 {% block title %}Agregar Cliente{% endblock %}
 
 {% block content %}
-  <h2>AGREGAR CLIENTE</h2>
+  <h2 class="titulo">AGREGAR CLIENTE</h2>
   <h4>DATOS PERSONALES</h4>
 
   <div>
     <div class="left-column">
     <form method="POST">
       {% csrf_token %}
-      {{ form.as_p }}
-      <div class="form-buttons">
-        <button class="btn save" type="submit">GUARDAR</button>
-        <button href="#" class="btn cancel">CANCELAR</button>
+
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">
+          <i class="bi bi-person-fill fs-4 text-secondary"></i>
+        </span>
+        {{ form.nombre }}
       </div>
+
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">
+          <i class="bi bi-person-fill fs-4 text-secondary"></i>     
+        </span>
+        {{ form.apellido }}
+      </div>
+
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">
+          <i class="bi bi-telephone-fill fs-4 text-secondary"></i>
+        </span>
+        {{ form.telefono }}
+
+      </div>
+
     </form>
   </div>
 
   <div class="right-column">
     <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
   </div>
+
+  
+  </div>
+  <div class="form-buttons">
+    <button class="btn save" type="submit">GUARDAR</button>
+    <button type="button" class="btn cancel" onclick="window.location.href='{% url 'cliente_list' %}';">CANCELAR</button>
   </div>
 
 {% endblock %}

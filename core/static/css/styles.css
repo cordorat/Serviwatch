@@ -88,6 +88,7 @@ body {
 }
 
 .user-info h2 {
+  font-family: "Inter", sans-serif;
   font-size: 20px;
   color: #000000;
   font-weight: bold;
@@ -95,6 +96,7 @@ body {
 }
 
 .nav-header {
+  font-family: "Inter", sans-serif;
   padding: 15px 20px;
   font-size: 16px;
   color: #333;
@@ -115,6 +117,7 @@ body {
 }
 
 .main-nav li {
+  font-family: "Inter", sans-serif;
   padding: 12px 10px;
   display: flex;
   align-items: center;
@@ -123,6 +126,7 @@ body {
   font-size: 16px;
   border-bottom: 5px solid #C7C7C7; 
   text-decoration: none;
+  font-weight: bold;
 }
 
 .icon-user {
@@ -145,6 +149,7 @@ body {
 }
 
 .main-nav li.active {
+  font-family: "Inter", sans-serif;
   background-color: #C9DC4E;
   font-weight: bold;
   border: 2px solid #626E15; 

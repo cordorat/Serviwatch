@@ -9,7 +9,7 @@ class ClienteForm(forms.ModelForm):
         min_length=10,
         widget=forms.TextInput(attrs={
             'class': 'validate',
-            'placeholder': 'Ingresa el número de teléfono'
+            'placeholder': 'Telefono',
         })
     )
 
@@ -19,11 +19,11 @@ class ClienteForm(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'validate',
-                'placeholder': 'Ingresa el nombre'
+                'placeholder': 'Nombre'
             }),
             'apellido': forms.TextInput(attrs={
                 'class': 'validate',
-                'placeholder': 'Ingresa el apellido'
+                'placeholder': 'Apellido'
             }),
         }
 
