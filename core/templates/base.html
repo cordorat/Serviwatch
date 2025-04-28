@@ -24,11 +24,11 @@
 
     <div class="header-icons">
       {% if not user.is_superuser %}
-      <a href="" class="icon-container">
+      <a href="#" class="icon-container">
         <img src="{% static 'images/campana-nuevo.png' %}" alt="Notificaciones" class="icon-container">
       </a>
       {% endif %}
-      <a href="" class="icon-container">
+      <a href="#" class="icon-container">
         <img src="{% static 'images/salida.png' %}" alt="Salir" class="icon-container">
       </a>
     </div>
@@ -38,15 +38,17 @@
   <div class="main-container" id="sidebar">
     <!-- Sidebar izquierda -->
     <aside class="sidebar">
-      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} user-active {% endif %}" href="#">
-        <div class="user-avatar">
-          <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
-        </div>
-        {% if user.is_superuser %}
-        <h2>ADMIN</h2>
-        {% else %}
-        <h2>USUARIO</h2>
-        {% endif %}
+      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} active {% endif %}">
+        <a href="#" class="user-avatar-container">
+          <div class="user-avatar">
+            <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
+          </div>
+          {% if user.is_superuser %}
+          <h2>ADMIN</h2>
+          {% else %}
+          <h2>USUARIO</h2>
+          {% endif %}
+        </a>
       </div>
 
       <div class="nav-header">
@@ -93,7 +95,7 @@
           {% else %}
 
           <li class="{% if '/clientes/' in request.path or request.path == '/clientes' %} active {% endif %}">
-            <a href="{% url 'cliente_list' %}">
+            <a href="{% url 'cliente_list' %}" class="{% if not '/clientes/' in request.path or request.path == '/clientes' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/clientes.png' %}" alt="Clientes" class="icon">
               </span>
@@ -101,7 +103,7 @@
             </a>
           </li>
           <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/productos/' in request.path or request.path == '/productos' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
               </span>
@@ -109,7 +111,7 @@
             </a>
           </li>
           <li class="{% if '/servicios/' in request.path or request.path == '/servicios' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/servicios/' in request.path or request.path == '/servicios' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Servicios" class="icon">
               </span>
@@ -117,7 +119,7 @@
             </a>
           </li>
           <li class="{% if '/egresos/' in request.path or request.path == '/egresos' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/egresos/' in request.path or request.path == '/egresos' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
               </span>

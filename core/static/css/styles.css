@@ -64,7 +64,7 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 36px;
+  padding: 40px;
   border-bottom: 2px solid #C7C7C7;
 }
 
@@ -75,11 +75,21 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 15px;
+  margin-right: 10px;
   font-size: 24px;
 }
 
-.user-active{
+.user-avatar-container {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  margin-left: 50px;
+}
+
+.user-info.active{
   width: 240px;
   border-radius: 5px;
   background-color: #C9DC4E;
@@ -93,7 +103,7 @@ body {
   font-size: 20px;
   color: #000000;
   font-weight: bold;
-  padding: 11px;
+  padding: 10px;
 }
 
 .nav-header {
@@ -130,10 +140,12 @@ body {
 }
 
 .icon-user {
-  width: 80px; 
-  height: 80px;
+  width: 70px; 
+  height: 70px;
   font-size: 20px;
   object-fit: contain; 
+  margin-right: 10px;
+  position: relative;
 }
 
 .icon {
@@ -161,4 +173,18 @@ body {
 a, a:link, a:visited, a:hover, a:active, a:focus {
   text-decoration: none !important;
   color: inherit !important;
+}
+
+.menu-link{
+  display: flex;
+  width: 100%;
+  height: 50px;
+  text-decoration: none;
+  border-radius: 8px;
+  justify-content: left;
+  align-items: center;
+}
+
+.menu-link:hover{
+  background-color: #b5b5b59d;
 }
