@@ -1,43 +1,39 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, get_user_model, login
 from core.forms.login_form import LoginForm
+from core.services.login_service import validate_credentials, get_user, authenticate_user, login_user
 
 def Login(request):
     if request.method == 'GET':
+        return render(request, 'login/login.html', {'form': LoginForm()})
+
+    usuario = request.POST.get('usuario', '')
+    contraseña = request.POST.get('contraseña', '')
+
+    is_valid, error = validate_credentials(usuario, contraseña)
+    if not is_valid:
         return render(request, 'login/login.html', {
-            'form': LoginForm()
+            'form': LoginForm(),
+            'error': error,
+            'usuario_error': not usuario,
+            'contraseña_error': not contraseña
         })
-    else:
-        usuario = request.POST.get('usuario', '')
-        contraseña = request.POST.get('contraseña', '')
-        
-        if not usuario or not contraseña:
-            form = LoginForm()
-            return render(request, 'login/login.html', {
-                'form': form,
-                'error': "Ingrese las credenciales",
-                'usuario_error': not usuario,
-                'contraseña_error': not contraseña
-            })
 
-        try:
-            user = get_user_model().objects.get(username=usuario)
-        except get_user_model().DoesNotExist:
-            form = LoginForm()
-            return render(request, 'login/login.html', {
-                'form': form,
-                'error': "Usuario inexistente"
-            })
+    # Verificar existencia del usuario
+    user, error = get_user(usuario)
+    if error:
+        return render(request, 'login/login.html', {
+            'form': LoginForm(),
+            'error': error
+        })
 
-        user = authenticate(request, username=usuario, password=contraseña)
-        if user is None:
-            form = LoginForm()
-            return render(request, 'login/login.html', {
-                'form': form,
-                'error': "Usuario o contraseña incorrectos"
-            })
-        else:
-            login(request, user)
-            if user.is_superuser:
-                return redirect('cliente_create')
-            return redirect('cliente_list')
+    # Autenticar usuario
+    user, error = authenticate_user(request, usuario, contraseña)
+    if error:
+        return render(request, 'login/login.html', {
+            'form': LoginForm(),
+            'error': error
+        })
+
+    # Login y redirección
+    redirect_url = login_user(request, user)
+    return redirect(redirect_url)
