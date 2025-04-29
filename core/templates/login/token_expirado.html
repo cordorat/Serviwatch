@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Token expirado</title>
+    <link rel="stylesheet" href="{% static 'css/token_invalido.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Token expirado</h2>
+        <p>Tu enlace para cambiar la contraseña ha expirado, Solicita uno nuevo.</p>
+        <a class="btn" href="{% url 'login' %}">Volver al inicio de sesión</a>
+    </div>
+</body>
+</html>
+
