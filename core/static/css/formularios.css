@@ -6,7 +6,7 @@
     position: relative;
     align-items: flex-start; 
     min-height: 500px;
-  }
+}
   
 form {
   display: flex;

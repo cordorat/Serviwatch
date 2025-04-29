@@ -18,9 +18,17 @@
     height: 50%;
     border-bottom: none;
     padding-top: 80px;
-
 }
 
+.modal-title {
+    font-family: "Monserrat", sans-serif;
+    font-size: 36px;
+    color: #000000;
+    font-weight: 900;
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+}
 .btn-cerrar {
     background-color: #D4E484;
     border: 2px solid #626E15;
@@ -48,14 +56,4 @@
     font-size: 16px;
     align-items: center;
     justify-content: center;;
-}
-
-h5 {
-    font-family: "Monserrat", sans-serif;
-    font-size: 36px;
-    color: #000000;
-    font-weight: 900;
-    padding: 10px;
-    justify-content: center;
-    align-items: center;
 }
