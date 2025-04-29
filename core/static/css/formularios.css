@@ -121,3 +121,50 @@ h4{
   font-size: 24px;
   padding-left: 40px;
 }
+
+.form-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: bold;
+}
+
+.help-text {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.form-group:has(.form-error) input,
+.form-group input.is-invalid {
+  border: 2px solid #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.form-group .errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #dc3545;
+}
+
+.form-group .errorlist li {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #dc3545;
+}
+
+.errorlist li {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+}

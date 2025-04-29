@@ -1,65 +1,107 @@
 {% extends 'base.html' %}
 
 {% load static %}
-{% block title %}Agregar Cliente{% endblock %}
+{% block title %}Agregar Usuario{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/simple_form_styles.css' %}">
+{% endblock %}
 
 {% block content %}
-  <h2 class="titulo">AGREGAR USUARIO</h2>
-  <h4>DATOS</h4>
+<h2 class="titulo">AGREGAR USUARIO</h2>
+<h4>DATOS</h4>
 
-  <div>
-    <div class="left-column">
+<div>
+<div class="left-column">
     <form method="POST" class="custom-form" id="usuarioForm">
-        {% csrf_token %}
-    
+    {% csrf_token %}
+
     <div class="form-group">
-        {{ form.username.label_tag }}
         {{ form.username }}
+        
+        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"  title="{{ form.username.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
         {% if form.username.errors %}
-            <div class="form-error">{{ form.username.errors.0 }}</div>
+            {% for error in form.username.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
         {% endif %}
+        
     </div>
 
     <div class="form-group">
-        {{ form.email.label_tag }}
         {{ form.email }}
+        
+        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
         {% if form.email.errors %}
-            <div class="form-error">{{ form.email.errors.0 }}</div>
+            {% for error in form.email.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
         {% endif %}
     </div>
 
     <div class="form-group">
-        {{ form.password1.label_tag }}
         {{ form.password1 }}
+        
+        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
         {% if form.password1.errors %}
-            <div class="form-error">{{ form.password1.errors.0 }}</div>
+            {% for error in form.password1.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
         {% endif %}
     </div>
 
     <div class="form-group">
-        {{ form.password2.label_tag }}
         {{ form.password2 }}
+        
+        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
         {% if form.password2.errors %}
-            <div class="form-error">{{ form.password2.errors.0 }}</div>
+            {% for error in form.password2.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
         {% endif %}
     </div>
+
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <div class="form-error">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-buttons">
         <button class="btn save" type="submit">GUARDAR</button> 
-        <a href="{% url 'cliente_list' %}">
-          <button type="button" class="btn cancel">CANCELAR</button>
+        <a href="{% url 'usuario_list' %}">
+        <button type="button" class="btn cancel">CANCELAR</button>
         </a>
-    
     </div>
-
     </form>
-   </div>
+</div>
 
-    <div class="right-column">
-      <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
-    </div>
+<div class="right-column">
+    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
+</div>
+</div>  
 
-  </div>  
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    new bootstrap.Tooltip(tooltipTriggerEl);
+});
 
-
+// Marcar campos con error
+document.querySelectorAll('.form-error').forEach(function(errorMessage) {
+    var fieldGroup = errorMessage.closest('.form-group');
+    if (fieldGroup) {
+    var inputField = fieldGroup.querySelector('input');
+    if (inputField) {
+        inputField.classList.add('is-invalid');
+    }
+    }
+});
+});
+</script>
 {% endblock %}

@@ -39,7 +39,7 @@
   <div class="main-container" id="sidebar">
     <!-- Sidebar izquierda -->
     <aside class="sidebar">
-      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} active {% endif %}">
+      <div class="user-info {% if '/edit-usuario' in request.path or request.path == '/admin' %} active {% endif %}">
         <a href="#" class="user-avatar-container">
           <div class="user-avatar">
             <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
