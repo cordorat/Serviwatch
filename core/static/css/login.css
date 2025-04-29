@@ -19,9 +19,9 @@ body {
     height: 500px;
     background-color: #f0f0f0;
     border-radius: 30px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 40px 40px rgba(0, 0, 0, 0.1);
     overflow: visible;
-    border: #696f2f 2px solid; ;
+    border: 2px solid #696f2f;
 }
 
 .brand-section {
