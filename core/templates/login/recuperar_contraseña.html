@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Contraseña</title>
+    <link rel="stylesheet" href="{% static 'css/recuperar_contraseña.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>RECUPERA TU CONTRASEÑA</h1>
+                <div class="divider"></div>
+                <p>INGRESA TU USUARIO Y CORREO ELECTRÓNICO PARA PODER RECUPERAR TU CONTRASEÑA</p>
+            </div>
+            
+            <form method="post" action="{% url 'recuperar_contraseña' %}">
+                {% csrf_token %}
+
+                    {% if error %}
+                        {{error}}
+                    {% endif %}
+                
+                <div class="input-group">
+                    <div class="input-container">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <input type="text" id="usuario" name="usuario" placeholder="USUARIO" 
+                               value="" 
+                               class="{% if form.usuario.errors %}error{% endif %}">
+                    </div>
+                    
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-container">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </span>
+                        <input type="email" id="email" name="email" placeholder="CORREO ELECTRÓNICO" 
+                               value="{{ form.email.value|default:'' }}" 
+                               class="{% if form.email.errors %}error{% endif %}">
+                    </div>
+
+                </div>
+                
+                <div class="button-group">
+                    <a href="{% url 'login' %}" class="button button-cancel">CANCELAR</a>
+                    <button type="submit" class="button button-submit">RECUPERAR CONTRASEÑA</button>
+                </div>
+            </form>
+        </div>
+        
+        {% if success %}
+            <div class="modal">
+                <div class="modal-content">
+                    <h2>Se ha enviado un enlace a el correo para cambiar la contraseña</h2>
+                    <div class="button-container">
+                        <a href="{% url 'login' %}" class="button button-submit">VOLVER</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
