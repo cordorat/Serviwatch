@@ -126,5 +126,13 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Servidor SMTP de Gmail
+EMAIL_PORT = 587  # Puerto para conexiones TLS
+EMAIL_USE_TLS = True  # Usa TLS (seguro)
+EMAIL_HOST_USER = 'serviwatch73@gmail.com'  # Tu correo de envío
+EMAIL_HOST_PASSWORD = 'htcltrdepclgsvnh'  # Tu contraseña o app password

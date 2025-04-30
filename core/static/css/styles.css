@@ -54,9 +54,10 @@ body {
 }
 
 .sidebar {
-  width: 240px;
+  width: 250px;
   background-color: #C7C7C7;
   padding: 0; 
+  min-width: 250px;
 }
 
 

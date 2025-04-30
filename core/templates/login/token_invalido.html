@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang=\"es\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Token Inválido</title>
+    <link rel=\"stylesheet\" href=\"{% static 'css/token_invalido.css' %}\">
+</head>
+<body>
+    <div class=\"container\">
+        <div class=\"form-container\">
+            <div class=\"form-header\">
+                <h1>ENLACE INVÁLIDO</h1>
+                <div class=\"divider\"></div>
+                <p>El enlace de recuperación de contraseña no es válido o ha sido utilizado, solicita uno nuevo.</p>
+            </div>
+
+            <div class=\"button-group\" style=\"justify-content: center;\">
+                <a href=\"{% url 'login' %}\" class=\"button button-submit\">VOLVER AL LOGIN</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
