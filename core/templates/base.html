@@ -45,9 +45,12 @@
         <img src="{% static 'images/campana-nuevo.png' %}" alt="Notificaciones" class="icon-container">
       </a>
       {% endif %}
-      <a href="#" class="icon-container">
-        <img src="{% static 'images/salida.png' %}" alt="Salir" class="icon-container">
-      </a>
+      <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="icon-container" style="background:none; border:none;" title="Cerrar sesión">
+            <img src="{% static 'images/salida.png' %}" alt="Cerrar Sesion" class="icon-container">
+        </button>
+      </form>
     </div>
   </header>
 
@@ -135,8 +138,8 @@
               Gestión de servicios
             </a>
           </li>
-          <li class="{% if '/egresos/' in request.path or request.path == '/egresos' %} active {% endif %}">
-            <a href="#" class="{% if not '/egresos/' in request.path or request.path == '/egresos' %} menu-link {% endif %}">
+          <li class="{% if '/egreso/' in request.path or request.path == '/egreso' %} active {% endif %}">
+            <a href="{% url 'egreso' %}" class="{% if not '/egreso/' in request.path or request.path == '/egreso' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
               </span>

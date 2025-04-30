@@ -8,7 +8,8 @@
     min-height: 500px;
     overflow-x: auto;
     min-width: 0;
-  }
+    max-width: 100%;
+}
 
   
 form {
@@ -33,12 +34,12 @@ form {
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
+  
 }
 
 .form-span {
   border: 1px solid #626E15; 
   border-radius: 4px;
-  background-color: #D4E484;
 }
 
 .form-buttons {
@@ -209,7 +210,7 @@ h4{
 
 table {
   width: 100%;
-  table-layout: fixed; /* o 'fixed' si quieres evitar que crezca demasiado */
+  table-layout: fixed;
 }
 
 .table-container {
@@ -230,7 +231,8 @@ table {
 }
 
 .search-form .input-group {
-  height: 48px;
+  height: 100%;
+  display: flex;
 }
 
 .search-form .form-control {
@@ -266,8 +268,6 @@ div.error-message span.text-danger {
   display: block;
   font-weight: bold;
 }
-
-
 
 .help-text {
   color: #6c757d;
