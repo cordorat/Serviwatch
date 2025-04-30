@@ -36,25 +36,13 @@ class ReparacionForm(forms.ModelForm):
         widget=forms.DateInput(
             attrs={
                 'class': 'form-control',
-                'id': 'id_fecha_entrega_estimada',  # Importante que coincida con flatpickr
+                'id': 'id_fecha_entrega_estimada',
                 'placeholder': 'dd/mm/aaaa',
                 'autocomplete': 'off'
             }
         )
     )
     
-    precio = forms.IntegerField(
-        min_value=1,
-        required=True,
-        widget=forms.NumberInput(attrs={
-            'class': 'validate',
-            'placeholder': 'Ingrese el precio'
-        }),
-        error_messages={
-            'invalid': 'El precio debe ser un número entero.',
-            'min_value': 'El precio debe ser mayor a 0.',
-        }
-    )
 
     class Meta:
         model = Reparacion
