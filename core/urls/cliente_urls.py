@@ -1,7 +1,8 @@
 from django.urls import path
-from core.views.Cliente.cliente_view import cliente_create_view, cliente_list_view
+from core.views.Cliente.cliente_view import cliente_create_view, cliente_list_view, cliente_search_view
 
 urlpatterns = [
     path('clientes/', cliente_list_view, name='cliente_list'),
-    path('clientes/nuevo/', cliente_create_view, name='cliente_create'),
+    path('clientes/agregar/', cliente_create_view, name='cliente_create'),
+    path('clientes/buscar/', cliente_search_view, name='cliente_search'),
 ]

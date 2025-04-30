@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERVI-WATCH - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="brand-section">
+
+            <img src="{% static 'images/logo.png' %}" width="100%" height="1000px" alt="Logo" class="logo">
+        
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="login-section">
+            <h1 class="login-header">LOGIN</h1>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+                
+                <div class="input-group">
+                    <i class="icon fas fa-user"></i>
+                    <input type="text" name="usuario" placeholder="USUARIO" class="form-control {% if usuario_error %}input-error{% endif %}" value="{{ request.POST.usuario|default:'' }}">
+                </div>
+                
+                <div class="input-group">
+                    <i class="icon fas fa-lock"></i>
+                    <input type="password" name="contraseña" placeholder="CONTRASEÑA" class="form-control {% if contraseña_error %}input-error{% endif %}">
+                    <i class="toggle-password fas fa-eye" id="togglePassword"></i>
+                </div>
+                
+                <button type="submit" class="login-button">ENTRAR</button>
+                
+                <a href="{% url 'recuperar_contraseña' %}" class="forgot-password">¿Olvidaste tu contraseña?</a>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const contraseñaInput = document.querySelector('input[name="contraseña"]');
+            
+            if (togglePassword && contraseñaInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = contraseñaInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    contraseñaInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

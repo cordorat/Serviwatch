@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="main-content">
+    <!-- Botón Agregar reparación -->
+    <div class="header-icons">
+        <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
+        <form method="get" action="{% url 'reparacion_list' %}" class="search-form">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Buscar reparación"
+                    value="{{ request.GET.search }}">
+                <button class="btn btn-search" type="submit">
+                    <i class="bi bi-search text-secondary"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+
+    <br>
+
+    <!-- Lista de reparaciones -->
+    <div class="table-container">
+        <table class="table table-hover align-middle custom-table">
+            <thead class="table-header">
+                <tr>
+                    <th>Código</th>
+                    <th>Precio</th>
+                    <th>Fecha de ingreso</th>
+                    <th>Estado</th>
+                    <th>Cliente/Teléfono</th>
+                    <th>Descripción</th>
+                    <th>Fecha estimada</th>
+                    <th>Espacio</th>
+                    <th>Técnico encargado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reparacion in reparaciones %}
+                <tr>
+                    <td>{{ reparacion.codigo_orden }}</td>
+                    <td>${{ reparacion.precio }}</td>
+                    <td>{{ reparacion.fecha_ingreso|date:"d/m/Y" }}</td>
+                    <td>{{ reparacion.estado }}</td>
+                    <td>{{ reparacion.cliente.nombre }} {{ reparacion.cliente.apellido }} - {{ reparacion.cliente.telefono }}</td>
+                    <td>{{ reparacion.descripcion }}</td>
+                    <td> {{ reparacion.fecha_entrega_estimada|date:'d/m/Y' }} </td>
+                    <td>{{ reparacion.espacio_fisico }}</td>
+                    <td>{{ reparacion.tecnico.nombre }} {{ reparacion.tecnico.apellidos }}</td>
+                    <td>
+                        <a href="" class="btn btn-sm btn-outline-primary" title="Editar reparación">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

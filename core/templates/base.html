@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Servi-Watch{% endblock %}</title>
+  <!--Fuentes de tipografia (Google Font)-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <!--Link de bootstrap-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!--CSS creados-->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.1.1/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="{% static 'css/formularios.css' %}">
+  <link rel="stylesheet" href="{% static 'css/reparacion.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+
+  <!-- Barra superior -->
+  <header class="header">
+    <div class="logo-container">
+      <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo">
+    </div>
+
+    <div class="header-icons">
+      {% if not user.is_superuser %}
+      <a href="#" class="icon-container">
+        <img src="{% static 'images/campana-nuevo.png' %}" alt="Notificaciones" class="icon-container" title="Notificaciones">
+      </a>
+      {% endif %}
+      <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="icon-container" style="background:none; border:none;" title="Cerrar sesión">
+            <img src="{% static 'images/salida.png' %}" alt="Cerrar Sesion" class="icon-container">
+        </button>
+      </form>
+    </div>
+  </header>
+
+  <!-- Contenedor principal debajo de la topbar -->
+  <div class="main-container" id="sidebar">
+    <!-- Sidebar izquierda -->
+    <aside class="sidebar">
+      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} active {% endif %}">
+        <a href="#" class="user-avatar-container">
+          <div class="user-avatar">
+            <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
+          </div>
+          {% if user.is_superuser %}
+          <h2>ADMIN</h2>
+          {% else %}
+          <h2>USUARIO</h2>
+          {% endif %}
+        </a>
+      </div>
+
+      <div class="nav-header">
+        Navegación Principal
+      </div>
+
+      <nav class="main-nav">
+        <ul>
+          {% if user.is_superuser %}
+          <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
+            <a href="#">
+              <span>
+                <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
+              </span>
+              Gestión de productos
+            </a>
+          </li>
+          <li class="{% if '/empleados/' in request.path or request.path == '/empleados' %} active {% endif %}">
+            <a href="#">
+            <span>
+              <img src="{% static 'images/clientes.png' %}" alt="Empleados" class="icon">
+            </span>
+            Gestión de empleados
+            </a>
+            
+          </li>
+          <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
+            <a href="#">
+              <span>
+                <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
+              </span>
+              Gestión de usuarios
+            </a>
+          </li>
+          <li class="{% if '/reportes/' in request.path or request.path == '/reportes' %} active {% endif %}">
+            <a href="#">
+              <span>
+                <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
+              </span>
+              Gestión de ingresos/egresos
+            </a>
+          </li>
+
+          {% else %}
+
+          <li class="{% if '/clientes/' in request.path or request.path == '/clientes' %} active {% endif %}">
+            <a href="{% url 'cliente_list' %}" class="{% if not '/clientes/' in request.path or request.path == '/clientes' %} menu-link {% endif %}">
+              <span>
+                <img src="{% static 'images/clientes.png' %}" alt="Clientes" class="icon">
+              </span>
+              Gestión de clientes
+            </a>
+          </li>
+          <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
+            <a href="#" class="{% if not '/productos/' in request.path or request.path == '/productos' %} menu-link {% endif %}">
+              <span>
+                <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
+              </span>
+              Gestión de productos
+            </a>
+          </li>
+          <li class="{% if '/servicios/' in request.path or request.path == '/servicios' %} active {% endif %}">
+            <a href="{% url 'servicios_usuario' %}" class="{% if not '/servicios/' in request.path or request.path == '/servicios' %} menu-link {% endif %}">
+              <span>
+                <img src="{% static 'images/reloj 1.png' %}" alt="Servicios" class="icon">
+              </span>
+              Gestión de servicios
+            </a>
+          </li>
+          <li class="{% if '/egresos/' in request.path or request.path == '/egresos' %} active {% endif %}">
+            <a href="#" class="{% if not '/egresos/' in request.path or request.path == '/egresos' %} menu-link {% endif %}">
+              <span>
+                <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
+              </span>
+              Gestión de egresos
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </aside>
+
+    
+    <!-- Contenido principal -->
+    <section class="content">
+      {% block content %}
+      {% endblock %}
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}
+  {% endblock %}
+</body>
+</html>
