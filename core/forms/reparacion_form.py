@@ -42,6 +42,19 @@ class ReparacionForm(forms.ModelForm):
             }
         )
     )
+    
+    precio = forms.IntegerField(
+        min_value=1,
+        required=True,
+        widget=forms.NumberInput(attrs={
+            'class': 'validate',
+            'placeholder': 'Ingrese el precio'
+        }),
+        error_messages={
+            'invalid': 'El precio debe ser un número entero.',
+            'min_value': 'El precio debe ser mayor a 0.',
+        }
+    )
 
     class Meta:
         model = Reparacion
