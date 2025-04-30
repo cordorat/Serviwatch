@@ -6,6 +6,8 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.db.models import Q
 from core.models.cliente import Cliente
+from core.utils.security import is_safe_url
+
 
 
 @login_required
@@ -23,7 +25,7 @@ def cliente_create_view(request):
         if form.is_valid():
             form.save()
             next_url = request.GET.get('next')
-            if next_url:
+            if next_url and is_safe_url(next_url):
                 return redirect(next_url)
             return redirect('cliente_list')
     else:
