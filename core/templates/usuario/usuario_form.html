@@ -51,6 +51,7 @@
                 <i class="bi bi-lock-fill fs-4 text-secondary"></i>
             </span>
             {{ form.password1 }}
+            <i class="toggle-password bi bi-eye" id="togglePassword"></i>
         </div>
         
         
@@ -67,6 +68,7 @@
                 <i class="bi bi-lock-fill fs-4 text-secondary"></i>
             </span>
             {{ form.password2 }}
+            <i class="toggle-password bi bi-eye" id="togglePassword"></i>
         </div>
         
         
@@ -251,11 +253,37 @@
         }
     });
     window.addEventListener('pageshow', function(event) {
-    if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
-        document.querySelectorAll('form.custom-form input').forEach(input => {
-            input.value = '';
+        if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
+            document.querySelectorAll('form.custom-form input').forEach(input => {
+                input.value = '';
+            });
+        }
+
+    });
+    const togglePassword = document.getElementById('togglePassword');
+    if (togglePassword && password1Field) {
+        togglePassword.addEventListener('click', function() {
+            // Cambia el tipo de input entre "password" y "text"
+            const type = password1Field.getAttribute('type') === 'password' ? 'text' : 'password';
+            password1Field.setAttribute('type', type);
+            
+            // Cambia el icono entre ojo y ojo tachado
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
         });
     }
+
+    const password2Toggle = document.createElement('i');
+    password2Toggle.className = 'toggle-password fas fa-eye';
+    password2Toggle.id = 'togglePassword2';
+    password2Field.parentElement.appendChild(password2Toggle);
+
+    password2Toggle.addEventListener('click', function() {
+        const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
+        password2Field.setAttribute('type', type);
+        
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
 });
 });
 </script>

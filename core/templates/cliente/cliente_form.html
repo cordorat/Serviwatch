@@ -11,27 +11,44 @@
     <div class="left-column">
     <form method="POST" class="custom-form" id="clienteForm" novalidate>
       {% csrf_token %}
-
-      <div class="input-group mb-3">
-        <span class="input-group-text form-span" id="basic-addon1">
-          <i class="bi bi-person-fill fs-4 text-secondary"></i>
-        </span>
-        {{ form.nombre }}
+      
+      <div class="form-group">
+        <div class="input-group mb-3">
+          <span class="input-group-text form-span" id="basic-addon1">
+            <i class="bi bi-person-fill fs-4 text-secondary"></i>
+          </span>
+          {{ form.nombre }}
+        </div>
+        {% if form.nombre.errors %}
+            <div class="form-error">{{ form.nombre.errors.0 }}</div>
+        {% endif %}
       </div>
 
-      <div class="input-group mb-3">
-        <span class="input-group-text form-span" id="basic-addon1">
-          <i class="bi bi-person-fill fs-4 text-secondary"></i>     
-        </span>
-        {{ form.apellido }}
+      <div class="form-group">
+        <div class="input-group mb-3">
+          <span class="input-group-text form-span" id="basic-addon1">
+            <i class="bi bi-person-fill fs-4 text-secondary"></i>     
+          </span>
+          {{ form.apellido }}
+        </div>
+  
+        {% if form.apellido.errors %}
+              <div class="form-error">{{ form.apellido.errors.0 }}</div>
+          {% endif %}
       </div>
 
-      <div class="input-group mb-3">
-        <span class="input-group-text form-span" id="basic-addon1">
-          <i class="bi bi-telephone-fill fs-4 text-secondary"></i>
-        </span>
-        {{ form.telefono }}
-
+      <div class="form-group">
+        <div class="input-group mb-3">
+          <span class="input-group-text form-span" id="basic-addon1">
+            <i class="bi bi-telephone-fill fs-4 text-secondary"></i>
+          </span>
+          {{ form.telefono }}
+  
+        </div>
+        {% if form.telefono.errors %}
+              <div class="form-error">{{ form.telefono.errors.0 }}</div>
+          {% endif %}
+  
       </div>
 
       <div class="form-buttons">
@@ -51,5 +68,95 @@
 
   </div>  
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const nombreField = document.querySelector('input[name="nombre"]');
+        const apellidoField = document.querySelector('input[name="apellido"]');
+        const telefonoField = document.querySelector('input[name="telefono"]');
+        
+        const allFields = [nombreField, apellidoField, telefonoField];
+    
+        // Marcar campos con errores del servidor
+        document.querySelectorAll('.form-error').forEach(function (errorMessage) {
+            var input = errorMessage.closest('.input-group')?.querySelector('input');
+            if (input) {
+                input.classList.add('is-invalid');
+            }
+        });
+    
+        function validateField(field) {
+            // Remover error anterior
+            const errorElement = field.parentElement.querySelector('.form-error');
+            if (errorElement) {
+                errorElement.remove();
+            }
+    
+            const value = field.value.trim();
+            let errorMessage = '';
+    
+            if (!value) {
+                if (field.name === 'nombre') errorMessage = 'El nombre es obligatorio.';
+                if (field.name === 'apellido') errorMessage = 'El apellido es obligatorio.';
+                if (field.name === 'telefono') errorMessage = 'El número de teléfono es obligatorio.';
+            } else {
+                if (field.name === 'nombre' || field.name === 'apellido') {
+                    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+                        errorMessage = `El ${field.name} solo debe contener letras.`;
+                    }
+                }
+    
+                if (field.name === 'telefono') {
+                    if (!/^\d{10}$/.test(value)) {
+                        errorMessage = 'El número de teléfono debe contener exactamente 10 dígitos.';
+                    }
+                }
+            }
+    
+            if (errorMessage) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error';
+                errorDiv.textContent = errorMessage;
+                field.parentElement.appendChild(errorDiv);
+                field.classList.add('is-invalid');
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                return true;
+            }
+        }
+    
+        // Validación al salir del input
+        allFields.forEach(field => {
+            field.addEventListener('blur', function () {
+                validateField(this);
+            });
+    
+            field.addEventListener('input', function () {
+                this.classList.remove('is-invalid');
+                const error = this.parentElement.querySelector('.form-error');
+                if (error) error.remove();
+            });
+        });
+    
+        const form = document.querySelector('#clienteForm');
+        form.addEventListener('submit', function (e) {
+            let isValid = true;
+            allFields.forEach(field => {
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
+    
+            if (!isValid) e.preventDefault();
+        });
+    
+        // Limpiar campos al recargar
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
+                allFields.forEach(input => input.value = '');
+            }
+        });
+    });
+    </script>    
 
 {% endblock %}
