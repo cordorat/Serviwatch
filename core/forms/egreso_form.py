@@ -1,53 +1,60 @@
 from django import forms
-from core.models import Egreso
+from django.core.validators import MaxValueValidator
+from core.models.egreso import Egreso
+from datetime import date
 
 class EgresoForm(forms.ModelForm):
     class Meta:
         model = Egreso
         fields = ['valor', 'fecha', 'descripcion']
         widgets = {
-            'fecha': forms.DateInput(
-                attrs={
-                    'type': 'date',
-                    'class': 'form-control',
-                    'aria-label': 'Fecha del egreso',
-                    'placeholder':'FECHA'
-                },
-                format='%d/%m/%Y'
-            ),'valor': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'aria-label': 'Valor del egreso',
-                    'placeholder':'VALOR'
-                }
-            ),
-            'descripcion': forms.Textarea(
-                attrs={
-                    'class': 'form-control',
-                    'aria-label': 'Descripción del egreso',
-                    'placeholder':'DESCRIPCION'
-                }
-            )
+            'valor': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese el valor'
+            }),
+            'fecha': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'placeholder': 'dd/mm/aaaa'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ingrese una descripción'
+            })
         }
         error_messages = {
-            'fecha': {
-                'required': 'Campo incompleto',
-                'invalid': 'Ingrese una fecha válida'
-            },
             'valor': {
                 'required': 'Campo incompleto',
-                'invalid': 'Ingrese un número válido',
-                'max_digits':'Valor demasiado grande. Límite máximo de 10 números'
+                'max_digits': 'Valor demasiado grande. Límite máximo de 10 números'
+            },
+            'fecha': {
+                'required': 'Fecha incompleta',
+                'invalid': 'Formato de fecha inválido'
             },
             'descripcion': {
                 'required': 'Campo incompleto',
-                'invalid': 'Ingrese un texto válido',
-                'max_length':'Descripción demasiado larga'
+                'max_length': 'Descripción demasiado larga'
             }
         }
+
+    def clean_valor(self):
+        valor = self.cleaned_data.get('valor')
+        if valor is None:
+            raise forms.ValidationError('Campo incompleto')
+            
+        # Añadido: Validación para rechazar valores negativos
+        if valor <= 0:
+            raise forms.ValidationError('El valor debe ser mayor a cero')
+            
+        if len(str(int(valor))) > 10:
+            raise forms.ValidationError('Valor demasiado grande. Límite máximo de 10 números')
+        return valor
+
     def clean_descripcion(self):
         descripcion = self.cleaned_data.get('descripcion')
+        if not descripcion:
+            raise forms.ValidationError('Campo incompleto')
         if len(descripcion) > 100:
-            raise forms.ValidationError("Máximo 100 caracteres permitidos")
+            raise forms.ValidationError('Descripción demasiado larga')
         return descripcion
-

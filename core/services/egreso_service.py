@@ -1,32 +1,40 @@
-from core.models import Egreso
-import locale
-def get_all_egreso():
-    return Egreso.objects.all()
+from core.models.egreso import Egreso
+from django.db import transaction
 
-def crear_egreso(datos):
-    egreso = Egreso(
-        fecha=datos['fecha'],
-        valor=datos['valor'],
-        descripcion=datos['descripcion']
-    )
-    egreso.save()
+def crear_egreso(form):
+    """
+    Crea un nuevo egreso a partir del formulario
+    """
+    with transaction.atomic():
+        egreso = form.save()
     return egreso
-def obtener_datos_resumen(datos):
-    """Formatea los datos para mostrar en la confirmación"""
-    # Configurar locale para formato de moneda de manera segura
-    try:
-        locale.setlocale(locale.LC_ALL, '')
-    except:
-        pass
 
+def get_all_egresos(fecha_inicio=None, fecha_fin=None, busqueda=None):
+    """
+    Obtiene todos los egresos con filtros opcionales
+    """
+    egresos = Egreso.objects.all()
+    
+    if fecha_inicio:
+        egresos = egresos.filter(fecha__gte=fecha_inicio)
+    
+    if fecha_fin:
+        egresos = egresos.filter(fecha__lte=fecha_fin)
+    
+    if busqueda:
+        egresos = egresos.filter(descripcion__icontains=busqueda)
+    
+    return egresos.order_by('-fecha')
 
-    try:
-        valor_formateada = locale.currency(float(datos['valor']), grouping=True)
-    except:
-        valor_formateada = f"${float(datos['valor']):,.2f}"
-
-    return {
-        'fecha': datos['fecha'].strftime('%d/%m/%Y'),
-        'valor': valor_formateada,
-        'descripcion': datos['descripcion']
-    }
+def crear_egreso_from_data(valor, fecha, descripcion):
+    """
+    Crea un nuevo egreso a partir de datos
+    """
+    with transaction.atomic():
+        egreso = Egreso(
+            valor=valor,
+            fecha=fecha,
+            descripcion=descripcion
+        )
+        egreso.save()
+    return egreso
