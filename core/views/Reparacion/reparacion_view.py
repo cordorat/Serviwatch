@@ -8,8 +8,6 @@ from core.models.cliente import Cliente
 from core.models.empleado import Empleado
 from django.core.paginator import Paginator
 from django.db.models import Q
-from core.utils.security import is_safe_url
-
 
 
 @login_required
