@@ -16,6 +16,10 @@ form {
   max-width: 300px;
 }
 
+.form-group input{
+  width: 100%;
+}
+
 .custom-form input {
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
@@ -30,6 +34,7 @@ form {
 .form-span {
   border: 1px solid #626E15; 
   border-radius: 4px;
+  background-color: #D4E484;
 }
 
 .form-buttons {
@@ -122,13 +127,6 @@ h4{
   padding-left: 40px;
 }
 
-.form-error {
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: block;
-  font-weight: bold;
-}
 
 .help-text {
   color: #6c757d;
@@ -137,34 +135,20 @@ h4{
   display: block;
 }
 
-.form-group:has(.form-error) input,
-.form-group input.is-invalid {
-  border: 2px solid #dc3545 !important;
+.form-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: bold;
+  width: 100%;
+}
+
+.form-group:has(.form-error) input {
+  border: 2px solid #dc3545;
   background-color: #fff8f8;
 }
 
-.form-group .errorlist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  color: #dc3545;
-}
-
-.form-group .errorlist li {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: bold;
-}
-
-.errorlist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  color: #dc3545;
-}
-
-.errorlist li {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: bold;
+.is-invalid {
+  border: 2px solid #dc3545;
 }
