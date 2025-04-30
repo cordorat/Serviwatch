@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="egreso-container">
+    <div class="egreso-header-confirm">
+        <h2>¿ESTA SEGURO QUE DESEAS AGREGAR EL SIGUIENTE EGRESO?</h2>
+        
+        <div class="datos-container">
+            <div class="dato-column">
+                <div class="field-label">VALOR</div>
+                <div>{{ resumen.valor }}</div>
+            </div>
+            
+            <div class="dato-column">
+                <div class="field-label">FECHA</div>
+                <div>{{ resumen.fecha }}</div>
+            </div>
+            
+            <div class="dato-column">
+                <div class="field-label">DESCRIPCION</div>
+                <div>{{ resumen.descripcion }}</div>
+            </div>
+        </div>
+        <div class="button-container justify-content-center">
+        <form method="post">
+            {% csrf_token %}
+            <div class="button-container justify-content-center">
+                <button type="submit" name="confirmar" class="btn-confirmar">Confirmar</button>
+                <button type="submit" name="editar" class="btn-cancelar">Cancelar</button>
+        
+        </form>
+        </div>
+    </div>
+</div>
+{% if success %}
+<!-- Modal de éxito - Colocado al principio para asegurar que se muestre -->
+<div class="success-modal" style="display: flex !important;">
+    <div class="success-modal-content">
+        <h2>{{ success }}</h2>
+        <div class="button-container">
+            <a href="{% url 'egreso' %}" class="btn-custom btn-guardar">VOLVER</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+
+
+{% endblock %}
