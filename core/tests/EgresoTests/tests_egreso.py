@@ -4,8 +4,9 @@ from django.utils import timezone
 from decimal import Decimal
 from core.models import Egreso
 from core.forms import EgresoForm
-import datetime
+from datetime import date
 from unittest.mock import patch
+from core.services.egreso_service import crear_egreso
 
 class EgresoModelTest(TestCase):
     """
@@ -154,3 +155,119 @@ class UsuarioCrearEgresoViewTest(TestCase):
         self.assertIn('valor', response.context['form'].errors)
 
 
+class EgresoViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.egreso_url = reverse('egreso')
+        self.confirmar_egreso_url = reverse('confirmar_egreso')
+        self.session = self.client.session
+
+    def test_egreso_view_get_empty_session(self):
+        response = self.client.get(self.egreso_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'egreso/egreso_form.html')
+        self.assertIn('form', response.context)
+        self.assertIn('total_egresos', response.context)
+
+    def test_egreso_view_get_with_session_data(self):
+        self.session['datos_egreso'] = {
+            'fecha_str': date.today().isoformat(),
+            'valor': 1000,
+            'descripcion': 'Test description'
+        }
+        self.session.save()
+        response = self.client.get(self.egreso_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'egreso/egreso_form.html')
+        self.assertIn('form', response.context)
+        self.assertEqual(response.context['form'].initial['valor'], 1000)
+
+    def test_egreso_view_post_valid_data(self):
+        data = {
+            'fecha': date.today().isoformat(),
+            'valor': 1000,
+            'descripcion': 'Test description'
+        }
+        response = self.client.post(self.egreso_url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.confirmar_egreso_url)
+        self.assertIn('datos_egreso', self.client.session)
+        self.assertEqual(self.client.session['datos_egreso']['valor'], 1000)
+
+    def test_egreso_view_post_invalid_data(self):
+        data = {
+            'fecha': '',
+            'valor': '',
+            'descripcion': ''
+        }
+        response = self.client.post(self.egreso_url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'egreso/egreso_form.html')
+        self.assertIn('form', response.context)
+        self.assertTrue(response.context['form'].errors)
+
+    def test_confirmar_egreso_view_get_without_session(self):
+        response = self.client.get(self.confirmar_egreso_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.egreso_url)
+
+    def test_confirmar_egreso_view_get_with_session(self):
+        self.session['datos_egreso'] = {
+            'fecha_str': date.today().isoformat(),
+            'valor': 1000,
+            'descripcion': 'Test description'
+        }
+        self.session.save()
+        with patch('core.services.egreso_service.obtener_datos_resumen', return_value={'resumen': 'mocked'}):
+            response = self.client.get(self.confirmar_egreso_url)
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, 'egreso/confirmar_egreso.html')
+            self.assertIn('resumen', response.context)
+
+    def test_confirmar_egreso_view_post_confirmar(self):
+        # Configurar los datos en la sesión con el formato exacto que espera la vista
+        fecha_hoy = date.today()
+        self.session['datos_egreso'] = {
+            'fecha_str': fecha_hoy.isoformat(),
+            'valor': 1000,
+            'descripcion': 'Test description'
+        }
+        self.session.save()
+
+        # Mock tanto crear_egreso como obtener_datos_resumen
+        with patch('core.views.Egreso.egreso_view.crear_egreso') as mock_crear_egreso, \
+            patch('core.views.Egreso.egreso_view.obtener_datos_resumen', return_value={'resumen': 'mocked'}):
+            
+            # Realizar la petición POST con confirmar
+            response = self.client.post(
+                self.confirmar_egreso_url, 
+                {'confirmar': True},
+                follow=True
+            )
+
+            # Verificar que se llamó a crear_egreso con los argumentos correctos
+            mock_crear_egreso.assert_called_once_with({
+                'fecha_str': fecha_hoy.isoformat(),
+                'valor': 1000,
+                'descripcion': 'Test description',
+                'fecha': fecha_hoy
+            })
+            
+            # Verificar la respuesta
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, 'egreso/confirmar_egreso.html')
+            self.assertTrue('success' in response.context)
+            
+            # Verificar que los datos fueron eliminados de la sesión
+            self.assertNotIn('datos_egreso', self.client.session)
+
+    def test_confirmar_egreso_view_post_editar(self):
+        self.session['datos_egreso'] = {
+            'fecha_str': date.today().isoformat(),
+            'valor': 1000,
+            'descripcion': 'Test description'
+        }
+        self.session.save()
+        response = self.client.post(self.confirmar_egreso_url, {'editar': 'true'})
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.egreso_url)
