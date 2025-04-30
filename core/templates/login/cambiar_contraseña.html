@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambiar Contraseña</title>
+    <link rel="stylesheet" href="{% static 'css/cambiar_contraseña.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>CAMBIAR TU CONTRASEÑA</h1>
+                <div class="divider"></div>
+                <p>INGRESA UNA NUEVA CONTRASEÑA</p>
+            </div>
+
+            <form method="post" action="{% url 'cambiar_contraseña' token=token %}">
+                {% csrf_token %}
+
+                {% if error %}
+                    <div class="message error">
+                        {{ error }}
+                    </div>
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="message error">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="input-group">
+                    <div class="input-container">
+                        <span class="input-icon">
+                            <!-- Icono para nueva contraseña -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <input type="password" id="password" name="password" placeholder="NUEVA CONTRASEÑA"
+                               class="{% if form.password.errors %}error{% endif %}"
+                               value="{{ form.password.value|default:'' }}">
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="error-text">
+                            {{ form.password.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="input-group">
+                    <div class="input-container">
+                        <span class="input-icon">
+                            <!-- Icono para confirmar contraseña -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </span>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="CONFIRMAR CONTRASEÑA"
+                               class="{% if form.confirm_password.errors %}error{% endif %}"
+                               value="{{ form.confirm_password.value|default:'' }}">
+                    </div>
+                    {% if form.confirm_password.errors %}
+                        <div class="error-text">
+                            {{ form.confirm_password.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="button-group">
+                    <a href="{% url 'login' %}" class="button button-cancel">CANCELAR</a>
+                    <button type="submit" class="button button-submit">CAMBIAR CONTRASEÑA</button>
+                </div>
+            </form>
+        </div>
+
+        {% if success %}
+            <div class="modal">
+                <div class="modal-content">
+                    <h2>¡Contraseña cambiada con éxito!</h2>
+                    <div class="button-container">
+                        <a href="{% url 'login' %}" class="button button-submit">VOLVER AL INICIO</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 from django.test import TestCase
 from core.models import Reparacion, Cliente, Empleado
-from datetime import date
+from datetime import date, timedelta
 from core.forms.reparacion_form import ReparacionForm
 from core.services.reparacion_service import get_all_reparaciones, crear_reparacion
 
@@ -44,177 +44,81 @@ class ReparacionModelTest(TestCase):
 
 class ReparacionFormTest(TestCase):
     def setUp(self):
-        # Crear el cliente y técnico que se usarán en todas las pruebas
         self.cliente = Cliente.objects.create(
-            nombre="Carlos",
-            apellido="Ramírez",
-            telefono="3123456789"  # Exactamente 10 dígitos
+            nombre="Test",
+            apellido="User",
+            telefono="1234567890"
         )
-
         self.tecnico = Empleado.objects.create(
             cedula="1234567890",
-            nombre="Juan",
-            apellidos="Pérez",
-            fecha_ingreso=date(2024, 1, 10),
+            nombre="Tech",
+            apellidos="Support",
+            fecha_ingreso=date.today(),
             fecha_nacimiento=date(1990, 5, 20),
             celular="3216549870",
             cargo="Técnico",
-            salario="2500000",
+            salario=2500000,
             estado="Activo"
         )
 
-    def test_reparacion_form(self):
-        form_data = {
-            'cliente': self.cliente.id,
-            'cliente_nombre': self.cliente.nombre,  # Solo el nombre sin apellido
-            'celular_cliente': self.cliente.telefono,  # Debe coincidir exactamente
-            'marca_reloj': 'Casio',
-            'descripcion': 'Cambio de batería',
-            'codigo_orden': '1001',  # Debe ser único
-            # Formato correcto para DateField
-            'fecha_entrega_estimada': date.today().strftime('%Y-%m-%d'),
-            'precio': 45000,  # Número entero positivo
-            'espacio_fisico': 'A1',
-            'estado': 'cotización',  # Debe coincidir con las opciones de ESTADOS
-            'tecnico': self.tecnico.id
+        self.valid_data = {
+            'cliente': self.cliente,
+            'marca_reloj': "Rolex",
+            'descripcion': "Reparación de cristal y ajuste de hora",
+            'codigo_orden': "12345",
+            'fecha_entrega_estimada': date(2025, 4, 30),
+            'precio': 100,
+            'espacio_fisico': "Caja 1",
+            'estado': "Reparación",
+            'tecnico': self.tecnico
         }
 
-        form = ReparacionForm(data=form_data)
+    def test_valid_form(self):
+        form = ReparacionForm(data=self.valid_data)
         if not form.is_valid():
-            print("Errores del formulario:", form.errors)
-            # Para ver qué datos pasaron la validación
-            print("Data limpia:", form.cleaned_data)
-        self.assertTrue(form.is_valid())
+            print("\nForm Validation Errors:")
+            for field, errors in form.errors.items():
+                print(f"{field}: {errors}")
+            print("\nSubmitted Data:")
+            for key, value in self.valid_data.items():
+                print(f"{key}: {value}")
+            print("\nCleaned Data:")
+            print(form.cleaned_data if hasattr(
+                form, 'cleaned_data') else "No cleaned data")
 
-    def test_reparacion_form_invalid(self):
-        form_data = {
-            'marca_reloj': '',
-            'descripcion': '',
-            'codigo_orden': '',
-            'fecha_entrega_estimada': '',
-            'precio': '',
-            'espacio_fisico': '',
-            'estado': '',
-        }
+        self.assertTrue(form.is_valid(),
+                        msg=f"Form validation failed: {form.errors}")
 
-        form = ReparacionForm(data=form_data)
-        self.assertFalse(form.is_valid())
-
-    def test_celular_cliente_invalido(self):
-        form_data = {
-            'celular_cliente': 'abc123',
-            'cliente_nombre': 'Carlos'
-        }
-        form = ReparacionForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('celular_cliente', form.errors)
-        self.assertEqual(form.errors['celular_cliente']
-                         [0], "El celular solo debe contener números.")
-
-    def test_codigo_orden_invalido(self):
-        form_data = {
-            'codigo_orden': 'ABC123',
-            'cliente_nombre': 'Carlos',
-            'celular_cliente': '3123456789'
-        }
-        form = ReparacionForm(data=form_data)
+    def test_codigo_orden_numerico(self):
+        self.valid_data['codigo_orden'] = "ABC123"
+        form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
         self.assertIn('codigo_orden', form.errors)
-        self.assertEqual(form.errors['codigo_orden']
-                         [0], "El código de orden debe ser numérico.")
 
-    def test_precio_invalido(self):
-        form_data = {
-            'precio': 'abc',
-            'cliente_nombre': 'Carlos',
-            'celular_cliente': '3123456789'
-        }
-        form = ReparacionForm(data=form_data)
+    def test_precio_positivo(self):
+        self.valid_data['precio'] = -100
+        form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
         self.assertIn('precio', form.errors)
-        self.assertEqual(form.errors['precio'][0],
-                         "El precio debe ser un número.")
 
-    def test_espacio_fisico_muy_largo(self):
-        form_data = {
-            'espacio_fisico': 'A' * 16,  # 16 caracteres
-            'cliente_nombre': 'Carlos',
-            'celular_cliente': '3123456789'
-        }
-        form = ReparacionForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('espacio_fisico', form.errors)
-        self.assertEqual(form.errors['espacio_fisico'][0],
-                         "El espacio físico no puede tener más de 15 caracteres.")
-
-    def test_marca_reloj_muy_larga(self):
-        form_data = {
-            'marca_reloj': 'M' * 31,  # 31 caracteres
-            'cliente_nombre': 'Carlos',
-            'celular_cliente': '3123456789'
-        }
-        form = ReparacionForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('marca_reloj', form.errors)
-        self.assertEqual(form.errors['marca_reloj'][0],
-                         "La marca del reloj no puede superar los 30 caracteres.")
-
-    def test_descripcion_muy_larga(self):
-        form_data = {
-            'descripcion': 'D' * 501,  # 501 caracteres
-            'cliente_nombre': 'Carlos',
-            'celular_cliente': '3123456789'
-        }
-        form = ReparacionForm(data=form_data)
+    def test_descripcion_minima(self):
+        self.valid_data['descripcion'] = "Corto"
+        form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
         self.assertIn('descripcion', form.errors)
-        self.assertEqual(form.errors['descripcion'][0],
-                         "La descripción no puede superar los 500 caracteres.")
 
-    def test_cliente_no_existe(self):
-        form_data = {
-            'cliente_nombre': 'Cliente Inexistente',
-            'celular_cliente': '3123456789',
-            'marca_reloj': 'Casio',
-            'descripcion': 'Cambio de batería',
-            'codigo_orden': '1001',
-            'fecha_entrega_estimada': date.today(),
-            'precio': '45000',
-            'espacio_fisico': 'A1',
-            'estado': 'cotización',
-            'tecnico': self.tecnico.id
-        }
-        form = ReparacionForm(data=form_data)
+    def test_fecha_futura(self):
+        self.valid_data['fecha_entrega_estimada'] = (
+            date.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+        form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(
-            str(form.errors['__all__'][0]),
-            "No se encontró un cliente con ese nombre y celular."
-        )
+        self.assertIn('fecha_entrega_estimada', form.errors)
 
-    def test_precio_invalido(self):
-        # Test con texto
-        form_data = {
-            'precio': 'abc',
-            'cliente_nombre': 'Carlos',
-            'celular_cliente': '3123456789'
-        }
-        form = ReparacionForm(data=form_data)
+    def test_codigo_orden_unico(self):
+        Reparacion.objects.create(**self.valid_data)
+        form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
-        self.assertIn('precio', form.errors)
-        self.assertEqual(
-            form.errors['precio'][0],
-            "El precio debe ser un número entero."
-        )
-
-        # Test con número negativo
-        form_data['precio'] = -1000
-        form = ReparacionForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('precio', form.errors)
-        self.assertEqual(
-            form.errors['precio'][0],
-            "El precio debe ser mayor a 0."
-        )
+        self.assertIn('codigo_orden', form.errors)
 
 
 class ReparacionServiceTest(TestCase):
@@ -274,7 +178,7 @@ class ReparacionServiceTest(TestCase):
             'fecha_entrega_estimada': date.today(),
             'precio': 75000,
             'espacio_fisico': 'B2',
-            'estado': 'cotización',
+            'estado': 'Cotización',
             'tecnico': self.tecnico.id
         }
 

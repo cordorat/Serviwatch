@@ -1,0 +1,172 @@
+.select2-container--bootstrap-5.select2-container--focus .select2-selection {
+  border-color: #626E15;
+  box-shadow: none;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #626E15;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 42px;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+  display: flex !important;
+  align-items: center !important;
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 0px 12px !important;
+  border: 1px solid #626E15 !important;
+  border-radius: 0 4px 4px 0 !important;
+  width: 100% !important;
+  box-sizing: border-box;
+  height: 48px !important;
+  background-color: #fff;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection--single {
+  border: 1px solid #585454 !important;
+  box-shadow: none !important;
+  padding: 0 12px !important;
+  align-items: center !important;
+  height: 48px !important;
+  font-weight: bold !important;
+}
+
+/* Texto del placeholder y opción seleccionada */
+.select2-container--bootstrap-5 .select2-selection__rendered {
+  padding: 0px !important;
+  margin: 0px !important;
+  line-height: normal !important;
+  display: flex !important;
+  align-items: center !important;
+  height: auto;
+  width: 100%;
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  color: #212529;
+}
+
+.select2-container--bootstrap-5 .select2-selection__rendered span {
+  color: #585454;
+  font-weight: bold !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection__placeholder {
+  font-weight: bold !important;
+  color: #585454 !important;
+  font-family: "Montserrat", sans-serif !important;
+  align-items: center !important;
+  display: flex;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+}
+
+/* Flecha del desplegable */
+.select2-container--bootstrap-5 .select2-selection__arrow {
+  height: 100%;
+  right: 10px;
+}
+
+/* Dropdown */
+.select2-dropdown.select {
+  border: 1px solid #626E15;
+  border-radius: 4px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+
+}
+
+/* Opciones del dropdown */
+.select2-results__option {
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* Opción destacada con hover */
+.select2-results__option--highlighted {
+  background-color: #D4E484 !important;
+  color: #000;
+}
+
+/* Opción seleccionada */
+.select2-results__option[aria-selected=true] {
+  background-color: #d3d3d395 !important;
+  color: #000 !important;
+  font-weight: bold !important;
+  font-family: "Montserrat", sans-serif !important;
+  padding: 10px 12px !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option.select2-results__option--selected {
+  background-color: #C9DC4E !important;
+  /* Tu color personalizado */
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+
+/* Ajusta la estructura cuando se usa dentro de input-group */
+.input-group .select2-container {
+  flex: 1;
+  width: 100% !important;
+}
+
+
+/* Ajuste de bordes para que se integren visualmente */
+.input-group-text {
+  background-color: #D4E484;
+  border: 1px solid #626E15;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  align-items: center;
+  display: flex;
+  padding: 0 12px;
+  font-size: 14;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+}
+
+.input-group .btn {
+  background-color: #D4E484 !important;
+}
+
+select.form-span {
+  border: 1px solid #626E15;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-reparacion {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.custom-form textarea {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #626E15;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
