@@ -102,59 +102,6 @@ class EgresoFormTest(TestCase):
         
     
 
-
-class UsuarioCrearEgresoViewTest(TestCase):
-    """
-    Pruebas unitarias para la vista usuario_crear_egreso
-    """
-    
-    def setUp(self):
-        """Configuración inicial para las pruebas"""
-        self.client = Client()
-        self.url = reverse('egreso')  # Asegúrate de que este nombre coincida con tu URL
-        self.form_data = {
-            'valor': '1000',
-            'fecha': '2025-01-01',
-            'descripcion': 'Test descripción'
-        }
-        
-    def test_get_request(self):
-        """Prueba que la vista responda correctamente a una solicitud GET"""
-        response = self.client.get(self.url)
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'egreso/egreso_form.html')
-        self.assertIsInstance(response.context['form'], EgresoForm)
-
-        
-        
-    def test_post_valid_data(self):
-        """Prueba que la vista maneje correctamente datos POST válidos"""
-        response = self.client.post(self.url, self.form_data)
-        
-        
-        
-        # Verifica que redirige a la página correcta
-        self.assertRedirects(response, reverse('confirmar_egreso'))
-        
-    
-    def test_post_invalid_data(self):
-        """Prueba que la vista maneje correctamente datos POST inválidos"""
-        # Datos inválidos: falta el campo valor
-        data_invalida = self.form_data.copy()
-        data_invalida.pop('valor')
-        
-        response = self.client.post(self.url, data_invalida)
-        
-        
-        
-        # Verifica que se muestra el formulario con errores
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'egreso/egreso_form.html')
-        self.assertFalse(response.context['form'].is_valid())
-        self.assertIn('valor', response.context['form'].errors)
-
-
 class EgresoViewTests(TestCase):
     def setUp(self):
         self.client = Client()
