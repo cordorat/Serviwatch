@@ -20,6 +20,7 @@
   <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.1.1/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="{% static 'css/formularios.css' %}">
+  <link rel="stylesheet" href="{% static 'css/ventana.css' %}">
   <link rel="stylesheet" href="{% static 'css/reparacion.css' %}">
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
@@ -41,15 +42,12 @@
     <div class="header-icons">
       {% if not user.is_superuser %}
       <a href="#" class="icon-container">
-        <img src="{% static 'images/campana-nuevo.png' %}" alt="Notificaciones" class="icon-container" title="Notificaciones">
+        <img src="{% static 'images/campana-nuevo.png' %}" alt="Notificaciones" class="icon-container">
       </a>
       {% endif %}
-      <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="icon-container" style="background:none; border:none;" title="Cerrar sesión">
-            <img src="{% static 'images/salida.png' %}" alt="Cerrar Sesion" class="icon-container">
-        </button>
-      </form>
+      <a href="#" class="icon-container">
+        <img src="{% static 'images/salida.png' %}" alt="Salir" class="icon-container">
+      </a>
     </div>
   </header>
 
@@ -57,7 +55,7 @@
   <div class="main-container" id="sidebar">
     <!-- Sidebar izquierda -->
     <aside class="sidebar">
-      <div class="user-info {% if '/usuario' in request.path or request.path == '/admin' %} active {% endif %}">
+      <div class="user-info {% if '/edit-usuario' in request.path or request.path == '/admin' %} active {% endif %}">
         <a href="#" class="user-avatar-container">
           <div class="user-avatar">
             <img src="{% static 'images/avatar (1).png' %}" alt="Usuario" class="icon-user">
@@ -78,7 +76,7 @@
         <ul>
           {% if user.is_superuser %}
           <li class="{% if '/productos/' in request.path or request.path == '/productos' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/productos/' in request.path or request.path == '/productos' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
               </span>
@@ -86,7 +84,7 @@
             </a>
           </li>
           <li class="{% if '/empleados/' in request.path or request.path == '/empleados' %} active {% endif %}">
-            <a href="#">
+            <a href="{% url 'empleado_list' %}" class="{% if not '/empleados/' in request.path or request.path == '/empleados' %} menu-link {% endif %}">
             <span>
               <img src="{% static 'images/clientes.png' %}" alt="Empleados" class="icon">
             </span>
@@ -95,7 +93,7 @@
             
           </li>
           <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/usuarios/' in request.path or request.path == '/usuarios' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
               </span>
@@ -103,7 +101,7 @@
             </a>
           </li>
           <li class="{% if '/reportes/' in request.path or request.path == '/reportes' %} active {% endif %}">
-            <a href="#">
+            <a href="#" class="{% if not '/reportes/' in request.path or request.path == '/reportes' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
               </span>

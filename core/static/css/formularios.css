@@ -9,13 +9,19 @@
     overflow-x: auto;
     min-width: 0;
   }
+
   
 form {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
+  width: 100%;
   max-width: 300px;
+}
+
+.form-group input{
+  width: 100%;
 }
 
 .custom-form input {
@@ -23,15 +29,16 @@ form {
   font-weight: bold;
   font-size: 14px;
   padding: 10px;
-  border: 1px solid #626E15;
+  border: 2px solid #626E15;
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-span {
-  border: 1px solid #626E15;/* tu color personalizado */
+  border: 1px solid #626E15; 
   border-radius: 4px;
+  background-color: #D4E484;
 }
 
 .form-buttons {
@@ -108,16 +115,17 @@ body {
 
 .left-column {
   float: left;
-  width: 800px;
+  width: 900px;
   padding-right: 10px;
   padding-left: 50px;
+  box-sizing: border-box;
 }
 
 .right-column {
-  position: fixed; 
-  top: 180px; 
-  right: 440px; 
-  width: 300px;
+  position: absolute; 
+  top: 100px; 
+  right: 7%; 
+  width: 34%;
   max-height: 500px;
   display: flex;
   justify-content: center;
@@ -257,4 +265,43 @@ div.error-message span.text-danger {
   color: #dc3545 !important;
   display: block;
   font-weight: bold;
+}
+
+
+
+.help-text {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.form-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: bold;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.form-group:has(.form-error) input {
+  border: 2px solid #dc3545;
+  background-color: #fff8f8;
+  border-radius: 4px;
+}
+
+.is-invalid {
+  border: 2px solid #dc3545;
+  border-radius: 4px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
 }
