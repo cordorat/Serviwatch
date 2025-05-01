@@ -4,3 +4,7 @@ desktop.ini
 __pycache__
 *.pyc
 *.sqlite3
+.coverage
+htmlcov/
+coverage/
+.coverage.*
