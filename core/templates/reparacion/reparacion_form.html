@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container">
     <div class="form-header">
-        <h2>Nueva Reparación</h2>
+        <h2 class="titulo">Nueva Reparación</h2>
     </div>
 
     <div class="form-content">
@@ -17,7 +17,7 @@
             <div class="form-field">
                 <div class="input-group custom-form">
                     <div class="input-group flex-grow-1 custom-form">
-                        <span class="input-group-text">
+                        <span class="input-group-text form-span">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
                         {{ form.cliente }}
@@ -136,7 +136,7 @@
                         <div class="error-message">
                             {% for error in form.estado.errors %}
                                 <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -150,7 +150,7 @@
                         <div class="error-message">
                             {% for error in form.tecnico.errors %}
                                 <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
