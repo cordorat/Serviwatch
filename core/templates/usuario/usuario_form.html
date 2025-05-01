@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block title %}Agregar Usuario{% endblock %}
+
+{% block content %}
+<h2 class="titulo">AGREGAR USUARIO</h2>
+<h4>DATOS</h4>
+
+<div>
+<div class="left-column">
+    <form method="POST" class="custom-form" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+        <div class="input-group mb-3">
+            <span class="input-group-text form-span" id="basic-addon1">
+              <i class="bi bi-person-fill fs-4 text-secondary"></i>
+            </span>
+            {{ form.username }}
+        </div>
+            
+          <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"  title="{{ form.username.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+  
+        
+        {% if form.username.errors %}
+            <div class="form-error">{{ form.username.errors.0 }}</div>
+        {% endif %}
+        
+        
+    </div>
+
+    <div class="form-group">
+        <div class="input-group mb-3">
+            <span class="input-group-text form-span" id="basic-addon1">
+                <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
+            </span>
+            {{ form.email }}
+        </div>
+        
+        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
+        {% if form.email.errors %}
+            <div class="form-error">{{ form.email.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <div class="input-group mb-3">
+            <span class="input-group-text form-span" id="basic-addon1">
+                <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+            </span>
+            {{ form.password1 }}
+            <i class="toggle-password bi bi-eye" id="togglePassword"></i>
+        </div>
+        
+        
+        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
+        {% if form.password1.errors %}
+        <div class="form-error">{{ form.password1.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <div class="input-group mb-3">
+            <span class="input-group-text form-span" id="basic-addon1">
+                <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+            </span>
+            {{ form.password2 }}
+            <i class="toggle-password bi bi-eye" id="togglePassword"></i>
+        </div>
+        
+        
+        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
+        {% if form.password2.errors %}
+        <div class="form-error">{{ form.password2.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <div class="form-error">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-buttons">
+        <button class="btn save" type="submit">GUARDAR</button> 
+        <a href="{% url 'usuario_list' %}">
+        <button type="button" class="btn cancel">CANCELAR</button>
+        </a>
+    </div>
+    </form>
+</div>
+
+<div class="right-column">
+    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
+</div>
+</div>  
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+
+    const usernameField = document.querySelector('input[name="username"]');
+    const emailField = document.querySelector('input[name="email"]');
+    const password1Field = document.querySelector('input[name="password1"]');
+    const password2Field = document.querySelector('input[name="password2"]');
+    
+    const allFields = [usernameField, emailField, password1Field, password2Field];
+    
+    // Aplicar clase de error a los campos con errores del servidor
+    document.querySelectorAll('.form-error').forEach(function(errorMessage) {
+        var fieldGroup = errorMessage.closest('.form-group');
+        if (fieldGroup) {
+            var inputField = fieldGroup.querySelector('input');
+            if (inputField) {
+                inputField.classList.add('is-invalid');
+            }
+        }
+    });
+    
+    // Función para validar cada campo y mostrar errores personalizados
+    function validateField(field) {
+        // Eliminar errores anteriores
+        const errorElement = field.parentElement.querySelector('.form-error:not(.password-match-error)');
+        if (errorElement) {
+            errorElement.remove();
+        }
+        
+        // Validar el campo
+        if (!field.value) {
+            // Mostrar mensaje de error personalizado
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'form-error';
+            
+            // Seleccionar mensaje según el campo
+            if (field.name === 'username') {
+                errorDiv.textContent = 'El nombre de usuario es obligatorio.';
+            } else if (field.name === 'email') {
+                errorDiv.textContent = 'El correo electrónico es obligatorio.';
+            } else if (field.name === 'password1') {
+                errorDiv.textContent = 'La contraseña es obligatoria.';
+            } else if (field.name === 'password2') {
+                errorDiv.textContent = 'Debe confirmar la contraseña.';
+            }
+            
+            // Añadir el mensaje de error al grupo del campo
+            field.parentElement.appendChild(errorDiv);
+            field.classList.add('is-invalid');
+            return false;
+        } else {
+            // Si es válido, quitar la clase de error
+            field.classList.remove('is-invalid');
+            return true;
+        }
+    }
+    
+    // Validar email con expresión regular
+    function validateEmail(email) {
+        if (email.length > 256) return false;
+        
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // Validar formato de email
+    emailField.addEventListener('blur', function() {
+        if (this.value && !validateEmail(this.value)) {
+            // Eliminar errores anteriores
+            const existingError = this.parentElement.querySelector('.form-error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Mostrar error de formato
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'form-error';
+            errorDiv.textContent = 'Introduzca un correo electrónico válido.';
+            this.parentElement.appendChild(errorDiv);
+            this.classList.add('is-invalid');
+        }
+    });
+    
+    // Añadir validación cuando el campo pierde el foco
+    allFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        // Validar y actualizar estado al escribir
+        field.addEventListener('input', function() {
+            // Si el campo tiene valor, quitar la clase de error
+            if (this.value) {
+                this.classList.remove('is-invalid');
+                const errorElement = this.parentElement.querySelector('.form-error:not(.password-match-error)');
+                if (errorElement) {
+                    errorElement.remove();
+                }
+            }
+        });
+    });
+    
+    // Validación de contraseña en tiempo real
+    if (password1Field && password2Field) {
+        password2Field.addEventListener('input', function() {
+            if (password1Field.value && password2Field.value) {
+                const errorElement = password2Field.parentElement.querySelector('.password-match-error');
+                
+                if (password1Field.value !== password2Field.value) {
+                    // Mostrar error de coincidencia
+                    if (!errorElement) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'form-error password-match-error';
+                        errorDiv.textContent = 'Las contraseñas no coinciden';
+                        password2Field.parentElement.appendChild(errorDiv);
+                    }
+                    password2Field.classList.add('is-invalid');
+                } else {
+                    // Quitar error si coinciden
+                    if (errorElement) {
+                        errorElement.remove();
+                    }
+                    password2Field.classList.remove('is-invalid');
+                }
+            }
+        });
+    }
+    
+    // Validar formulario completo al enviar
+    const form = document.querySelector('form.custom-form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+
+        allFields.forEach(field => {
+            if (!validateField(field)) {
+                isValid = false;
+            }
+        });
+        
+        // Validar coincidencia de contraseñas
+        if (password1Field.value && password2Field.value && password1Field.value !== password2Field.value) {
+            isValid = false;
+        }
+        
+        // Validar formato de email
+        if (emailField.value && !validateEmail(emailField.value)) {
+            isValid = false;
+        }
+        
+        // Detener envío si hay errores
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
+            document.querySelectorAll('form.custom-form input').forEach(input => {
+                input.value = '';
+            });
+        }
+
+    });
+    const togglePassword = document.getElementById('togglePassword');
+    if (togglePassword && password1Field) {
+        togglePassword.addEventListener('click', function() {
+            // Cambia el tipo de input entre "password" y "text"
+            const type = password1Field.getAttribute('type') === 'password' ? 'text' : 'password';
+            password1Field.setAttribute('type', type);
+            
+            // Cambia el icono entre ojo y ojo tachado
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    const password2Toggle = document.createElement('i');
+    password2Toggle.className = 'toggle-password fas fa-eye';
+    password2Toggle.id = 'togglePassword2';
+    password2Field.parentElement.appendChild(password2Toggle);
+
+    password2Toggle.addEventListener('click', function() {
+        const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
+        password2Field.setAttribute('type', type);
+        
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+});
+});
+</script>
+{% endblock %}
