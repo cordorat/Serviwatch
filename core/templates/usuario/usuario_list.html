@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="main-content">
+  <!-- Botón Agregar reparación -->
+  <div class="header-icons">
+    <a href="{% url 'usuario_create' %}" class="btn btn-add me-3s"> Agregar Usuario</a>
+  </div>
+
+  <br>
+
+  <!-- Lista de reparaciones -->
+  <div class="table-container">
+    <table class="table table-hover align-middle custom-table">
+      <thead class="table-header">
+        <tr>
+          <th>Usuario</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+          <td>{{ usuario.username }}</td>
+          <td>
+            <a href="" class="btn btn-sm btn-outline-primary" title="Editar usuario">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == "success" %}
+    <!-- Mostrar el modal SOLO si el mensaje es de tipo "success" -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+          <div class="modal-header justify-content-center">
+            <h5 class="modal-title" id="confirmModalLabel">USUARIO AGREGADO</h5>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+      modal.show();
+    </script>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -5,6 +5,8 @@ from core.views.login.recuperar_contraseña import recuperar_contraseña, cambia
 
 urlpatterns = [
     path('', login_view, name='login'),
+    path('recuperarContraseña/', recuperar_contraseña, name='recuperar_contraseña'),
+    path('cambiarContraseña/<str:token>/', cambiar_contraseña, name='cambiar_contraseña'),
     path('servicios/', usuario_servicios_view, name='servicios_usuario'),
     path('', login_view, name='login'),
     path('recuperarContraseña/', recuperar_contraseña, name='recuperar_contraseña'),
