@@ -6,10 +6,8 @@
 <div class="main-content">
     <!-- Botón Agregar reparación -->
     <div class="header-icons">
-      <a href="{% url 'cliente_create' %}" class="btn btn-add me-3"> Agregar Cliente</a>
+      <a href="{% url 'usuario_create' %}" class="btn btn-add me-3s"> Agregar Usuario</a>
     </div>
-
-
 
     <br>
 
@@ -18,20 +16,16 @@
         <table class="table table-hover align-middle custom-table">
             <thead class="table-header">
                 <tr>
-                  <th>Nombre</th>
-                  <th>Apellido</th>
-                  <th>Teléfono</th>
-                  <th>Acciones</th>
+                  <th>Usuario</th>
+              <th class="text-end">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                {% for cliente in clientes %}
+                {% for usuario in usuarios %}
                 <tr>
-                  <td>{{ cliente.nombre }}</td>
-                  <td>{{ cliente.apellido }}</td>
-                  <td>{{ cliente.telefono }}</td>
+                  <td>{{ usuario.username }}</td>
                     <td>
-                        <a href="" class="btn btn-sm btn-outline-primary" title="Editar cliente">
+                        <a href="" class="btn btn-sm btn-outline-primary" title="Editar usuario">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                     </td>
