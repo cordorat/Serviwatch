@@ -9,97 +9,67 @@ from django.utils import timezone
 from datetime import timedelta
 from core.forms.recuperar_contraseña_form import recuperarContrasenaForm
 from core.forms.recuperar_contraseña_form import CambiarContrasenaForm
-from core.models.cambiar_contraseña import PasswordResetToken
+from core.services.recuperar_service import (
+    get_user_by_username, is_email_matching,
+    generate_password_reset_token, build_reset_url,
+    send_password_reset_email, get_token,
+    update_user_password, mark_token_as_used
+)
+from django.views.decorators.http import require_http_methods
 
+@require_http_methods(["GET", "POST"])
 def recuperar_contraseña(request):
     if request.method == 'GET':
         return render(request, 'login/recuperar_contraseña.html', {
             'form': recuperarContrasenaForm(),
         })
-    else:
-        form = recuperarContrasenaForm(request.POST)
-        if form.is_valid():
-            usuario = request.POST.get('usuario', '')
-            email = request.POST.get('email', '')
 
-            print(usuario)
-            print(email)
+    form = recuperarContrasenaForm(request.POST)
+    if not form.is_valid():
+        return render(request, 'login/recuperar_contraseña.html', {
+            'form': form,
+            'error': 'Formulario inválido'
+        })
 
-            try:
-                user = get_user_model().objects.get(username=usuario)
-            except get_user_model().DoesNotExist:
-                return render(request, 'login/recuperar_contraseña.html', {
-                    'form': recuperarContrasenaForm(),
-                    'error': 'Usuario inexistente'
-                })
-            if user.email != email:
-                return render(request, 'login/recuperar_contraseña.html', {
-                    'form': recuperarContrasenaForm(),
-                    'error': 'El correo no está asociado a este usuario'
-                })
-            else:
-                # Generar token único para el cambio de contraseña
-                token = get_random_string(length=32)
-                
-                # Guardar el token en el modelo separado
-                reset_token = PasswordResetToken.objects.create(
-                    user=user,
-                    token=token
-                )
-                
-                # Crear la URL para el cambio de contraseña
-                reset_url = request.build_absolute_uri(
-                    reverse('cambiar_contraseña', kwargs={'token': token})
-                )
-                
-                # Enviar correo con el enlace para cambiar la contraseña
-                send_mail(
-                    subject='Recuperación de contraseña',
-                    message=f'Haz clic en el siguiente enlace para cambiar tu contraseña: {reset_url}\n'
-                           f'Este enlace expirará en 24 horas.',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[email],
-                    fail_silently=False,
-                )
-                
-                return render(request, 'login/recuperar_contraseña.html', {
-                    'form': recuperarContrasenaForm(),
-                    'success': 'Se ha enviado un enlace a tu correo para cambiar la contraseña'
-                })
-        else: 
-            return render(request, 'login/recuperar_contraseña.html', {
-                'form': recuperarContrasenaForm(),
-                'error': 'formulario invalido'
-            })
+    usuario = request.POST.get('usuario', '')
+    email = request.POST.get('email', '')
 
+    user, error = get_user_by_username(usuario)
+    if error:
+        return render(request, 'login/recuperar_contraseña.html', {
+            'form': recuperarContrasenaForm(),
+            'error': error
+        })
 
+    if not is_email_matching(user, email):
+        return render(request, 'login/recuperar_contraseña.html', {
+            'form': recuperarContrasenaForm(),
+            'error': 'El correo no está asociado a este usuario'
+        })
 
+    token = generate_password_reset_token(user)
+    reset_url = build_reset_url(request, token)
+    send_password_reset_email(email, reset_url)
+
+    return render(request, 'login/recuperar_contraseña.html', {
+        'form': recuperarContrasenaForm(),
+        'success': 'Se ha enviado un enlace a tu correo para cambiar la contraseña'
+    })
 
 def cambiar_contraseña(request, token):
-    # Verificar si el token existe y no ha expirado
-    try:
-        reset_token = PasswordResetToken.objects.get(token=token)
-
-        if not reset_token.is_valid():
-            return render(request, 'login/token_expirado.html')
-
-    except PasswordResetToken.DoesNotExist:
+    token_obj, error = get_token(token)
+    if error == 'Token inválido':
         return render(request, 'login/token_invalido.html')
+    if error == 'Token expirado':
+        return render(request, 'login/token_expirado.html')
 
-    user = reset_token.user
+    user = token_obj.user
 
     if request.method == 'POST':
         form = CambiarContrasenaForm(request.POST)
         if form.is_valid():
-            # Cambiar la contraseña
-            password = form.cleaned_data['password']
-            user.set_password(password)
-            user.save()
-
-            # Marcar el token como usado
-            reset_token.used = True
-            reset_token.save()
-
+            update_user_password(user, form.cleaned_data['password'])
+            mark_token_as_used(token_obj)
             return render(request, 'login/cambiar_contraseña.html', {
                 'form': CambiarContrasenaForm(),
                 'token': token,
@@ -111,10 +81,8 @@ def cambiar_contraseña(request, token):
                 'token': token,
                 'error': 'Formulario inválido. Verifica los campos.'
             })
-    else:
-        form = CambiarContrasenaForm()
 
     return render(request, 'login/cambiar_contraseña.html', {
-        'form': form,
+        'form': CambiarContrasenaForm(),
         'token': token
     })
