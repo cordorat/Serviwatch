@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from core.forms.login_form import LoginForm
 from core.services.login_service import validate_credentials, get_user, authenticate_user, login_user
+from django.views.decorators.http import require_http_methods
 
-def Login(request):
+@require_http_methods(["GET", "POST"])
+def login_view(request):
     if request.method == 'GET':
         return render(request, 'login/login.html', {'form': LoginForm()})
 
