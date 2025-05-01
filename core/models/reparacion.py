@@ -4,10 +4,11 @@ from core.models.empleado import Empleado
 
 class Reparacion(models.Model):
     ESTADOS = [
-        ('cotización', 'Cotización'),
-        ('reparación', 'En reparación'),
-        ('prueba', 'En prueba'),
-        ('entregado', 'Entregado'),
+        ('Cotización', 'Cotización'),
+        ('Reparación', 'En reparación'),
+        ('Prueba', 'En prueba'),
+        ('Listo', 'Listo para entrega'),
+        ('Entregado', 'Entregado'),
     ]
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
@@ -18,7 +19,7 @@ class Reparacion(models.Model):
     fecha_entrega_estimada = models.DateField()
     precio = models.PositiveIntegerField()
     espacio_fisico = models.CharField(max_length=15)
-    estado = models.CharField(max_length=15, choices=ESTADOS, default='cotización')
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='Cotización')
     tecnico = models.ForeignKey(Empleado, on_delete=models.SET_NULL, null=True, related_name='reparaciones')
 
     def __str__(self):
