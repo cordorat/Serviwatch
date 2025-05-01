@@ -39,6 +39,7 @@ form {
 .form-span {
   border: 1px solid #626E15; 
   border-radius: 4px;
+  background-color: #D4E484;
 }
 
 .form-buttons {

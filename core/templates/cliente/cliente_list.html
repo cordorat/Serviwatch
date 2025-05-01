@@ -4,66 +4,93 @@
 {% block content %}
 
 <div class="main-content">
-    <!-- Botón Agregar reparación -->
-    <div class="header-icons">
-      <a href="{% url 'cliente_create' %}" class="btn btn-add me-3"> Agregar Cliente</a>
+  <!-- Botón Agregar reparación -->
+  <div class="header-icons">
+    <a href="{% url 'cliente_create' %}" class="btn btn-add me-3"> Agregar Cliente</a>
+  </div>
+
+
+
+  <br>
+
+  <!-- Lista de reparaciones -->
+  <div class="table-container">
+    <table class="table table-hover align-middle custom-table">
+      <thead class="table-header">
+        <tr>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Teléfono</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cliente in clientes %}
+        <tr>
+          <td>{{ cliente.nombre }}</td>
+          <td>{{ cliente.apellido }}</td>
+          <td>{{ cliente.telefono }}</td>
+          <td>
+            <a href="" class="btn btn-sm btn-outline-primary" title="Editar cliente">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if messages %}
+  {% for message in messages %}
+  {% if message.tags == "success" %}
+  <!-- Mostrar el modal SOLO si el mensaje es de tipo "success" -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content">
+        <div class="modal-header justify-content-center">
+          <h5 class="modal-title" id="confirmModalLabel">CLIENTE AGREGADO</h5>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <script>
+    var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
+  </script>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
 
 
+  <!-- Paginación -->
+  {% if is_paginated %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+      </li>
+      {% endif %}
 
-    <br>
+      {% for num in page_obj.paginator.page_range %}
+      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+      </li>
+      {% endfor %}
 
-    <!-- Lista de reparaciones -->
-    <div class="table-container">
-        <table class="table table-hover align-middle custom-table">
-            <thead class="table-header">
-                <tr>
-                  <th>Nombre</th>
-                  <th>Apellido</th>
-                  <th>Teléfono</th>
-                  <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cliente in clientes %}
-                <tr>
-                  <td>{{ cliente.nombre }}</td>
-                  <td>{{ cliente.apellido }}</td>
-                  <td>{{ cliente.telefono }}</td>
-                    <td>
-                        <a href="" class="btn btn-sm btn-outline-primary" title="Editar cliente">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Paginación -->
-        {% if is_paginated %}
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-                </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
-    </div>
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
 </div>
 {% endblock %}

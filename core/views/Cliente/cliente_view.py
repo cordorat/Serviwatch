@@ -28,7 +28,7 @@ def cliente_create_view(request):
             messages.success(request, 'Cliente creado exitosamente.')
             form.save()
             next_url = request.GET.get('next')
-            if next_url (next_url):
+            if next_url:
                 return redirect(next_url)
 
             return redirect('cliente_list')
