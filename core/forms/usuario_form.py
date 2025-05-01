@@ -161,13 +161,14 @@ class FormularioRegistroUsuario(UserCreationForm):
         return email
     
     def _post_clean(self):
-
         super()._post_clean()
+
+        # Evita duplicar el error si ya lo tiene password1
         if 'password2' in self._errors:
             errors = []
             for error in self._errors['password2']:
                 if "too similar to" in error or "similar" in error.lower():
-                    errors.append("La contraseña es muy similar al nombre de usuario.")
+                    errors.append("La contraseña no puede ser igual al nombre de usuario.")
                 else:
                     errors.append(error)
             self._errors['password2'] = self.error_class(errors)
