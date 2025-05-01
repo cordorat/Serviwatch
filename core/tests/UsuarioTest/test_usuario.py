@@ -1,4 +1,5 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from core.services.usuario_service import crear_usuario
@@ -160,3 +161,23 @@ class FormularioRegistroUsuarioTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
         self.assertIn('El nombre de usuario debe tener al menos 8 caracteres.', form.errors['username'])
+
+    class UsuarioListViewTest(TestCase):
+        def setUp(self):
+            self.client = Client()
+            self.user = User.objects.create_user(username='testuser', password='testpass')
+            self.url = reverse('usuario_list')  # Asegúrate de que la URL esté bien nombrada en urls.py
+
+        def test_usuario_list_view_autenticado(self):
+            self.client.login(username='testuser', password='testpass')
+            response = self.client.get(self.url)
+
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, 'usuario/usuario_list.html')
+            self.assertIn('usuarios', response.context)
+            self.assertContains(response, 'testuser')  
+
+        def test_usuario_list_view_no_autenticado(self):
+            response = self.client.get(self.url)
+            self.assertNotEqual(response.status_code, 200)
+            self.assertRedirects(response, f'/accounts/login/?next={self.url}')
