@@ -158,6 +158,8 @@
     
     // Validar email con expresión regular
     function validateEmail(email) {
+        if (email.length > 256) return false;
+        
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     }

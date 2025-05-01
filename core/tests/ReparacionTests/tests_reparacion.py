@@ -70,7 +70,7 @@ class ReparacionFormTest(TestCase):
             'marca_reloj': "Rolex",
             'descripcion': "Reparación de cristal y ajuste de hora",
             'codigo_orden': "12345",
-            'fecha_entrega_estimada': date(2025, 4, 30),
+            'fecha_entrega_estimada': date(2025, 5, 1),
             'precio': 100,
             'espacio_fisico': "Caja 1",
             'estado': "Reparación",
@@ -153,7 +153,7 @@ class ReparacionServiceTest(TestCase):
             marca_reloj="Casio",
             descripcion="Cambio de batería",
             codigo_orden="1001",
-            fecha_entrega_estimada=date.today(),
+            fecha_entrega_estimada=date(2025, 5, 1),
             precio=45000,
             espacio_fisico="A1",
             estado="cotización",
@@ -434,7 +434,7 @@ class ReparacionViewsTest(TestCase):
         """Prueba POST exitoso a la vista de creación"""
         # Construir fecha en formato ISO 8601 (YYYY-MM-DD)
         fecha_futura = date.today() + timedelta(days=30)
-        fecha_str = fecha_futura.strftime('%Y-%m-%d')
+        fecha_str = fecha_futura.strftime('%d/%m/%Y')
         
         # Probar varios posibles formatos de fecha
         data = {
@@ -442,7 +442,7 @@ class ReparacionViewsTest(TestCase):
             'marca_reloj': 'Seiko',
             'descripcion': 'Reparación completa del mecanismo automático. Descripción detallada para asegurar longitud mínima.',
             'codigo_orden': '2001',
-            'fecha_entrega_estimada': fecha_str,  # Formato YYYY-MM-DD
+            'fecha_entrega_estimada': fecha_str,
             'precio': 85000,
             'espacio_fisico': 'B5',
             'estado': 'Cotización',

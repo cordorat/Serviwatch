@@ -44,7 +44,7 @@ class FormularioRegistroUsuario(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Contraseña'
         }),
-        help_text='La contraseña debe tener al menos 8 caracteres y máximo 16 caracteres. Debe tener números, letras y caracteres especiales.',
+        help_text='La contraseña debe tener una longitud de 8 a 16 caracteres e incluir al menos un número, una letra mayúscula, una letra minúscula y un carácter especial.',
         error_messages={
             'required': 'La contraseña es obligatoria.',
             'similar': 'La contraseña no puede ser igual al nombre de usuario.'
@@ -87,10 +87,16 @@ class FormularioRegistroUsuario(UserCreationForm):
                 )
                 
         # Verificar que la contraseña tenga letras
-        if password1 and not any(char.isalpha() for char in password1):
+        if password1 and not any(char.isupper() for char in password1):
             raise ValidationError(
-                "La contraseña debe incluir al menos una letra.",
-                code='password_no_letters',
+                "La contraseña debe incluir al menos una letra mayúscula.",
+                code='password_no_uppercase',
+            )
+        
+        if password1 and not any(char.islower() for char in password1):
+            raise ValidationError(
+                "La contraseña debe incluir al menos una letra minúscula.",
+                code='password_no_lowercase',
             )
             
         # Verificar que la contraseña tenga números
@@ -136,6 +142,13 @@ class FormularioRegistroUsuario(UserCreationForm):
                 _("El nombre de usuario ya está en uso."),
                 code='username_exists',
             )
+        
+        if username and len(username) < 8:
+            raise ValidationError(
+                _("El nombre de usuario debe tener al menos 8 caracteres."),
+                code='username_too_short',
+            )
+        
         return username
     
     def clean_email(self):
@@ -148,13 +161,14 @@ class FormularioRegistroUsuario(UserCreationForm):
         return email
     
     def _post_clean(self):
-
         super()._post_clean()
+
+        # Evita duplicar el error si ya lo tiene password1
         if 'password2' in self._errors:
             errors = []
             for error in self._errors['password2']:
                 if "too similar to" in error or "similar" in error.lower():
-                    errors.append("La contraseña es muy similar al nombre de usuario.")
+                    errors.append("La contraseña no puede ser igual al nombre de usuario.")
                 else:
                     errors.append(error)
             self._errors['password2'] = self.error_class(errors)
