@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from core.forms.cliente_form import ClienteForm
 from core.services.cliente_service import get_all_clientes, crear_cliente
 from django.contrib import messages
@@ -20,12 +20,22 @@ def cliente_list_view(request):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def cliente_create_view(request):
+def cliente_create_view(request, nombre=None, apellido=None, telefono=None):
+    if nombre and apellido and telefono:
+        cliente = get_object_or_404(Cliente, nombre=nombre, apellido=apellido, telefono=telefono)
+        modo = 'editar'
+    else:
+        modo = 'agregar'
+        cliente = None
+
     if request.method == 'POST':
-        form = ClienteForm(request.POST)
+        form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             crear_cliente(form)
-            messages.success(request, 'Cliente creado exitosamente.')
+            if modo == 'editar':
+                messages.success(request, 'Cliente editado exitosamente.')
+            else:
+                messages.success(request, 'Cliente creado exitosamente.')
             form.save()
             next_url = request.GET.get('next')
             if next_url:
@@ -33,8 +43,11 @@ def cliente_create_view(request):
 
             return redirect('cliente_list')
     else:
-        form = ClienteForm()
-    return render(request, 'cliente/cliente_form.html', {'form': form})
+        form = ClienteForm(instance=cliente)
+    return render(request, 'cliente/cliente_form.html', {
+        'form': form,
+        'modo': modo
+        })
 
 
 def cliente_search_view(request):
