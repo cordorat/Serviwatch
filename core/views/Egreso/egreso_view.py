@@ -37,7 +37,7 @@ def egreso_view(request):
     else:
         form = EgresoForm()
     
-    return render(request, 'egreso/egreso_form.html', {'form': form})
+    return render(request, 'egreso/egreso_form.html', {'form': form, })
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -77,7 +77,7 @@ def confirmar_egreso_view(request):
                     del request.session['datos_egreso']
                 
                 messages.success(request, 'Egreso agregado correctamente')
-                return redirect('egreso_list')
+                return redirect('egreso')
             except Exception as e:
                 messages.error(request, f'Error al crear el egreso: {str(e)}')
                 return render(request, 'egreso/confirmar_egreso.html', {
