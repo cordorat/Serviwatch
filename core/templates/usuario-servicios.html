@@ -4,8 +4,8 @@
 {% block title %}Servicios de Relojería{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Servicios de Relojería</h2>
+<div class="servicios-container mt-5">
+    <h2 class="titulo text-center mb-4">Servicios de Relojería</h2>
     <div class="row justify-content-center">
         <div class="col-12 d-flex flex-wrap gap-3 justify-content-center">
 
@@ -78,6 +78,20 @@
         font-size: 14px;
         font-weight: bold;
         text-transform: uppercase;
+    }
+
+    .servicios-container {
+        max-width: 900px;
+        margin: 0 auto !important;
+        padding: 20px;
+    }
+
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: flex-start;
+        width: 100%;
+        padding: 20px;
     }
 
     @media (max-width: 500px) {
