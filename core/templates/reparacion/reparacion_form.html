@@ -9,6 +9,7 @@
         border: 1px solid red;
         box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
     }
+
 </style>
 
 <div class="container">
@@ -17,15 +18,15 @@
     </div>
 
     <div class="form-content">
-        <form method="post" id="reparacionForm" class="custom-form form-reparacion" novalidate>
+        <form method="post" id="reparacionForm" class="repair-form custom-form" novalidate>
             {% csrf_token %}
 
             <br>
 
             <!-- Cliente -->
             <div class="form-field">
-                <div class="input-group custom-form">
-                    <div class="input-group flex-grow-1 custom-form">
+                <div class="input-group repair-form">
+                    <div class="input-group flex-grow-1 repair-form">
                         <span class="input-group-text form-span">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
@@ -50,7 +51,7 @@
 
             <!-- Resto de campos del formulario -->
             <div class="row g-4">
-                <div class="col-md-6">
+                <div class="repair-form-column">
                     <div class="input-group ">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-watch fs-4 text-secondary"></i>
@@ -59,14 +60,14 @@
                     </div>
                     <div class="error-message">
                         {% if form.marca_reloj.errors %}
-                            {% for error in form.marca_reloj.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.marca_reloj.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
 
-                    <div class="input-group custom-form mt-3">
+                    <div class="input-group reparacion-custom-form mt-3">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                         </span>
@@ -74,9 +75,9 @@
                     </div>
                     <div class="error-message">
                         {% if form.descripcion.errors %}
-                            {% for error in form.descripcion.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.descripcion.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
@@ -88,9 +89,9 @@
                     </div>
                     <div class="error-message">
                         {% if form.codigo_orden.errors %}
-                            {% for error in form.codigo_orden.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.codigo_orden.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
@@ -102,15 +103,15 @@
                     </div>
                     <div class="error-message">
                         {% if form.fecha_entrega_estimada.errors %}
-                            {% for error in form.fecha_entrega_estimada.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.fecha_entrega_estimada.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="input-group custom-form">
+                <div class="repair-form-column">
+                    <div class="input-group">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                         </span>
@@ -118,23 +119,23 @@
                     </div>
                     <div class="error-message">
                         {% if form.precio.errors %}
-                            {% for error in form.precio.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.precio.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
                     <div class="input-group mt-3">
-                        <span class="input-group-text form-span" id="basic-addon1">
+                        <span class="input-group-text form-span " id="basic-addon1">
                             <i class="bi bi-box-seam fs-4 text-secondary"></i>
                         </span>
                         {{ form.espacio_fisico}}
                     </div>
                     <div class="error-message">
                         {% if form.espacio_fisico.errors %}
-                            {% for error in form.espacio_fisico.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.espacio_fisico.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
@@ -147,9 +148,9 @@
                     </div>
                     <div class="error-message">
                         {% if form.estado.errors %}
-                            {% for error in form.estado.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.estado.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
@@ -161,9 +162,9 @@
                     </div>
                     <div class="error-message">
                         {% if form.tecnico.errors %}
-                            {% for error in form.tecnico.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
+                        {% for error in form.tecnico.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
                 </div>

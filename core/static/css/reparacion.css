@@ -155,8 +155,6 @@ select.form-span {
 .form-reparacion {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 100%;
   max-width: 1000px;
 }
 
