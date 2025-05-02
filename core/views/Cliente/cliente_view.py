@@ -16,6 +16,8 @@ from django.core.paginator import Paginator
 @require_http_methods(["GET"])
 def cliente_list_view(request):
     clientes = get_all_clientes()
+    
+    clientes = clientes.order_by('nombre', 'apellido', 'telefono')
 
     paginator = Paginator(clientes, 6)
     page_number = request.GET.get('page')

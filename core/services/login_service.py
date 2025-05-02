@@ -23,4 +23,4 @@ def authenticate_user(request, username, password):
 def login_user(request, user):
     """Inicia sesión y determina la redirección"""
     login(request, user)
-    return 'cliente_create' if user.is_superuser else 'cliente_list'
+    return 'usuario_list' if user.is_superuser else 'cliente_list'

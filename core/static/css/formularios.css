@@ -31,9 +31,6 @@ form {
   width: 100%;
 }
 
-.form-group input{
-  width: 100%;
-}
 
 .custom-form input {
   font-family: "Montserrat", sans-serif;
@@ -50,7 +47,6 @@ form {
 .form-span {
   border: 1px solid #626E15; 
   border-radius: 4px;
-  background-color: #D4E484;
 }
 
 .form-buttons {
@@ -139,7 +135,6 @@ h4{
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   font-size: 24px;
-  padding-left: 40px;
 }
 
 .help-text {
@@ -237,3 +232,52 @@ input.form-control {
   cursor: pointer;
   z-index: 10;
 }
+
+/* Añadir al final de formularios.css */
+
+/* Clase específica para formulario de reparación */
+.repair-form {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con repair-form */
+form.repair-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+/* Para organizar campos en columnas */
+.repair-form-column {
+  flex: 0 0 50%;
+  flex-direction: column;
+}
+
+/* Para pantallas pequeñas */
+
+  
+  form.repair-form.custom-form {
+    flex-direction: column;
+  }
+
+
+/* Añadir al final de formularios.css */
+
+/* Clase específica para formulario de reparación */
+.egreso-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con repair-form */
+form.egreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+

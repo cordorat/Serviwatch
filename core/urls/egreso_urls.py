@@ -1,0 +1,8 @@
+from django.urls import path
+from core.views.Egreso.egreso_view import egreso_view
+from core.views.Egreso.confirmar_egreso_view import confirmar_egreso_view
+
+urlpatterns = [
+    path('egreso/', egreso_view, name='egreso'),
+    path('egreso/confirmar/', confirmar_egreso_view, name='confirmar_egreso'),
+]
