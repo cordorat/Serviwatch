@@ -6,12 +6,24 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from core.services.usuario_service import crear_usuario, get_all_usuarios
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 
 @login_required
 @require_http_methods(["GET"])
 def usuario_list_view(request):
     usuarios = get_all_usuarios()
-    return render(request, "usuario/usuario_list.html",{"usuarios":usuarios})
+
+    paginator = Paginator(usuarios, 8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'usuarios': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+
+    return render(request, "usuario/usuario_list.html",context)
 
 @login_required
 @require_http_methods(["GET", "POST"])
