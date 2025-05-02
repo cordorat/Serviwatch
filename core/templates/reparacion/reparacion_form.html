@@ -2,32 +2,35 @@
 {% load static %}
 
 {% block content %}
+<style>
+    input.is-invalid,
+    select.is-invalid,
+    textarea.is-invalid {
+        border: 1px solid red;
+        box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
+    }
+
+</style>
+
 <div class="container">
     <div class="form-header">
         <h2 class="titulo">Nueva Reparación</h2>
     </div>
 
     <div class="form-content">
-        <form method="post" id="reparacionForm" class="custom-form form-reparacion" novalidate>
+        <form method="post" id="reparacionForm" class="repair-form custom-form" novalidate>
             {% csrf_token %}
 
             <br>
 
             <!-- Cliente -->
             <div class="form-field">
-                <div class="input-group custom-form">
-                    <div class="input-group flex-grow-1 custom-form">
+                <div class="input-group repair-form">
+                    <div class="input-group flex-grow-1 repair-form">
                         <span class="input-group-text form-span">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
                         {{ form.cliente }}
-                        {% if form.cliente.errors %}
-                        <div class="error-message">
-                            {% for error in form.cliente.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
                         <a href="{% url 'cliente_create' %}?next={% url 'reparacion_create' %}"
                             class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
                             title="Agregar cliente"
@@ -36,141 +39,136 @@
                         </a>
                     </div>
                 </div>
+                <div class="error-message">
+                    {% if form.cliente.errors %}
+                    {% for error in form.cliente.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
             </div>
+
 
             <!-- Resto de campos del formulario -->
             <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="input-group mb-3">
+                <div class="repair-form-column">
+                    <div class="input-group ">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-watch fs-4 text-secondary"></i>
                         </span>
                         {{ form.marca_reloj}}
+                    </div>
+                    <div class="error-message">
                         {% if form.marca_reloj.errors %}
-                        <div class="error-message mt-2">
-                            {% for error in form.marca_reloj.errors %}
-                            <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.marca_reloj.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
-                    <div class="input-group mb-3">
+
+                    <div class="input-group reparacion-custom-form mt-3">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                         </span>
                         {{ form.descripcion }}
+                    </div>
+                    <div class="error-message">
                         {% if form.descripcion.errors %}
-                        <div class="error-message">
-                            {% for error in form.descripcion.errors %}
-                            <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.descripcion.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
-                    <div class="input-group mb-3">
+                    <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-hash fs-4 text-secondary"></i>
                         </span>
                         {{ form.codigo_orden }}
+                    </div>
+                    <div class="error-message">
                         {% if form.codigo_orden.errors %}
-                        <div class="error-message">
-                            {% for error in form.codigo_orden.errors %}
-                            <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.codigo_orden.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
-                    <div class="input-group mb-3">
+                    <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                         </span>
                         {{ form.fecha_entrega_estimada }}
+                    </div>
+                    <div class="error-message">
                         {% if form.fecha_entrega_estimada.errors %}
-                        <div class="error-message">
-                            {% for error in form.fecha_entrega_estimada.errors %}
-                            <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.fecha_entrega_estimada.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="input-group mb-3">
+                <div class="repair-form-column">
+                    <div class="input-group">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                         </span>
                         {{ form.precio}}
+                    </div>
+                    <div class="error-message">
                         {% if form.precio.errors %}
-                        <div class="error-message">
-                            {% for error in form.precio.errors %}
-                            <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.precio.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
-                    <div class="input-group mb-3">
-                        <span class="input-group-text form-span" id="basic-addon1">
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span " id="basic-addon1">
                             <i class="bi bi-box-seam fs-4 text-secondary"></i>
                         </span>
                         {{ form.espacio_fisico}}
+                    </div>
+                    <div class="error-message">
                         {% if form.espacio_fisico.errors %}
-                        <div class="error-message">
-                            {% for error in form.espacio_fisico.errors %}
-                            <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.espacio_fisico.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
 
-                    <div class="input-group mb-3">
+                    <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-smartwatch fs-4 text-secondary"></i>
                         </span>
                         {{ form.estado }}
+                    </div>
+                    <div class="error-message">
                         {% if form.estado.errors %}
-                        <div class="error-message">
-                            {% for error in form.estado.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.estado.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
 
-                    <div class="input-group mb-3">
+                    <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-person-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.tecnico}}
+                    </div>
+                    <div class="error-message">
                         {% if form.tecnico.errors %}
-                        <div class="error-message">
-                            {% for error in form.tecnico.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
+                        {% for error in form.tecnico.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
                         {% endif %}
                     </div>
                 </div>
             </div>
-
-            <!--{% for field in form %}
-                {% if field.name != 'cliente' %}
-                <div class="form-field">
-                    <label for="{{ field.id_for_label }}" class="form-label">
-                        {{ field.label }} {% if field.field.required %}*{% endif %}
-                    </label>
-                    {{ field }}
-                    {% if field.errors %}
-                    <div class="form-error">{{ field.errors }}</div>
-                    {% endif %}
-                </div>
-                {% endif %}
-            {% endfor %}-->
 
             <div class="form-buttons">
                 <button class="btn save" type="submit">GUARDAR</button>
@@ -217,6 +215,9 @@
                 return null;
             }
         });
+        if ($('#id_cliente').hasClass('is-invalid')) {
+            $('#id_cliente').next('.select2-container').find('.select2-selection').addClass('is-invalid');
+        }
     });
 
     function formatCliente(cliente) {
@@ -237,6 +238,253 @@
         dateFormat: "d/m/Y", // formato deseado
         locale: "es", // para español
         minDate: "today"
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Seleccionar todos los campos de entrada que requieren validación
+        const formFields = {
+            marca_reloj: document.querySelector('#id_marca_reloj'),
+            descripcion: document.querySelector('#id_descripcion'),
+            codigo_orden: document.querySelector('#id_codigo_orden'),
+            fecha_entrega_estimada: document.querySelector('#id_fecha_entrega_estimada'),
+            precio: document.querySelector('#id_precio'),
+            espacio_fisico: document.querySelector('#id_espacio_fisico'),
+            tecnico: document.querySelector('#id_tecnico'),
+        };
+
+        // Limpiar todos los mensajes de error al cargar la página
+        function clearAllErrors() {
+            // Limpiar errores del cliente
+            const clienteSelect = document.querySelector('#id_cliente');
+            if (clienteSelect) {
+                clienteSelect.classList.remove('is-invalid');
+                // Usar el selector correcto para el div de error del cliente
+                const clienteErrorDiv = document.querySelector('.form-field .error-message');
+                if (clienteErrorDiv) {
+                    clienteErrorDiv.innerHTML = '';
+                }
+            }
+
+            // Limpiar errores de los demás campos
+            for (const fieldName in formFields) {
+                const field = formFields[fieldName];
+                if (field) {
+                    field.classList.remove('is-invalid');
+                    const errorDiv = field.parentElement.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('error-message')) {
+                        errorDiv.innerHTML = '';
+                    }
+                }
+            }
+
+            // Limpiar todos los divs de error
+            document.querySelectorAll('.error-message').forEach(div => {
+                // Mantener solo errores del servidor si existen
+                const serverErrors = div.querySelectorAll('.text-danger[data-server-error="true"]');
+                if (serverErrors.length === 0) {
+                    div.innerHTML = '';
+                }
+            });
+            // Limpiar todos los campos de formulario, incluyendo estado y técnico
+            document.querySelectorAll('.form-control, select').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+
+            // Limpiar todos los mensajes de error
+            document.querySelectorAll('.error-message').forEach(div => {
+                div.innerHTML = '';
+            });
+        }
+
+        // Limpiar errores al cargar la página
+        clearAllErrors();
+
+        // Validación por campo
+        function validateField(field) {
+            // Obtener el div de error existente o crear uno nuevo
+            let errorDiv = field.parentElement.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                field.parentElement.after(errorDiv);
+            }
+
+            // Limpiar errores anteriores
+            errorDiv.innerHTML = '';
+
+            const fieldName = field.id.replace('id_', '');
+            const value = field.value.trim();
+            let isValid = true;
+            let errorMessage = '';
+
+            // Validaciones específicas por campo
+            switch (fieldName) {
+                case 'marca_reloj':
+                    if (!value) {
+                        errorMessage = 'La marca del reloj es obligatoria';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'descripcion':
+                    if (!value) {
+                        errorMessage = 'La descripción es obligatoria';
+                        isValid = false;
+                    } else if (value.length < 10) {
+                        errorMessage = 'La descripción debe tener al menos 10 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'codigo_orden':
+                    if (!value) {
+                        errorMessage = 'El código de orden es obligatorio';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'fecha_entrega_estimada':
+                    if (!value) {
+                        errorMessage = 'La fecha de entrega estimada es obligatoria';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'precio':
+                    if (!value) {
+                        errorMessage = 'El precio es obligatorio';
+                        isValid = false;
+                    } else if (isNaN(value) || parseInt(value) <= 0) {
+                        errorMessage = 'El precio debe ser un número mayor a cero';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'espacio_fisico':
+                    if (!value) {
+                        errorMessage = 'El espacio físico es obligatorio';
+                        isValid = false;
+                    }
+                    break;
+                case 'tecnico':
+                    if (!value) {
+                        errorMessage = 'El técnico es obligatorio';
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            // Mostrar mensaje de error si existe
+            if (!isValid) {
+                field.classList.add('is-invalid');
+                errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+
+            return isValid;
+        }
+
+        // Validar todos los campos
+        function validateForm() {
+            let isValid = true;
+
+            // Validar cliente (Select2)
+            const clienteSelect = document.querySelector('#id_cliente');
+            const clienteErrorDiv = document.querySelector('.form-field .error-message');  // Selector mejorado
+
+            if (!clienteSelect.value) {
+                isValid = false;
+                clienteSelect.classList.add('is-invalid');
+
+                // También aplicar el estilo al contenedor Select2
+                const select2Container = clienteSelect.nextElementSibling;
+                if (select2Container) {
+                    select2Container.querySelector('.select2-selection').classList.add('is-invalid');
+                }
+
+                if (clienteErrorDiv) {
+                    clienteErrorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
+                } else {
+                    // Si no existe div de error, crearlo
+                    const newErrorDiv = document.createElement('div');
+                    newErrorDiv.className = 'error-message';
+                    newErrorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';  // Mensaje correcto
+                    clienteSelect.closest('.form-field').appendChild(newErrorDiv);
+                }
+            } else {
+                clienteSelect.classList.remove('is-invalid');
+
+                // Quitar estilo del contenedor Select2
+                const select2Container = clienteSelect.nextElementSibling;
+                if (select2Container) {
+                    select2Container.querySelector('.select2-selection').classList.remove('is-invalid');
+                }
+
+                if (clienteErrorDiv) {
+                    clienteErrorDiv.innerHTML = '';
+                }
+            }
+
+            // Validar resto de campos
+            for (const fieldName in formFields) {
+                const field = formFields[fieldName];
+                if (field && !validateField(field)) {
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        // Asignar eventos blur para validación en tiempo real
+        for (const fieldName in formFields) {
+            const field = formFields[fieldName];
+            if (field) {
+                field.addEventListener('blur', function () {
+                    validateField(this);
+                });
+
+                field.addEventListener('input', function () {
+                    // Quitar clase de error al escribir
+                    this.classList.remove('is-invalid');
+
+                    // Limpiar mensaje de error si existe
+                    const errorDiv = this.parentElement.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('error-message')) {
+                        errorDiv.innerHTML = '';
+                    }
+                });
+            }
+        }
+
+        // Validar formulario al enviar
+        const form = document.querySelector('#reparacionForm');
+        form.addEventListener('submit', function (e) {
+            if (!validateForm()) {
+                e.preventDefault();
+            }
+        });
+
+        // Validar Select2 al cambiar
+        $('#id_cliente').on('change', function () {
+            const clienteSelect = document.querySelector('#id_cliente');
+            const errorDiv = clienteSelect.closest('.input-group').nextElementSibling;
+
+            if (this.value) {
+                clienteSelect.classList.remove('is-invalid');
+                if (errorDiv && errorDiv.classList.contains('error-message')) {
+                    errorDiv.innerHTML = '';
+                }
+            } else {
+                clienteSelect.classList.add('is-invalid');
+                if (errorDiv && errorDiv.classList.contains('error-message')) {
+                    errorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
+                }
+            }
+        });
     });
 </script>
 {% endblock %}

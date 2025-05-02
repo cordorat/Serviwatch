@@ -11,9 +11,12 @@ class ClienteChoiceField(forms.ModelChoiceField):
 class ReparacionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['cliente'].required = False  # <- Esto es lo clave
-        self.fields['cliente'].widget.attrs['class'] = 'form-control'  # si quieres clases
+        self.fields['cliente'].required = False  
+        self.fields['cliente'].widget.attrs['class'] = 'form-control'
         self.fields['cliente'].widget.attrs['placeholder'] = 'Seleccione un cliente'
+        for field in self.fields:
+            if self[field].errors:
+                self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
             
     cliente = ClienteChoiceField(
         queryset=Cliente.objects.all(),
@@ -26,6 +29,7 @@ class ReparacionForm(forms.ModelForm):
     tecnico = forms.ModelChoiceField(
         queryset=Empleado.objects.all(),
         empty_label="Seleccione un técnico",
+        required=False,
         widget=forms.Select(attrs={
             'class': 'form-control form-span text-secondary'
         })
@@ -33,6 +37,7 @@ class ReparacionForm(forms.ModelForm):
     
     fecha_entrega_estimada = forms.DateField(
         input_formats=['%d/%m/%Y'],
+        required=False,
         widget=forms.DateInput(
             attrs={
                 'class': 'form-control',
@@ -104,6 +109,12 @@ class ReparacionForm(forms.ModelForm):
             'estado': forms.Select(attrs={'class': 'form-span form-control text-secondary', 'placeholder': 'Estado'}),
             'tecnico': forms.Select(attrs={'class': 'form-control form-span text-secondary'}),
         }
+    def clean_cliente(self):
+        cliente = self.cleaned_data.get('cliente')
+        if not cliente:
+            raise forms.ValidationError("Debe seleccionar un cliente.")
+        return cliente
+        
 
     def clean_marca_reloj(self):
         marca = self.cleaned_data.get('marca_reloj')
@@ -166,6 +177,12 @@ class ReparacionForm(forms.ModelForm):
         if not cliente:
             raise forms.ValidationError("Por favor seleccione un cliente.")
         return cliente
+    
+    def clean_tecnico(self):
+        tecnico = self.cleaned_data.get('tecnico')
+        if not tecnico:
+            raise forms.ValidationError("Debe seleccionar un técnico para la reparación.")
+        return tecnico
 
     def clean(self):
         cleaned_data = super().clean()

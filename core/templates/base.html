@@ -97,7 +97,7 @@
             
           </li>
           <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
-            <a href="#" class="{% if not '/usuarios/' in request.path or request.path == '/usuarios' %} menu-link {% endif %}">
+            <a href="{% url 'usuario_list' %}" class="{% if not '/usuarios/' in request.path or request.path == '/usuarios' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
               </span>
