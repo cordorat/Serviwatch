@@ -29,9 +29,10 @@
                         </div>
                         {% endif %}
                         <a href="{% url 'cliente_create' %}?next={% url 'reparacion_create' %}"
-                        class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
-                        title="Agregar cliente" style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
-                        Agregar Cliente
+                            class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
+                            title="Agregar cliente"
+                            style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
+                            Agregar Cliente
                         </a>
                     </div>
                 </div>
@@ -48,8 +49,8 @@
                         {% if form.marca_reloj.errors %}
                         <div class="error-message mt-2">
                             {% for error in form.marca_reloj.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -62,8 +63,8 @@
                         {% if form.descripcion.errors %}
                         <div class="error-message">
                             {% for error in form.descripcion.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -76,8 +77,8 @@
                         {% if form.codigo_orden.errors %}
                         <div class="error-message">
                             {% for error in form.codigo_orden.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -90,8 +91,8 @@
                         {% if form.fecha_entrega_estimada.errors %}
                         <div class="error-message">
                             {% for error in form.fecha_entrega_estimada.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -106,8 +107,8 @@
                         {% if form.precio.errors %}
                         <div class="error-message">
                             {% for error in form.precio.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -120,8 +121,8 @@
                         {% if form.espacio_fisico.errors %}
                         <div class="error-message">
                             {% for error in form.espacio_fisico.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>

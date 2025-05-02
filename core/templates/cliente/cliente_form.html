@@ -4,7 +4,13 @@
 {% block title %}Agregar Cliente{% endblock %}
 
 {% block content %}
-  <h2 class="titulo">AGREGAR CLIENTE</h2>
+  <h2 class="titulo">
+    {% if modo == 'editar' %}
+      EDITAR CLIENTE
+    {% else %}
+      AGREGAR CLIENTE
+    {% endif %}
+  </h2>
   <h4>DATOS PERSONALES</h4>
 
   <div>
