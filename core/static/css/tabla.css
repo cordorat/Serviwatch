@@ -1,0 +1,195 @@
+/* Tabla base */
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+    table-layout: fixed;
+    border: 2px solid #3b3b3b; /* Borde más oscuro */
+    border-radius: 16px;
+    padding: 8px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.custom-table td,
+.custom-table th {
+    background-color: transparent;
+    padding: 8px 12px;
+    font-family: "Montserrat", sans-serif;
+    text-align: left;
+}
+
+/* Encabezado */
+.table-header {
+    background-color: #f6f8f3;
+    color: #4a4a4a;
+    font-weight: 600;
+    border-radius: 16px 16px 0 0;
+}
+
+.custom-table thead {
+    display: flex;
+    width: 100%;
+}
+
+.custom-table thead tr {
+    display: flex;
+    width: 100%;
+}
+
+.custom-table th {
+    vertical-align: middle;
+    font-family: "Montserrat", sans-serif;
+    border: none;
+    flex: 1;
+    text-align: left;
+    padding: 8px 12px;
+}
+
+/* Estilo de filas como tarjetas */
+.custom-table tbody {
+    display: block;
+    width: 100%;
+}
+
+.custom-table tbody tr {
+    display: flex;
+    width: 100%;
+    border: 1px solid #626E15;
+    border-radius: 8px;
+    background-color: #D4E484;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    height: 42px; /* Altura ligeramente mayor */
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #C9DC4E;
+}
+
+.custom-table tbody tr td {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    padding: 6px 10px;
+    font-family: "Montserrat", sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Inputs dentro de celdas */
+.custom-table td:has(input) {
+    background-color: #d4e484;
+    border-radius: 10px;
+    padding: 5px 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Ícono de lápiz */
+.custom-table td a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Botón editar */
+.btn-outline-primary {
+    border-color: #626E15;
+    color: #626E15;
+}
+.btn-outline-primary:hover {
+    background-color: #626E15;
+    color: white;
+}
+
+/* Botón agregar */
+.btn-add {
+    background-color: #C9DC4E;
+    border: 1px solid #626E15;
+    justify-self: right;
+    white-space: nowrap;
+    font-family: "Montserrat", sans-serif;
+}
+
+.btn-add:hover {
+    background-color: #C9DC4E;
+    border: 1px solid #626E15;
+    align-self: right;
+}
+
+/* Contenedor de tabla */
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* Cabecera con íconos */
+.header-icons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Buscador */
+.search-form {
+    flex: 1;
+    max-width: 400px;
+}
+.search-form .input-group {
+    display: flex;
+}
+.buscar {
+    height: 50px;
+}
+.search-form .form-control {
+    border-right: none;
+    border: 2px solid #626E15;
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+}
+.search-form .btn-search {
+    height: 100%;
+    border-left: none;
+    background-color: white;
+    border: 2px solid #626E15;
+}
+.btn-search {
+    height: 38px;
+    background-color: #C9DC4E;
+    border: 2px solid #626E15;
+}
+.btn-search:hover {
+    background-color: #C9DC4E;
+    border: 2px solid #626E15;
+}
+
+/* Errores */
+div.error-message {
+    font-size: 0.875rem;
+    color: #dc3545; 
+    padding-left: 1rem; 
+    margin-top: 0.25rem; 
+    display: block; 
+}
+.input-group .error-message span.text-danger {
+    font-weight: bold; 
+}
+div.error-message span.text-danger {
+    font-size: 0.875rem;
+    color: #dc3545 !important;
+    display: block;
+    font-weight: bold;
+}
+
+/* Paginación */
+.pagination {
+    margin-top: 20px;
+    justify-content: center;
+}

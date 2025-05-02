@@ -8,7 +8,7 @@
     <div class="header-icons">
         <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
         <form method="get" action="{% url 'reparacion_list' %}" class="search-form">
-            <div class="input-group">
+            <div class="input-group" style="gap: 10px;">
                 <input type="text" name="search" class="form-control" placeholder="Buscar reparación"
                     value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
@@ -46,10 +46,9 @@
                     <td>${{ reparacion.precio }}</td>
                     <td>{{ reparacion.fecha_ingreso|date:"d/m/Y" }}</td>
                     <td>{{ reparacion.estado }}</td>
-                    <td>{{ reparacion.cliente.nombre }} {{ reparacion.cliente.apellido }} - {{
-                        reparacion.cliente.telefono }}</td>
+                    <td>{{ reparacion.cliente.nombre }} {{ reparacion.cliente.apellido }} - {{reparacion.cliente.telefono }}</td>
                     <td>{{ reparacion.descripcion }}</td>
-                    <td> {{ reparacion.fecha_entrega_estimada|date:'d/m/Y' }} </td>
+                    <td>{{ reparacion.fecha_entrega_estimada|date:'d/m/Y' }} </td>
                     <td>{{ reparacion.espacio_fisico }}</td>
                     <td>{{ reparacion.tecnico.nombre }} {{ reparacion.tecnico.apellidos }}</td>
                     <td>
