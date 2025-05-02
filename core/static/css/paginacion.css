@@ -1,0 +1,20 @@
+.page-item .page-link {
+    border-radius: 5px;
+    margin: 2px;
+    border: 1px solid #626E15; 
+}
+
+.page-item .page-link:hover {
+    background-color: #B2C94C;
+    border-color: #626E15;
+    color: #fff;
+}
+
+.page-item.active .page-link {
+    background-color: #B2C94C !important;
+    border-color: #626E15 !important;
+}
+
+.page-item .page-link:focus {
+    box-shadow: 0 0 0 0.25rem rgba(98, 110, 21, 0.25);
+}

@@ -270,13 +270,18 @@
             password1Field.setAttribute('type', type);
             
             // Cambia el icono entre ojo y ojo tachado
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
+            if (this.classList.contains('bi-eye')) {
+                this.classList.remove('bi-eye');
+                this.classList.add('bi-eye-slash');
+            } else {
+                this.classList.remove('bi-eye-slash');
+                this.classList.add('bi-eye');
+            }
         });
     }
 
     const password2Toggle = document.createElement('i');
-    password2Toggle.className = 'toggle-password fas fa-eye';
+    password2Toggle.className = 'toggle-password bi bi-eye';
     password2Toggle.id = 'togglePassword2';
     password2Field.parentElement.appendChild(password2Toggle);
 
@@ -284,8 +289,13 @@
         const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
         password2Field.setAttribute('type', type);
         
-        this.classList.toggle('fa-eye');
-        this.classList.toggle('fa-eye-slash');
+        if (this.classList.contains('bi-eye')) {
+                this.classList.remove('bi-eye');
+                this.classList.add('bi-eye-slash');
+            } else {
+                this.classList.remove('bi-eye-slash');
+                this.classList.add('bi-eye');
+            }
 });
 });
 </script>
