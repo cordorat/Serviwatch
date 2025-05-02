@@ -2,8 +2,16 @@ from django.core.validators import RegexValidator, MinLengthValidator, MaxLength
 from django.db import models
 
 class Cliente(models.Model):
-    nombre = models.CharField(max_length=100)
-    apellido = models.CharField(max_length=100)
+    nombre = models.CharField(
+        max_length=100,
+        validators=[
+            MaxLengthValidator(20, "El nombre debe tener maximo 20 caracteres")
+        ])
+    apellido = models.CharField(
+        max_length=100,
+        validators=[
+            MaxLengthValidator(30, "El apellido debe tener maximo 30 caracteres")
+        ])
     telefono = models.CharField(
         max_length=10,
         validators=[
