@@ -170,3 +170,7 @@ select.form-span {
   width: 100%;
   box-sizing: border-box;
 }
+
+.select2-selection.is-invalid {
+  border: 1px solid #dc3545 !important; /* rojo de Bootstrap */
+}
