@@ -261,3 +261,23 @@ form.repair-form.custom-form {
   form.repair-form.custom-form {
     flex-direction: column;
   }
+
+
+/* Añadir al final de formularios.css */
+
+/* Clase específica para formulario de reparación */
+.egreso-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con repair-form */
+form.egreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+
