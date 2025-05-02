@@ -8,7 +8,7 @@
     <div class="header-icons">
         <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
         <form method="get" action="{% url 'reparacion_list' %}" class="search-form">
-            <div class="input-group buscar">
+            <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Buscar reparación"
                     value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
