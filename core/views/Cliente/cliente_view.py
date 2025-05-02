@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.db.models import Q
 from core.models.cliente import Cliente
+from django.core.paginator import Paginator
 
 
 
@@ -15,7 +16,18 @@ from core.models.cliente import Cliente
 @require_http_methods(["GET"])
 def cliente_list_view(request):
     clientes = get_all_clientes()
-    return render(request, "cliente/cliente_list.html", {"clientes": clientes})
+
+    paginator = Paginator(clientes, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'clientes': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+
+    return render(request, "cliente/cliente_list.html", context)
 
 
 @login_required
