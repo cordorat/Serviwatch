@@ -70,7 +70,7 @@ class ReparacionFormTest(TestCase):
             'marca_reloj': "Rolex",
             'descripcion': "Reparación de cristal y ajuste de hora",
             'codigo_orden': "12345",
-            'fecha_entrega_estimada': date(2025, 5, 1),
+            'fecha_entrega_estimada': date(2025, 5, 10),
             'precio': 100,
             'espacio_fisico': "Caja 1",
             'estado': "Reparación",
