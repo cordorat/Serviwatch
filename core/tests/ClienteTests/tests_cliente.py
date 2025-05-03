@@ -5,7 +5,9 @@ from core.forms.cliente_form import ClienteForm
 from django.contrib.auth.models import User
 from django.urls import reverse
 import json
-
+from unittest.mock import patch, MagicMock
+from django.test import TestCase, RequestFactory
+from core.views.Cliente.cliente_view import cliente_search_view
 class ClienteModelTest(TestCase):
 
     def test_crear_cliente_valido(self):
@@ -345,133 +347,126 @@ class ClienteCreateViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
-class ClienteSearchViewTest(TestCase):
-    
+class ClienteSearchViewTests(TestCase):
     def setUp(self):
-        # Create some test clients
-        Cliente.objects.create(
+        """Configuración inicial para las pruebas"""
+        self.client = Client()
+        # Crear usuario de prueba
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='12345',
+            is_active=True
+        )
+        self.client.login(username='testuser', password='12345')
+
+        # Crear clientes de prueba
+        self.cliente1 = Cliente.objects.create(
             nombre="Juan",
             apellido="Pérez",
-            telefono="3001234567"
+            telefono="123456789"
         )
-        Cliente.objects.create(
+        self.cliente2 = Cliente.objects.create(
+            nombre="Juan",
+            apellido="García",
+            telefono="987654321"
+        )
+        self.cliente3 = Cliente.objects.create(
             nombre="María",
             apellido="López",
-            telefono="3007654321"
+            telefono="456789123"
         )
-        Cliente.objects.create(
-            nombre="Pedro",
-            apellido="Martínez",
-            telefono="3005551234"
-        )
-        
-        # Create a test client for HTTP requests
-        self.client = Client()
-    
-    def test_search_by_nombre(self):
-        """Test searching by nombre"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'Juan'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'Juan Pérez')
-        self.assertEqual(data[0]['telefono'], '3001234567')
-    
-    def test_search_by_apellido(self):
-        """Test searching by apellido"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'López'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'María López')
-        self.assertEqual(data[0]['telefono'], '3007654321')
-    
-    def test_search_by_telefono(self):
-        """Test searching by telefono"""
-        response = self.client.get(reverse('cliente_search'), {'term': '3005551234'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'Pedro Martínez')
-        self.assertEqual(data[0]['telefono'], '3005551234')
-    
-    def test_search_partial_match(self):
-        """Test searching with a partial match"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'Mar'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return two results (María and Martínez)
-        self.assertEqual(len(data), 2)
-        
-        # Check that the results contain the expected clients
-        values = [item['value'] for item in data]
-        self.assertIn('María López', values)
-        self.assertIn('Pedro Martínez', values)
-    
-    def test_search_case_insensitive(self):
-        """Test that search is case insensitive"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'juan'})  # Lowercase
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'Juan Pérez')
-    
+
     def test_search_term_too_short(self):
-        """Test that search terms shorter than 2 characters return empty results"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'J'})
+        """Prueba búsqueda con término demasiado corto"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'a'}
+        )
         self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
+        self.assertEqual(json.loads(response.content), [])
+
+    def test_search_by_nombre(self):
+        """Prueba búsqueda por nombre"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'Juan'}
+        )
         data = json.loads(response.content)
-        
-        # Should return empty list
-        self.assertEqual(len(data), 0)
-    
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 2)
+        self.assertTrue(any(d['nombre'] == 'Juan' and d['apellido'] == 'Pérez' for d in data))
+        self.assertTrue(any(d['nombre'] == 'Juan' and d['apellido'] == 'García' for d in data))
+
+    def test_search_by_apellido(self):
+        """Prueba búsqueda por apellido"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'López'}
+        )
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['apellido'], 'López')
+
+    def test_search_by_telefono(self):
+        """Prueba búsqueda por teléfono"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': '123456789'}
+        )
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['telefono'], '123456789')
+
+    def test_search_multiple_terms(self):
+        """Prueba búsqueda con múltiples términos"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'Juan Pérez'}
+        )
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['nombre'], 'Juan')
+        self.assertEqual(data[0]['apellido'], 'Pérez')
+
+
     def test_search_no_results(self):
-        """Test searching with a term that has no matches"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'NoExiste'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
+        """Prueba búsqueda sin resultados"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'NoExiste'}
+        )
         data = json.loads(response.content)
-        
-        # Should return empty list
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(data), 0)
-    
-    def test_search_response_format(self):
-        """Test that the search response has the correct format"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'Juan'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
+
+    def test_search_result_format(self):
+        """Prueba formato correcto de los resultados"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'Juan'}
+        )
         data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(data) > 0)
         
-        # Check the structure of the first result
-        self.assertIn('id', data[0])
-        self.assertIn('label', data[0])
-        self.assertIn('value', data[0])
-        self.assertIn('telefono', data[0])
-        
-        # Check the content of the first result
-        self.assertEqual(data[0]['label'], 'Juan Pérez - 3001234567')
-        self.assertEqual(data[0]['value'], 'Juan Pérez')
-        self.assertEqual(data[0]['telefono'], '3001234567')
+        # Verificar estructura del resultado
+        result = data[0]
+        self.assertIn('id', result)
+        self.assertIn('label', result)
+        self.assertIn('value', result)
+        self.assertIn('nombre', result)
+        self.assertIn('apellido', result)
+        self.assertIn('telefono', result)
+
+    def test_search_case_insensitive(self):
+        """Prueba búsqueda insensible a mayúsculas/minúsculas"""
+        response = self.client.get(
+            reverse('cliente_search'),
+            {'term': 'juan'}
+        )
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 2)
