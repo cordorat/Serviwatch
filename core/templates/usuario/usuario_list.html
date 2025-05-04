@@ -10,26 +10,32 @@
     <a href="{% url 'usuario_create' %}" class="btn btn-add me-3s"> Agregar Usuario</a>
   </div>
 
-  <br>
-
   <!-- Lista de reparaciones -->
   <div class="table-container">
     <table class="table table-hover align-middle custom-table">
       <thead class="table-header">
         <tr>
-          <th>Usuario</th>
-          <th class="text-end">Acciones</th>
+          <th class="text-center" style="padding-right: 60%;">Usuario</th>
+          <th class="text-end">Editar </th>
+          <th class="text-end">Eliminar </th>
         </tr>
       </thead>
       <tbody>
         {% for usuario in usuarios %}
         <tr>
-          <td>{{ usuario.username }}</td>
-          <td>
-            <a href="" class="btn btn-sm btn-outline-primary" title="Editar usuario">
+          <td style="padding-right: 60%;">
+            <i class="bi bi-person fs-4"></i>
+            {{ usuario.username }}
+          </td>
+          <td style="padding-right: 0 !important; border-right: none !important;">
+            <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm fs-4" title="Editar usuario">
               <i class="bi bi-pencil"></i>
             </a>
           </td>
+          <td style="padding-left: 0 !important; border-left: none !important;">
+            <a class="btn btn-sm fs-4" data-bs-toggle = "modal" data-bs-target="#confirmDeleteModal" data-user-id="{{usuario.pk}}" data-username="{{usuario.username}}" data-email="{{usuario.email}}" title="Eliminar usuario">
+              <i class="bi bi-trash"></i>
+            </a>
         </tr>
         {% endfor %}
       </tbody>
@@ -43,7 +49,9 @@
       <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
           <div class="modal-header justify-content-center">
-            <h5 class="modal-title" id="confirmModalLabel">USUARIO AGREGADO</h5>
+            <h5 class="modal-title" id="confirmModalLabel">
+              {{ message }}
+            </h5>
           </div>
           <div class="modal-footer justify-content-center">
             <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
@@ -59,6 +67,55 @@
     {% endif %}
     {% endfor %}
     {% endif %}
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content custom-delete-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmDeleteModalLabel">
+              ¿ESTÁS SEGURO DE BORRAR ESTE USUARIO?
+            </h5>
+          </div>
+          <div class="modal-body text-center">
+            <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+              <p class="fw-bold m-0" id="deleteUserName"></p>
+              <span class="separator">|</span>
+              <p class="fw-bold m-0 text-muted" id="deleteUserEmail"></p>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <form method="POST" id="deleteUserForm" class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+              {% csrf_token %}
+              <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+                <button type="submit" class="btn save m-0">SÍ</button>
+                <button type="button" class="btn cancel m-0" data-bs-dismiss="modal">NO</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const confirmModal = document.getElementById('confirmDeleteModal');
+      confirmModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-user-id');
+        const username = button.getAttribute('data-username');
+        const email = button.getAttribute('data-email');
+
+        // Rellenar el nombre del usuario
+        const usernamePlaceholder = confirmModal.querySelector('#deleteUserName');
+        usernamePlaceholder.textContent = username;
+        const emailPlaceholder = confirmModal.querySelector('#deleteUserEmail');
+        emailPlaceholder.textContent = email;
+
+        // Asignar la URL al formulario
+        const form = confirmModal.querySelector('#deleteUserForm');
+        form.action = `/usuarios/eliminar/${userId}/`;
+      });
+    </script>
 
     <!-- Paginación -->
     {% if is_paginated %}

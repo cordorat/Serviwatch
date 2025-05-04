@@ -172,3 +172,28 @@ class FormularioRegistroUsuario(UserCreationForm):
                 else:
                     errors.append(error)
             self._errors['password2'] = self.error_class(errors)
+
+class FormularioEditarUsuario(forms.ModelForm):
+    username = forms.CharField(
+        label='Nombre de usuario',
+        error_messages={
+            'required': 'Este campo es obligatorio.'
+        }
+    )
+    email = forms.EmailField(
+        label='Correo electrónico',
+        error_messages={
+            'required': 'Este campo es obligatorio.',
+            'invalid': 'Ingrese un correo electrónico válido.'
+        }
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+            raise forms.ValidationError("Este correo ya está en uso por otro usuario.")
+        return email
