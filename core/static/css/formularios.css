@@ -6,7 +6,6 @@
     position: relative;
     align-items: flex-start; 
     min-height: 500px;
-    overflow-x: auto;
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
