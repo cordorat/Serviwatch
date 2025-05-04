@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from core.forms.usuario_form import FormularioRegistroUsuario
+from core.forms.usuario_form import FormularioRegistroUsuario, FormularioEditarUsuario
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from core.services.usuario_service import crear_usuario, get_all_usuarios
@@ -40,7 +40,7 @@ def usuario_create_view(request):
                     password=data['password1'],
                     email=data['email']
                 )
-                messages.success(request, 'Usuario creado exitosamente')
+                messages.success(request, 'SE AGREGÓ EL USUARIO CON ÉXITO')
                 return redirect('usuario_list')  
             except ValidationError as e:
                 form.add_error(None, e)
@@ -52,5 +52,46 @@ def usuario_create_view(request):
         form = FormularioRegistroUsuario()
     
     return render(request, 'usuario/usuario_form.html', {
-        'form': form
+        'form': form, 'modo': 'crear'
     })
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def usuario_update_view(request, pk):
+    try:
+        usuario = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        messages.error(request, 'El usuario no existe.')
+        return redirect('usuario_list')
+    
+    if request.method == 'POST':
+        form = FormularioEditarUsuario(request.POST, instance=usuario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'SE EDITÓ EL USUARIO CON ÉXITO')
+            return redirect('usuario_list')
+        else:
+            messages.error(request, 'Error al actualizar el usuario')
+    else:
+        form = FormularioEditarUsuario(instance=usuario)
+
+    return render(request, 'usuario/usuario_form.html', {
+        'form': form,
+        'modo': 'editar',
+    })
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def usuario_delete_view(request, pk):
+    try:
+        usuario = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        messages.error(request, 'El usuario no existe.')
+        return redirect('usuario_list')
+
+    if request.method == 'POST':
+        usuario.delete()
+        messages.success(request, 'SE ELIMINÓ EL USUARIO CON ÉXITO')
+        return redirect('usuario_list')
+
+    return redirect('usuario_list')

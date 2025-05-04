@@ -17,6 +17,9 @@
     padding: 8px 12px;
     font-family: "Montserrat", sans-serif;
     text-align: left;
+    align-items: center;
+    justify-content: center;
+
 }
 
 /* Encabezado */
@@ -25,6 +28,9 @@
     color: #4a4a4a;
     font-weight: 600;
     border-radius: 16px 16px 0 0;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
 }
 
 .custom-table thead {
@@ -63,6 +69,8 @@
     height: 42px; /* Altura ligeramente mayor */
     margin-bottom: 12px;
     box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
 }
 
 .custom-table tbody tr:hover {
@@ -75,9 +83,11 @@
     border: none;
     padding: 6px 10px;
     font-family: "Montserrat", sans-serif;
+    font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 14px;
 }
 
 /* Inputs dentro de celdas */
@@ -93,8 +103,9 @@
 /* Ícono de lápiz */
 .custom-table td a {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: right;
+    justify-content: right;
+    text-decoration: none;
 }
 
 /* Botón editar */
@@ -188,8 +199,6 @@ div.error-message span.text-danger {
     font-weight: bold;
 }
 
-/* Paginación */
 .pagination {
-    margin-top: 20px;
     justify-content: center;
 }
