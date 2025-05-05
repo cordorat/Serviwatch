@@ -50,6 +50,10 @@
         padding: 2px;
         font-size: medium;
     }
+
+    .btn-add-empleado {
+        background-color: #D4E484 !important;
+    }
 </style>
 
 <div class="main-content">
@@ -58,13 +62,13 @@
         <h2 class="titulo">EMPLEADOS</h2>
     </div>
     <div class="header-icons header-icons-empleado">
-        <a href="{% url 'empleado_create' %}" class="btn btn-add me-3"> Agregar Empleado</a>
+        <a href="{% url 'empleado_create' %}" class="btn btn-add btn-add-empleado me-3"> Agregar Empleado</a>
         <form method="get" action="{% url 'empleado_list' %}" class="search-form">
             <div class="input-group input-group-empleado" style="gap: 10px;">
                 <input type="text" name="search" class="form-control form-control-empleado"
                     placeholder="Buscar empleado" value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
-                    <i class="bi bi-search text-secondary"></i>
+                    <i class="bi bi-search"></i>
                 </button>
             </div>
         </form>
@@ -85,7 +89,7 @@
             </form>
         </div>
         <div class="report-button-container">
-            <a href="{% url 'empleado_create' %}" class="btn btn-add me-3"> Generar reporte</a>
+            <a href="{% url 'empleado_create' %}" class="btn btn-add btn-add-empleado me-3"> Generar reporte</a>
         </div>
     </div>
     
