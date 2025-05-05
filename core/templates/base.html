@@ -26,13 +26,8 @@
   <link rel="stylesheet" href="{% static 'css/ventana.css' %}">
   <link rel="stylesheet" href="{% static 'css/reparacion.css' %}">
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
   <link rel="stylesheet" href="{% static 'css/password_change.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/paginacion.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tabla.css' %}">
-  <link rel="stylesheet" href="{% static 'css/paginacion.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tabla.css' %}">
 
   <!-- Añadimos solo los estilos necesarios para el botón del avatar -->
   <style>
@@ -75,6 +70,9 @@
       font-weight: bold !important;
     }
   </style>
+  <link rel="stylesheet" href="{% static 'css/paginacion.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tabla.css' %}">
+</head>
 
 <body>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -149,12 +147,8 @@
 
           </li>
           <li class="{% if '/usuarios/' in request.path or request.path == '/usuarios' %} active {% endif %}">
-<<<<<<< HEAD
-            <a href="#"
-              class="{% if not '/usuarios/' in request.path or request.path == '/usuarios' %} menu-link {% endif %}">
-=======
+
             <a href="{% url 'usuario_list' %}" class="{% if not '/usuarios/' in request.path or request.path == '/usuarios' %} menu-link {% endif %}">
->>>>>>> 7a2638eb1c3b2d2edc6d8f262939e920a74f642c
               <span>
                 <img src="{% static 'images/usuarios.png' %}" alt="Usuarios" class="icon">
               </span>
@@ -201,12 +195,7 @@
             </a>
           </li>
           <li class="{% if '/egreso/' in request.path or request.path == '/egreso' %} active {% endif %}">
-<<<<<<< HEAD
-            <a href="#"
-              class="{% if not '/egreso/' in request.path or request.path == '/egreso' %} menu-link {% endif %}">
-=======
             <a href="{% url 'egreso' %}" class="{% if not '/egreso/' in request.path or request.path == '/egreso' %} menu-link {% endif %}">
->>>>>>> 7a2638eb1c3b2d2edc6d8f262939e920a74f642c
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
               </span>
