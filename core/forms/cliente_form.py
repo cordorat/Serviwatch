@@ -1,5 +1,6 @@
 from django import forms
 from core.models import Cliente
+from django.db.models import Q
 
 class ClienteForm(forms.ModelForm):
     telefono = forms.CharField(
@@ -13,7 +14,7 @@ class ClienteForm(forms.ModelForm):
         }),
         error_messages={
             'required': 'El número de teléfono es obligatorio.',
-            'min_length': 'El número de teléfono debe tener al menos 10 dígitos.',
+            'min_length': 'El número de teléfono debe tener exactamente 10 dígitos.',
             'invalid': 'El número de teléfono solo puede contener números.'
         }
     )
@@ -34,12 +35,12 @@ class ClienteForm(forms.ModelForm):
         error_messages = {
             'nombre': {
                 'required': 'El nombre es obligatorio.',
-                'max_length': 'El nombre no puede tener más de 50 caracteres.',
+                'max_length': 'El nombre no puede tener más de 20 caracteres.',
                 'invalid': 'El nombre solo puede contener letras.'
             },
             'apellido': {
                 'required': 'El apellido es obligatorio.',
-                'max_length': 'El apellido no puede tener más de 50 caracteres.',
+                'max_length': 'El apellido no puede tener más de 30 caracteres.',
                 'invalid': 'El apellido solo puede contener letras.'
             }
         }
@@ -66,3 +67,22 @@ class ClienteForm(forms.ModelForm):
         if not apellido.isalpha():
             raise forms.ValidationError("El apellido solo debe contener letras.")
         return apellido
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        nombre = cleaned_data.get('nombre')
+        apellido = cleaned_data.get('apellido')
+        telefono = cleaned_data.get('telefono')
+        
+        if nombre and apellido and telefono:
+            # Consulta para buscar clientes con los mismos datos (insensible a mayúsculas/minúsculas)
+            query = Q(nombre__iexact=nombre) & Q(apellido__iexact=apellido) & Q(telefono=telefono)
+            
+            # Verificar si existe un cliente con los mismos datos
+            if Cliente.objects.filter(query).exists():
+                # Add the error to a specific field instead of the entire form
+                self.add_error(
+                    'nombre', "Este cliente ya esta registrado."
+                    )
+        
+        return cleaned_data

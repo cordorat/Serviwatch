@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from core.forms.cliente_form import ClienteForm
 from core.services.cliente_service import get_all_clientes, crear_cliente
 from django.contrib import messages
@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.db.models import Q
 from core.models.cliente import Cliente
+from django.core.paginator import Paginator
 
 
 
@@ -15,26 +16,52 @@ from core.models.cliente import Cliente
 @require_http_methods(["GET"])
 def cliente_list_view(request):
     clientes = get_all_clientes()
-    return render(request, "cliente/cliente_list.html", {"clientes": clientes})
+    
+    clientes = clientes.order_by('nombre', 'apellido', 'telefono')
+
+    paginator = Paginator(clientes, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'clientes': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+
+    return render(request, "cliente/cliente_list.html", context)
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def cliente_create_view(request):
+def cliente_create_view(request, nombre=None, apellido=None, telefono=None):
+    if nombre and apellido and telefono:
+        cliente = get_object_or_404(Cliente, nombre=nombre, apellido=apellido, telefono=telefono)
+        modo = 'editar'
+    else:
+        modo = 'agregar'
+        cliente = None
+
     if request.method == 'POST':
-        form = ClienteForm(request.POST)
+        form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             crear_cliente(form)
-            messages.success(request, 'Cliente creado exitosamente.')
+            if modo == 'editar':
+                messages.success(request, 'Cliente editado exitosamente.')
+            else:
+                messages.success(request, 'Cliente creado exitosamente.')
             form.save()
             next_url = request.GET.get('next')
-            if next_url (next_url):
+            if next_url:
                 return redirect(next_url)
 
             return redirect('cliente_list')
     else:
-        form = ClienteForm()
-    return render(request, 'cliente/cliente_form.html', {'form': form})
+        form = ClienteForm(instance=cliente)
+    return render(request, 'cliente/cliente_form.html', {
+        'form': form,
+        'modo': modo
+        })
 
 
 def cliente_search_view(request):
@@ -46,13 +73,24 @@ def cliente_search_view(request):
     if len(search_term) < 2:
         return JsonResponse([], safe=False)
 
-    # Buscar clientes que coincidan
-    clientes = Cliente.objects.filter(
-        Q(nombre__icontains=search_term) | 
-        Q(apellido__icontains=search_term) |
-        Q(telefono__icontains=search_term)
-    )[:10]
+    # Inicializar la consulta base
+    query = Q(nombre__icontains=search_term) | Q(apellido__icontains=search_term) | Q(telefono__icontains=search_term)
     
+    # Búsqueda más específica si hay múltiples términos
+    terms = search_term.split()
+    if len(terms) >= 2:
+        # Primer término como nombre, resto como apellido
+        nombre_query = Q(nombre__icontains=terms[0])
+        apellido_query = Q(apellido__icontains=' '.join(terms[1:]))
+        query |= nombre_query & apellido_query
+        
+        # Último término como apellido, resto como nombre
+        nombre_query2 = Q(nombre__icontains=' '.join(terms[:-1]))
+        apellido_query2 = Q(apellido__icontains=terms[-1])
+        query |= nombre_query2 & apellido_query2
+    
+    # Ejecutar la consulta
+    clientes = Cliente.objects.filter(query)[:10]
 
     # Formatear resultados
     results = []
@@ -61,6 +99,8 @@ def cliente_search_view(request):
             'id': cliente.id,
             'label': f"{cliente.nombre} {cliente.apellido} - {cliente.telefono}",
             'value': f"{cliente.nombre} {cliente.apellido}",
+            'nombre': cliente.nombre,
+            'apellido': cliente.apellido,
             'telefono': cliente.telefono
         })
 
