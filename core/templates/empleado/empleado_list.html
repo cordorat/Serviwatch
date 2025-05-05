@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .header-icons-empleado {
+        gap: 0px;
+        justify-content: start;
+    }
+
+    .search-form .form-control-empleado {
+        height: auto;
+    }
+
+    .input-group.input-group-empleado>.form-control.form-control-empleado {
+        height: auto;
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+    }
+
+    .input-group.input-group-empleado>.btn.btn-search {
+        border-radius: 4px !important;
+        /* Asegura espacio entre el input y el botón */
+    }
+
+    .filtro-container {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .filtro-container .form-select {
+        min-width: 120px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        height: 38px;
+    }
+
+    .text-muted {
+        font-weight: bold !important;
+    }
+
+    .report-button-container {
+        margin-left: auto; 
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-editar-empleado {
+        font-size: medium;
+    }
+
+    .btn-add-empleado {
+        background-color: #D4E484 !important;
+    }
+
+    .custom-table-empleado td a {
+        display: initial;
+    }
+</style>
+
+<div class="main-content">
+    <!-- Encabezado con botón para agregar -->
+    <div class="header-icons">
+        <h2 class="titulo">EMPLEADOS</h2>
+    </div>
+    <div class="header-icons header-icons-empleado">
+        <a href="{% url 'empleado_create' %}" class="btn btn-add btn-add-empleado me-3"> Agregar Empleado</a>
+        <form method="get" action="{% url 'empleado_list' %}" class="search-form">
+            <div class="input-group input-group-empleado" style="gap: 10px;">
+                <input type="text" name="search" class="form-control form-control-empleado"
+                    placeholder="Buscar empleado" value="{{ request.GET.search }}">
+                <button class="btn btn-search" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+        <div class="filtro-container ms-3">
+            <form method="get" action="{% url 'empleado_list' %}" id="filtroForm">
+                <!-- Mantener la búsqueda actual si existe -->
+                {% if search %}
+                <input type="hidden" name="search" value="{{ search }}">
+                {% endif %}
+
+                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                    {% for valor, texto in estados %}
+                    <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
+                        {{ texto }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="report-button-container">
+            <a href="{% url 'empleado_create' %}" class="btn btn-add btn-add-empleado me-3"> Generar reporte</a>
+        </div>
+    </div>
+    
+    
+
+    <br>
+
+    <!-- Tabla de empleados -->
+    <div class="table-container">
+        <table class="table table-hover align-middle custom-table custom-table-empleado">
+            <thead class="table-header">
+                <tr>
+                    <th>Cedula</th>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Teléfono</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Cargo</th>
+                    <th>Salario</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if empleados %}
+                {% for empleado in empleados %}
+                <tr>
+                    <td> {{ empleado.cedula }}</td>
+                    <td>{{ empleado.nombre }}</td>
+                    <td>{{ empleado.apellidos }}</td>
+                    <td>{{ empleado.celular }}</td>
+                    <td> {{ empleado.fecha_ingreso|date:"d/m/Y" }}</td>
+                    <td> {{ empleado.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    <td>{{ empleado.cargo }}</td>
+                    <td>{{ empleado.salario }}</td>
+                    <td>{{ empleado.estado }}</td>
+                    <td>
+                        <a href="{% url 'empleado_update' id=empleado.id %}" class="btn btn-editar-empleado btn-sm btn-outline-primary" title="Editar empleado">
+                            <i class="bi bi-pencil fs-4"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="10" class="text-center">
+                        <p class="text-muted">No se encontraron empleados</p>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == "success" %}
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title" id="confirmModalLabel">
+                        {% if 'editado' in message.message %}
+                        EMPLEADO EDITADO
+                        {% else %}
+                        EMPLEADO AGREGADO
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    </script>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link"
+                    href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }} {% endif %}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            <li class="page-item">
+                <a class="page-link" href="{% if page_obj.has_next %} ?page={{ page_obj.next_page_number }} {% endif %}"
+                    aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
