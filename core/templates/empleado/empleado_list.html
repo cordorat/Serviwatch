@@ -47,12 +47,15 @@
     }
 
     .btn-editar-empleado {
-        padding: 2px;
         font-size: medium;
     }
 
     .btn-add-empleado {
         background-color: #D4E484 !important;
+    }
+
+    .custom-table-empleado td a {
+        display: initial;
     }
 </style>
 
@@ -99,7 +102,7 @@
 
     <!-- Tabla de empleados -->
     <div class="table-container">
-        <table class="table table-hover align-middle custom-table">
+        <table class="table table-hover align-middle custom-table custom-table-empleado">
             <thead class="table-header">
                 <tr>
                     <th>Cedula</th>
@@ -129,7 +132,7 @@
                     <td>{{ empleado.estado }}</td>
                     <td>
                         <a href="{% url 'empleado_update' id=empleado.id %}" class="btn btn-editar-empleado btn-sm btn-outline-primary" title="Editar empleado">
-                            <i class="bi bi-pencil"></i>
+                            <i class="bi bi-pencil fs-4"></i>
                         </a>
                     </td>
                 </tr>
