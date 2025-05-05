@@ -31,7 +31,7 @@ def empleado_list_view(request,):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'Empleado/empleado_list.html', {
+    return render(request, 'empleado/empleado_list.html', {
         'page_obj': page_obj,
         'empleados': page_obj,  # Agregar esta línea
         # Para que la paginación funcione en el template

@@ -481,7 +481,7 @@ class EmpleadoViewsTest(TestCase):
     def test_empleado_list_view_sin_filtros(self):
         response = self.client.get(reverse('empleado_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'Empleado/empleado_list.html')
+        self.assertTemplateUsed(response, 'empleado/empleado_list.html')
         self.assertEqual(len(response.context['page_obj']), 2)
 
     def test_empleado_list_view_con_busqueda_cedula(self):
@@ -497,7 +497,7 @@ class EmpleadoViewsTest(TestCase):
 
         # O simplemente omite esta verificación específica
         # y verifica que la respuesta es exitosa
-        self.assertTemplateUsed(response, 'Empleado/empleado_list.html')
+        self.assertTemplateUsed(response, 'empleado/empleado_list.html')
 
     def test_empleado_list_view_paginacion(self):
         # Crear más empleados para probar paginación
