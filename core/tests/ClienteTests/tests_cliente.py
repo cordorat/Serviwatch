@@ -252,11 +252,8 @@ class ClienteCreateViewTest(TestCase):
     
     def test_view_mode_is_editar_for_existing_client(self):
         """Test that the view mode is 'editar' for an existing client"""
-        url = reverse('cliente_editar', kwargs={
-            'nombre': self.test_cliente.nombre,
-            'apellido': self.test_cliente.apellido,
-            'telefono': self.test_cliente.telefono
-        })
+        url = reverse('cliente_editar', kwargs={'id': self.test_cliente.id})
+        
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['modo'], 'editar')
@@ -283,11 +280,9 @@ class ClienteCreateViewTest(TestCase):
     
     def test_edit_existing_client(self):
         """Test editing an existing client"""
-        url = reverse('cliente_editar', kwargs={
-            'nombre': self.test_cliente.nombre,
-            'apellido': self.test_cliente.apellido,
-            'telefono': self.test_cliente.telefono
-        })
+        # Use the client's ID instead of name/surname/phone
+        url = reverse('cliente_editar', kwargs={'id': self.test_cliente.id})
+        
         form_data = {
             'nombre': 'Editado',
             'apellido': 'Actualizado',
