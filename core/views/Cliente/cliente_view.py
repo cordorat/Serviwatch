@@ -20,9 +20,9 @@ def cliente_list_view(request):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def cliente_create_view(request, nombre=None, apellido=None, telefono=None):
-    if nombre and apellido and telefono:
-        cliente = get_object_or_404(Cliente, nombre=nombre, apellido=apellido, telefono=telefono)
+def cliente_create_view(request, id=None):
+    if id:
+        cliente = get_object_or_404(Cliente, id=id)
         modo = 'editar'
     else:
         modo = 'agregar'
