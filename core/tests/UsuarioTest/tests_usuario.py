@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from core.services.usuario_service import crear_usuario
 from core.forms.usuario_form import FormularioRegistroUsuario
+from django.contrib.messages import get_messages
 
 class GuardarUsuarioServiceTest(TestCase):
 
@@ -166,7 +167,7 @@ class FormularioRegistroUsuarioTest(TestCase):
         def setUp(self):
             self.client = Client()
             self.user = User.objects.create_user(username='testuser', password='testpass')
-            self.url = reverse('usuario_list')  # Asegúrate de que la URL esté bien nombrada en urls.py
+            self.url = reverse('usuario_list') 
 
         def test_usuario_list_view_autenticado(self):
             self.client.login(username='testuser', password='testpass')
@@ -181,3 +182,84 @@ class FormularioRegistroUsuarioTest(TestCase):
             response = self.client.get(self.url)
             self.assertNotEqual(response.status_code, 200)
             self.assertRedirects(response, f'/accounts/login/?next={self.url}')
+
+class UsuarioDeleteViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        # Usuario autenticado
+        self.auth_user = User.objects.create_user(username='authuser', password='12345')
+        self.client.force_login(self.auth_user)
+
+        # Usuario que será eliminado
+        self.user_to_delete = User.objects.create_user(username='tobedeleted', password='abc123')
+        self.delete_url = reverse('usuario_delete', args=[self.user_to_delete.pk])
+        self.list_url = reverse('usuario_list')
+
+    def test_delete_existing_user_post(self):
+        response = self.client.post(self.delete_url)
+        self.assertRedirects(response, self.list_url)
+        self.assertFalse(User.objects.filter(pk=self.user_to_delete.pk).exists())
+
+    def test_delete_nonexistent_user(self):
+        invalid_url = reverse('usuario_delete', args=[9999])  # Un ID que no existe
+        response = self.client.post(invalid_url)
+        self.assertRedirects(response, self.list_url)
+
+    def test_get_request_redirects_without_deletion(self):
+        response = self.client.get(self.delete_url)
+        self.assertRedirects(response, self.list_url)
+        self.assertTrue(User.objects.filter(pk=self.user_to_delete.pk).exists())
+
+class UsuarioUpdateViewTests(TestCase):
+    def setUp(self):
+        self.user_admin = User.objects.create_user(username='admin', password='adminpass')
+        self.client.login(username='admin', password='adminpass')
+
+        self.user_to_edit = User.objects.create_user(username='jdoe', email='jdoe@example.com', password='password123')
+        self.url = reverse('usuario_update', args=[self.user_to_edit.pk])
+        self.list_url = reverse('usuario_list')
+
+    def test_get_request_renders_form(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'usuario/usuario_form.html')
+        self.assertIn('form', response.context)
+        self.assertEqual(response.context['modo'], 'editar')
+
+    def test_post_valid_data_updates_user_and_redirects(self):
+        data = {
+            'username': 'johndoe_updated',
+            'email': 'newemail@example.com',
+        }
+        response = self.client.post(self.url, data)
+        self.assertRedirects(response, self.list_url)
+
+        self.user_to_edit.refresh_from_db()
+        self.assertEqual(self.user_to_edit.username, 'johndoe_updated')
+        self.assertEqual(self.user_to_edit.email, 'newemail@example.com')
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("éxito" in str(m.message).lower() for m in messages))
+
+    def test_post_invalid_data_shows_error(self):
+        data = {
+            'username': '', 
+            'email': 'correo@valido.com',
+            }
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'usuario/usuario_form.html')
+
+        self.assertFormError(response.context['form'], 'username', 'Este campo es obligatorio.')
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("error" in str(m.message).lower() for m in messages))
+
+    def test_user_does_not_exist_redirects_and_shows_message(self):
+        url = reverse('usuario_update', args=[99999]) 
+        response = self.client.get(url)
+        self.assertRedirects(response, self.list_url)
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("no existe" in str(m.message).lower() for m in messages))

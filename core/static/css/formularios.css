@@ -6,23 +6,31 @@
     position: relative;
     align-items: flex-start; 
     min-height: 500px;
-    overflow-x: auto;
     min-width: 0;
     max-width: 100%;
+    overflow: hidden;
 }
 
-  
 form {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  max-width: 300px;
+  max-width: 400px;
+}
+
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
 }
 
 .form-group input{
   width: 100%;
 }
+
 
 .custom-form input {
   font-family: "Montserrat", sans-serif;
@@ -31,7 +39,7 @@ form {
   padding: 10px;
   border: 2px solid #626E15;
   border-radius: 4px;
-  width: 100%;
+  width: 70%;
   box-sizing: border-box;
   
 }
@@ -39,7 +47,6 @@ form {
 .form-span {
   border: 1px solid #626E15; 
   border-radius: 4px;
-  background-color: #D4E484;
 }
 
 .form-buttons {
@@ -60,22 +67,6 @@ form {
   transition: none !important;
   
 }
-
-.btn-add {
-  background-color: #D4E484;
-  border: 1px solid #626E15;
-  align-self: right;
-  white-space: nowrap;
-  font-family: "Montserrat", sans-serif;
-}
-
-
-.btn-add:hover {
-  background-color: #D4E484;
-  border: 1px solid #626E15;
-  align-self: right;
-}
-
 
 .save {
   background-color: #D4E484;
@@ -144,129 +135,65 @@ h4{
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   font-size: 24px;
-  padding-left: 40px;
 }
 
-.custom-table {
-  border: 1px solid #8d8d8d;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  word-break: break-word;
-}
-
-.table-header {
-  background-color: #f6f8f3; /* tono claro verde/neutral */
-  color: #4a4a4a;
-  font-weight: 600;
-}
-
-.custom-table td {
-  vertical-align: middle;
-  padding: 12px 16px;
-  border-bottom: 1px solid #8e8c8c;
-  border-right: 1px solid #8e8c8c;
-  font-family: "Montserrat", sans-serif;
-  background-color: #D4E484;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-wrap: break-word;  
-  word-break: break-word;
-  min-width: 100px;
-}
-
-.custom-table th {
-  vertical-align: middle;
-  padding: 12px 16px;
-  font-family: "Montserrat", sans-serif;
-  border: 1px solid #8d8d8d;
-}
-
-.custom-table tbody tr:hover {
-  background-color: #f0f3e7; /* un verde claro sutil */
-}
-
-.btn-outline-primary {
-  border-color: #626E15;
-  color: #626E15;
-}
-
-.btn-outline-primary:hover {
-  background-color: #626E15;
-  color: white;
-}
-
-.btn-search {
-  height: 38px;
-  background-color: #C9DC4E;
-  border: 2px solid #626E15;
-}
-
-.btn-search:hover {
-  background-color: #C9DC4E;
-  border: 2px solid #626E15;
-}
-
-table {
-  width: 100%;
-  table-layout: fixed;
-}
-
-.table-container {
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-.header-icons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.search-form {
-  flex: 1;
-  max-width: 400px;
-}
-
-.search-form .input-group {
-  height: 100%;
-  display: flex;
-}
-
-.search-form .form-control {
-  height: 100%;
-  border-right: none;
-  border: 2px solid #626E15;
-  font-family: "Montserrat", sans-serif;
-  font-weight: bold;
-}
-
-.search-form .btn-search {
-  height: 100%;
-  border-left: none;
-  background-color: white;
-  border: 2px solid #626E15;
-}
-
-div.error-message {
+.help-text {
+  color: #6c757d;
   font-size: 0.875rem;
-  color: #dc3545; 
-  padding-left: 1rem; 
-  margin-top: 0.25rem; 
-  display: block; 
+  margin-top: 0.25rem;
+  display: block;
 }
 
-.input-group .error-message span.text-danger {
-  font-weight: bold; 
-}
-
-div.error-message span.text-danger {
+.form-error {
+  color: #dc3545;
   font-size: 0.875rem;
-  color: #dc3545 !important;
+  margin-top: 0.25rem;
   display: block;
   font-weight: bold;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.form-group:has(.form-error) input {
+  border: 2px solid #dc3545;
+  background-color: #fff8f8;
+  border-radius: 4px;
+}
+
+.form-group:has(.form-error) .input-group-text {
+  border-color: #dc3545;
+  background-color: #fff8f8;
+}
+
+.form-group:has(.form-error) .input-group-text:first-child {
+  background-color: #D4E484;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.form-group:has(.form-error) .input-group-text:last-child {
+  background-color: #D4E484;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
+}
+
+input.is-invalid {
+  border: 2px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+  border-radius: 4px !important;
+}
+
+input.form-control {
+  border-radius: 4px;
 }
 
 .help-text {
@@ -305,3 +232,52 @@ div.error-message span.text-danger {
   cursor: pointer;
   z-index: 10;
 }
+
+/* Añadir al final de formularios.css */
+
+/* Clase específica para formulario de reparación */
+.repair-form {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con repair-form */
+form.repair-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+/* Para organizar campos en columnas */
+.repair-form-column {
+  flex: 0 0 50%;
+  flex-direction: column;
+}
+
+/* Para pantallas pequeñas */
+
+  
+  form.repair-form.custom-form {
+    flex-direction: column;
+  }
+
+
+/* Añadir al final de formularios.css */
+
+/* Clase específica para formulario de reparación */
+.egreso-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con repair-form */
+form.egreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+

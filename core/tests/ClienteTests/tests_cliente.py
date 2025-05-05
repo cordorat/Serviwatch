@@ -5,6 +5,9 @@ from core.forms.cliente_form import ClienteForm
 from django.contrib.auth.models import User
 from django.urls import reverse
 import json
+from unittest.mock import patch, MagicMock
+from django.test import TestCase, RequestFactory
+from core.views.Cliente.cliente_view import cliente_search_view
 
 class ClienteModelTest(TestCase):
 
