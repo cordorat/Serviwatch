@@ -7,5 +7,6 @@ urlpatterns = [
     path('', include('core.urls.empleado_urls')),
     path('', include('core.urls.usuario_urls')),
     path('', include('core.urls.logout_urls')),
+    path('', include('core.urls.pilas_urls')),
     path('', include('core.urls.egreso_urls')),
 ]
