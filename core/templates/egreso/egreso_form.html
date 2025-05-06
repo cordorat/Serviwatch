@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
-{% load static %} 
+{% load static %}
 {% block content %}
 <style>
     /* Estilos más específicos con !important para forzar la aplicación */
@@ -19,7 +19,7 @@
     }
 
     .form-egreso {
-        max-width: 900px; 
+        max-width: 900px;
     }
 
     @media (max-width: 768px) {
@@ -27,17 +27,16 @@
             padding-left: 0 !important;
         }
     }
-
-
 </style>
 
-<div class="egreso-container bg-white p-4">
+<div class="egreso-container bg-#f7f7f7 p-4">
     <div class="text-center mb-4">
         <div style="background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
             <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">EGRESOS DEL DÍA</h2>
             <div
                 style="background-color: #e2eec1; padding: 0.5rem 2rem; border-radius: 10px; border: 2px solid #a0b34c; display: inline-block; margin-top: 0.5rem;">
-                <h3 style="margin: 0; font-family: Montserrat, sans-serif;">${{ total_egresos|floatformat:0|intcomma }} COP</h3>
+                <h3 style="margin: 0; font-family: Montserrat, sans-serif;">${{ total_egresos|floatformat:0|intcomma }}
+                    COP</h3>
             </div>
         </div>
     </div>
@@ -56,9 +55,9 @@
             </div>
             <div class="error-container mt-1">
                 {% if form.valor.errors %}
-                    {% for error in form.valor.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                {% for error in form.valor.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
                 {% endif %}
             </div>
         </div>
@@ -72,9 +71,9 @@
             </div>
             <div class="error-container mt-1">
                 {% if form.fecha.errors %}
-                    {% for error in form.fecha.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                {% for error in form.fecha.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
                 {% endif %}
             </div>
         </div>
@@ -82,15 +81,15 @@
         <div class="mb-3">
             <div class="input-group egreso-form custom-form">
                 <span class="input-group-text form-span" id="basic-addon1">
-                    <i class="bi bi-pencil-square fs-4 text-secondary"></i>     
+                    <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                 </span>
                 {{ form.descripcion }}
             </div>
             <div class="error-container mt-1">
                 {% if form.descripcion.errors %}
-                    {% for error in form.descripcion.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                {% for error in form.descripcion.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
                 {% endif %}
             </div>
         </div>
@@ -104,10 +103,78 @@
     </form>
 </div>
 
-  
+
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'js/egreso_validaciones.js' %}">
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Corregido: Seleccionar los campos correctamente
+        const fechaField = document.querySelector('input[name="fecha"]');
+        const valorField = document.querySelector('input[name="valor"]');
+        const descripcionField = document.querySelector('textarea[name="descripcion"]');
+
+        const allFields = [fechaField, valorField, descripcionField];
+
+        function validateField(field) {
+            // Remover error anterior
+            const errorContainer = field.closest('.mb-3').querySelector('.error-container');
+            errorContainer.innerHTML = '';
+
+            const value = field.value.trim();
+            let errorMessage = '';
+
+            if (!value) {
+                if (field.name === 'fecha') errorMessage = 'La fecha es obligatoria.';
+                if (field.name === 'valor') errorMessage = 'El valor es obligatorio.';
+                if (field.name === 'descripcion') errorMessage = 'La descripción es obligatoria.';
+            }
+
+            if (field.name === 'valor' && value && parseInt(value) <= 0) {
+                errorMessage = 'El valor debe ser mayor que cero.';
+            }
+
+            if (errorMessage) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'text-danger small';
+                errorDiv.textContent = errorMessage;
+                errorContainer.appendChild(errorDiv);
+                field.classList.add('is-invalid');
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        // Validación al salir del input
+        allFields.forEach(field => {
+            if (!field) return; // Evitar errores si no se encuentra el campo
+
+            field.addEventListener('blur', function () {
+                validateField(this);
+            });
+
+            field.addEventListener('input', function () {
+                this.classList.remove('is-invalid');
+                const errorContainer = this.closest('.mb-3').querySelector('.error-container');
+                errorContainer.innerHTML = '';
+            });
+        });
+
+        const form = document.querySelector('#egresoForm');
+        form.addEventListener('submit', function (e) {
+            let isValid = true;
+
+            allFields.forEach(field => {
+                if (!field) return;
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) e.preventDefault();
+        });
+    });
 </script>
 {% endblock %}

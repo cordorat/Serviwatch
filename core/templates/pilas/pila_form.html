@@ -20,66 +20,51 @@
           <span class="input-group-text form-span" id="basic-addon1">
             <i class="bi bi-upc-scan fs-4 text-secondary"></i>
           </span>
-          <input type="text" 
-                name="codigo" 
-                id="id_codigo" 
-                class="form-control {% if form.codigo.errors %}is-invalid{% endif %}" 
-                value="{{ form.codigo.value|default:'' }}"
-                placeholder="Código" 
-                maxlength="30" 
-                required>
+          <input type="text" name="codigo" id="id_codigo"
+            class="form-control {% if form.codigo.errors %}is-invalid{% endif %}"
+            value="{{ form.codigo.value|default:'' }}" placeholder="Código" maxlength="30" required>
         </div>
         {% if form.codigo.errors %}
-          <div class="error-message mt-2">
-            <span class="text-danger">{{ form.codigo.errors.0 }}</span>
-          </div>
+        <div class="error-message mt-2">
+          <span class="text-danger">{{ form.codigo.errors.0 }}</span>
+        </div>
         {% endif %}
       </div>
-      
+
       <div class="mb-4">
         <div class="input-group mb-3">
           <span class="input-group-text form-span" id="basic-addon2">
             <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
           </span>
-          <input type="text" 
-                name="precio" 
-                id="id_precio" 
-                class="form-control {% if form.precio.errors %}is-invalid{% endif %}" 
-                value="{{ form.precio.value|default:'' }}"
-                placeholder="Precio" 
-                maxlength="6" 
-                required>
+          <input type="text" name="precio" id="id_precio"
+            class="form-control {% if form.precio.errors %}is-invalid{% endif %}"
+            value="{{ form.precio.value|default:'' }}" placeholder="Precio" maxlength="6" required>
         </div>
         {% if form.precio.errors %}
-          <div class="error-message mt-2">
-            <span class="text-danger">{{ form.precio.errors.0 }}</span>
-          </div>
+        <div class="error-message mt-2">
+          <span class="text-danger">{{ form.precio.errors.0 }}</span>
+        </div>
         {% endif %}
       </div>
-      
+
       <div class="mb-4">
         <div class="input-group mb-3">
           <span class="input-group-text form-span" id="basic-addon3">
             <i class="bi bi-box-seam fs-4 text-secondary"></i>
           </span>
-          <input type="text" 
-                name="cantidad" 
-                id="id_cantidad" 
-                class="form-control {% if form.cantidad.errors %}is-invalid{% endif %}" 
-                value="{{ form.cantidad.value|default:'' }}"
-                placeholder="Cantidad" 
-                maxlength="3" 
-                required>
+          <input type="text" name="cantidad" id="id_cantidad"
+            class="form-control {% if form.cantidad.errors %}is-invalid{% endif %}"
+            value="{{ form.cantidad.value|default:'' }}" placeholder="Cantidad" maxlength="3" required>
         </div>
         {% if form.cantidad.errors %}
-          <div class="error-message mt-2">
-            <span class="text-danger">{{ form.cantidad.errors.0 }}</span>
-          </div>
+        <div class="error-message mt-2">
+          <span class="text-danger">{{ form.cantidad.errors.0 }}</span>
+        </div>
         {% endif %}
       </div>
 
       <div class="form-buttons">
-        <button class="btn save" type="submit">GUARDAR</button> 
+        <button class="btn save" id="btnGuardarPila"">GUARDAR</button>
         <a href="{% url 'pilas_list' %}">
           <button type="button" class="btn cancel">CANCELAR</button>
         </a>
@@ -88,85 +73,133 @@
   </div>
 </div>
 
+<!-- Modal de confirmación simplificado -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #f1f1f1;">
+      <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+        {% if form.instance.id %}
+        <h4 class="titulo m-0" id="modalMessage">REFERENCIA DE PILA ACTUALIZADA CORRECTAMENTE</h4>
+        {% else %}
+        <h4 class="titulo m-0" id="modalMessage">REFERENCIA DE PILA ACTUALIZADA AGREGADA CORRECTAMENTE</h4>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
+    const btnGuardarPila = document.getElementById('btnGuardarPila');
+    const pilaForm = document.getElementById('pilaForm');
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+    btnGuardarPila.addEventListener('click', function (event) {
+      event.preventDefault(); // Evita el envío inmediato del formulario
+
+      // Agregar un campo oculto solo si no existe
+      if (!document.querySelector('input[name="confirmar"]')) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'confirmar';
+        hiddenInput.value = 'true';
+        pilaForm.appendChild(hiddenInput);
+      }
+
+      // Mostrar el modal
+      modal.show();
+
+      // Enviar el formulario después de 3 segundos
+      setTimeout(function () {
+        pilaForm.submit();
+      }, 3000);
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
     const codigoField = document.querySelector('input[name="codigo"]');
     const precioField = document.querySelector('input[name="precio"]');
     const cantidadField = document.querySelector('input[name="cantidad"]');
-    
+
     const allFields = [codigoField, precioField, cantidadField];
 
     // Marcar campos con errores del servidor
     document.querySelectorAll('.error-message').forEach(function (errorMessage) {
-        var input = errorMessage.closest('.input-group')?.querySelector('input');
-        if (input) {
-            input.classList.add('is-invalid');
-        }
+      var input = errorMessage.closest('.input-group')?.querySelector('input');
+      if (input) {
+        input.classList.add('is-invalid');
+      }
     });
 
     function validateField(field) {
-        // Remover error anterior
-        const errorElement = field.closest('.mb-4').querySelector('.error-message');
-        if (errorElement) {
-            errorElement.remove();
-        }
+      // Remover error anterior
+      const errorElement = field.closest('.mb-4').querySelector('.error-message');
+      if (errorElement) {
+        errorElement.remove();
+      }
 
-        const value = field.value.trim();
-        let errorMessage = '';
+      const value = field.value.trim();
+      let errorMessage = '';
 
-        if (!value) {
-            if (field.name === 'codigo') errorMessage = 'El código es obligatorio.';
-            if (field.name === 'precio') errorMessage = 'El precio es obligatorio.';
-            if (field.name === 'cantidad') errorMessage = 'La cantidad es obligatoria.';
-        } else {
-            if (field.name === 'precio' || field.name === 'cantidad') {
-                if (!/^\d+$/.test(value)) {
-                    errorMessage = `El ${field.name} solo debe contener números.`;
-                }
-            }
+      if (!value) {
+        if (field.name === 'codigo') errorMessage = 'El código es obligatorio.';
+        if (field.name === 'precio') errorMessage = 'El precio es obligatorio.';
+        if (field.name === 'cantidad') errorMessage = 'La cantidad es obligatoria.';
+      } else {
+        if (field.name === 'precio' || field.name === 'cantidad') {
+          if (!/^\d+$/.test(value)) {
+            errorMessage = `El ${field.name} solo debe contener números.`;
+          }
         }
+      }
 
-        if (errorMessage) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message mt-2';
-            const errorSpan = document.createElement('span');
-            errorSpan.className = 'text-danger';
-            errorSpan.textContent = errorMessage;
-            errorDiv.appendChild(errorSpan);
-            field.closest('.mb-4').appendChild(errorDiv);
-            field.classList.add('is-invalid');
-            return false;
-        } else {
-            field.classList.remove('is-invalid');
-            return true;
-        }
+      if (errorMessage) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message mt-2';
+        const errorSpan = document.createElement('span');
+        errorSpan.className = 'text-danger';
+        errorSpan.textContent = errorMessage;
+        errorDiv.appendChild(errorSpan);
+        field.closest('.mb-4').appendChild(errorDiv);
+        field.classList.add('is-invalid');
+        return false;
+      } else {
+        field.classList.remove('is-invalid');
+        return true;
+      }
     }
 
     // Validación al salir del input
     allFields.forEach(field => {
-        field.addEventListener('blur', function () {
-            validateField(this);
-        });
+      field.addEventListener('blur', function () {
+        validateField(this);
+      });
 
-        field.addEventListener('input', function () {
-            this.classList.remove('is-invalid');
-            const error = this.closest('.mb-4').querySelector('.error-message');
-            if (error) error.remove();
-        });
+      field.addEventListener('input', function () {
+        this.classList.remove('is-invalid');
+        const error = this.closest('.mb-4').querySelector('.error-message');
+        if (error) error.remove();
+      });
     });
 
     const form = document.querySelector('#pilaForm');
     form.addEventListener('submit', function (e) {
-        let isValid = true;
-        allFields.forEach(field => {
-            if (!validateField(field)) {
-                isValid = false;
-            }
-        });
+      let isValid = true;
+      allFields.forEach(field => {
+        if (!validateField(field)) {
+          isValid = false;
+        }
+      });
 
-        if (!isValid) e.preventDefault();
+      if (!isValid) e.preventDefault();
     });
-});
+  });
 </script>
 
 {% endblock %}

@@ -180,7 +180,7 @@
                 </div>
 
                 <div class="form-buttons">
-                    <button class="btn save" type="submit">GUARDAR</button>
+                    <button class="btn save" id="btnGuardar">GUARDAR</button>
                     <a href="{% url 'reparacion_list' %}">
                         <button type="button" class="btn cancel">CANCELAR</button>
                     </a>
@@ -188,6 +188,54 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal de confirmación simplificado -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center" style="background-color: #f1f1f1;">
+                <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+                    {% if editing %}
+                    <h4 class="titulo m-0" id="modalMessage">REPARACIÓN ACTUALIZADA CORRECTAMENTE</h4>
+                    {% else %}
+                    <h4 class="titulo m-0" id="modalMessage">REPARACIÓN AGREGADA CORRECTAMENTE</h4>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
+
+    {% block javascript %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnGuardar = document.getElementById('btnGuardar');
+            const reparacionForm = document.getElementById('reparacionForm');
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+            btnGuardar.addEventListener('click', function (event) {
+                event.preventDefault(); // Evita el envío inmediato del formulario
+
+                // Agregar un campo oculto solo si no existe
+                if (!document.querySelector('input[name="confirmar"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'confirmar';
+                    hiddenInput.value = 'true';
+                    reparacionForm.appendChild(hiddenInput);
+                }
+
+                // Mostrar el modal
+                modal.show();
+
+                // Enviar el formulario después de 3 segundos
+                setTimeout(function () {
+                    reparacionForm.submit();
+                }, 3000);
+            });
+        });
+    </script>
 
 
 
@@ -273,7 +321,7 @@
                 }
             }
         });
-        
+
         document.addEventListener('DOMContentLoaded', function () {
             // Seleccionar todos los campos de entrada que requieren validación
             const formFields = {
