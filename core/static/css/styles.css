@@ -90,7 +90,7 @@ body {
   margin-left: 50px;
 }
 
-.user-info.active{
+.user-info-active{
   display: flex;
   align-items: center;
   width: 100%;
