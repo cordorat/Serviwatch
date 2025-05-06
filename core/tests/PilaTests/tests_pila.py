@@ -186,7 +186,7 @@ class PilasFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['cantidad'], ['La cantidad solo debe contener números.'])
 
-    def test_rcampos_requeridos(self):
+    def test_campos_requeridos(self):
         """Test that all fields are required"""
         form = PilasForm({})
         self.assertFalse(form.is_valid())
