@@ -15,6 +15,20 @@ class EgresoForm(forms.ModelForm):
             for field in self.fields:
                 if field in self.errors:
                      self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
+                     
+    fecha = forms.DateField(
+        input_formats=['%d/%m/%Y'],
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                'type': 'text',
+                'id': 'id_fecha',
+                'class': 'form-control text-secondary',
+                'placeholder': 'Fecha',
+            }
+        )
+    )    
+    
     class Meta:
 
         model = Egreso
