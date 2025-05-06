@@ -181,5 +181,3 @@ class PasswordChangeViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('contraseña_nueva', response.context['form'].errors)
         self.assertEqual(response.context['form'].errors['contraseña_nueva'][0], 'La contraseña nueva no puede ser igual a la anterior')
-    
-
