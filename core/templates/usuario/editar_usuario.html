@@ -1,0 +1,33 @@
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="contrasena_actual">Contraseña actual</label>
+        <input type="password" id="contrasena_actual" name="contrasena_actual" required>
+    </div>
+    <div>
+        <label for="nueva_contrasena">Nueva contraseña</label>
+        <input type="password" id="nueva_contrasena" name="nueva_contrasena" required>
+    </div>
+    <div>
+        <label for="confirmar_contrasena">Confirmar nueva contraseña</label>
+        <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" required>
+    </div>
+
+    <button type="submit">Guardar cambios</button>
+</form>
+
+<script>
+    function togglePasswordVisibility(inputId) {
+        var input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+    
+    // Agregar botones para cambiar visibilidad
+    document.getElementById("contrasena_actual").insertAdjacentHTML("afterend", '<button type="button" onclick="togglePasswordVisibility(\'contrasena_actual\')">Mostrar/Ocultar</button>');
+    document.getElementById("nueva_contrasena").insertAdjacentHTML("afterend", '<button type="button" onclick="togglePasswordVisibility(\'nueva_contrasena\')">Mostrar/Ocultar</button>');
+    document.getElementById("confirmar_contrasena").insertAdjacentHTML("afterend", '<button type="button" onclick="togglePasswordVisibility(\'confirmar_contrasena\')">Mostrar/Ocultar</button>');
+</script>
