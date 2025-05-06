@@ -143,7 +143,7 @@ class PilasFormTest(TestCase):
             cantidad="10"
         )
 
-    def test_valid_form(self):
+    def test_formulario_valido(self):
         """Test that the form validates with correct data"""
         data = {
             'codigo': 'CR2025', 
@@ -153,7 +153,7 @@ class PilasFormTest(TestCase):
         form = PilasForm(data)
         self.assertTrue(form.is_valid())
 
-    def test_codigo_unique_validation(self):
+    def test_codigo_unico(self):
         """Test that the form validates codigo uniqueness"""
         data = {
             'codigo': 'CR2032',  # Already exists in setUp
@@ -164,7 +164,7 @@ class PilasFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['codigo'], ['Este codigo ya esta registrado'])
 
-    def test_precio_numeric_validation(self):
+    def test_precio_numerico(self):
         """Test that precio must be numeric"""
         data = {
             'codigo': 'CR2026',
@@ -175,7 +175,7 @@ class PilasFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['precio'], ['El precio solo debe contener números.'])
 
-    def test_cantidad_numeric_validation(self):
+    def test_cantidad_numerica(self):
         """Test that cantidad must be numeric"""
         data = {
             'codigo': 'CR2027',
@@ -186,7 +186,7 @@ class PilasFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['cantidad'], ['La cantidad solo debe contener números.'])
 
-    def test_required_fields(self):
+    def test_rcampos_requeridos(self):
         """Test that all fields are required"""
         form = PilasForm({})
         self.assertFalse(form.is_valid())
