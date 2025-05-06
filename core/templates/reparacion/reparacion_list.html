@@ -52,7 +52,7 @@
                     <td>{{ reparacion.espacio_fisico }}</td>
                     <td>{{ reparacion.tecnico.nombre }} {{ reparacion.tecnico.apellidos }}</td>
                     <td>
-                        <a href="" class="btn btn-sm btn-outline-primary" title="Editar reparación">
+                        <a href="{% url 'reparacion_edit' reparacion.id %}" class="btn btn-sm btn-outline-primary" title="Editar reparación">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                     </td>
