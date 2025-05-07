@@ -2,43 +2,39 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
 from core.forms.password_change_form import PasswordChangeForm
-from core.services.password_change_service import validate_current_password, validate_new_password, change_password
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def password_change_view(request):
+    """
+    Vista para cambiar la contraseña del usuario.
+    Utiliza el formulario PasswordChangeForm para validar y procesar el cambio.
+    """
     if request.method == 'GET':
-        return render(request, 'usuario/password_change.html', {'form': PasswordChangeForm()})
+        # Pasar el usuario al formulario
+        form = PasswordChangeForm(user=request.user)
+        return render(request, 'usuario/password_change.html', {'form': form})
 
-    form = PasswordChangeForm(request.POST)
+    # Pasar el usuario y los datos POST al formulario
+    form = PasswordChangeForm(request.POST, user=request.user)
     
     if not form.is_valid():
         return render(request, 'usuario/password_change.html', {'form': form})
-
-    contraseña_actual = form.cleaned_data.get('contraseña_actual')
-    contraseña_nueva = form.cleaned_data.get('contraseña_nueva')
     
-    is_valid_current, error = validate_current_password(request.user, contraseña_actual)
-    if not is_valid_current:
-        form.add_error('contraseña_actual', error)
-        return render(request, 'usuario/password_change.html', {'form': form})
+    # El formulario ya realizó todas las validaciones necesarias
+    # Usar el método save del formulario para cambiar la contraseña
+    form.save()
     
-    is_valid_new, error = validate_new_password(contraseña_actual, contraseña_nueva)
-    if not is_valid_new:
-        form.add_error('contraseña_nueva', error)
-        return render(request, 'usuario/password_change.html', {'form': form})
-    
-    success, message = change_password(request.user, contraseña_nueva)
-    if not success:
-        return render(request, 'usuario/password_change.html', {
-            'form': form,
-            'error': message
-        })
-    
+    # Actualizar la sesión para evitar cerrarla al cambiar la contraseña
     update_session_auth_hash(request, request.user)
 
+    # Mensaje de éxito para el usuario
+    messages.success(request, "Tu contraseña ha sido cambiada correctamente.")
+    
+    # Redirigir o mostrar el éxito con un formulario limpio
     return render(request, 'usuario/password_change.html', {
-        'form': PasswordChangeForm(),  # Limpia el formulario
-        'success': message  # Muestra el modal
+        'form': PasswordChangeForm(user=request.user),  # Formulario limpio
+        'success': "Contraseña actualizada correctamente"  # Para el modal
     })

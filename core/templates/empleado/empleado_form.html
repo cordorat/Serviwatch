@@ -214,41 +214,17 @@
 
 {% block javascript %}
 <script>
+    // Variable global para errores del servidor
+    var hasServerErrorsValue = "{% if form.errors %}true{% else %}false{% endif %}";
+
     document.addEventListener("DOMContentLoaded", function () {
+        // ===== REFERENCIAS ELEMENTOS DOM =====
         const btnGuardarEmpleado = document.getElementById('btnGuardarEmpleado');
         const empleadoForm = document.getElementById('empleadoForm');
         const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-
-        btnGuardarEmpleado.addEventListener('click', function (event) {
-            event.preventDefault(); // Evita el envío inmediato del formulario
-
-            // Agregar un campo oculto solo si no existe
-            if (!document.querySelector('input[name="confirmar"]')) {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'confirmar';
-                hiddenInput.value = 'true';
-                empleadoForm.appendChild(hiddenInput);
-            }
-
-            // Mostrar el modal
-            modal.show();
-
-            // Enviar el formulario después de 3 segundos
-            setTimeout(function () {
-                empleadoForm.submit();
-            }, 3000);
-        });
-    });
-</script>
-
-<script>
-    var hasServerErrorsValue = "{% if form.errors %}true{% else %}false{% endif %}";
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // ===== VARIABLES INICIALES =====
         const hasServerErrors = (hasServerErrorsValue === "true");
 
+        // ===== VALORES INICIALES =====
         const fechaNacimientoValue = "{{ form.fecha_nacimiento.value|date:'d/m/Y' }}";
         const fechaIngresoValue = "{{ form.fecha_ingreso.value|date:'d/m/Y' }}";
 
@@ -506,7 +482,6 @@
                         isValid = false;
                     }
                     break;
-
             }
 
             if (!isValid) {
@@ -554,10 +529,47 @@
             }
         }
 
+        // ===== EVENTO CLIC EN BOTÓN GUARDAR =====
+        // PUNTO CLAVE: Modificado para validar antes de mostrar el modal
+        btnGuardarEmpleado.addEventListener('click', function (event) {
+            event.preventDefault(); // Evita el envío inmediato del formulario
+
+            // VALIDAR FORMULARIO PRIMERO
+            if (validateForm()) {
+                console.log("Formulario válido, mostrando modal...");
+
+                // Agregar un campo oculto solo si no existe
+                if (!document.querySelector('input[name="confirmar"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'confirmar';
+                    hiddenInput.value = 'true';
+                    empleadoForm.appendChild(hiddenInput);
+                }
+
+                // Mostrar el modal SOLO si el formulario es válido
+                modal.show();
+
+                // Enviar el formulario después de 3 segundos
+                setTimeout(function () {
+                    empleadoForm.submit();
+                }, 3000);
+            } else {
+                console.log("Formulario inválido, no se muestra el modal");
+
+                // Hacer scroll al primer campo con error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+
         // ===== VALIDAR AL ENVIAR =====
-        const form = document.querySelector('#empleadoForm');
-        form.addEventListener('submit', function (e) {
-            if (!validateForm()) {
+        empleadoForm.addEventListener('submit', function (e) {
+            // Esta validación es un respaldo para cuando se envía con Enter
+            if (!document.querySelector('input[name="confirmar"]') && !validateForm()) {
                 e.preventDefault();
             }
         });
