@@ -3,7 +3,42 @@
 {% load static %}
 {% block title %}Agregar Usuario{% endblock %}
 
+
 {% block content %}
+
+<style>
+    /* Sobrescribe el estilo de Bootstrap para los inputs de contraseña */
+    .input-group:has(input[type="password"]) > input[type="password"],
+    .input-group:has(input[name="password1"]) > input[name="password1"],
+    .input-group:has(input[name="password2"]) > input[name="password2"] {
+      border-top-right-radius: 4px !important;
+      border-bottom-right-radius: 4px !important;
+    }
+    
+    /* También asegura que el borde izquierdo tenga el mismo radio */
+    .input-group:has(input[type="password"]) > .input-group-text,
+    .input-group:has(input[name="password1"]) > .input-group-text,
+    .input-group:has(input[name="password2"]) > .input-group-text {
+      border-top-left-radius: 0px !important;
+      border-bottom-left-radius: 0px !important;
+    }
+    
+    /* Ajusta el icono para que no rompa el radio */
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      cursor: pointer;
+    }
+    
+    /* Añade padding extra a la derecha para que el texto no se sobreponga con el icono */
+    input[name="password1"], input[name="password2"] {
+      padding-right: 35px !important;
+    }
+</style>
+
 <h2 class="titulo">
     {% if modo == 'editar' %}
         EDITAR USUARIO
