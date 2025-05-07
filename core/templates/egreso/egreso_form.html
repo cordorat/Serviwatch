@@ -177,4 +177,34 @@
         });
     });
 </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+        // ===== VARIABLES INICIALES =====
+        const fechaValue = "{{ form.fecha.value|date:'d/m/Y' }}";
+
+        // ===== CONFIGURACIÓN DE DATEPICKERS =====
+        function setupDatepicker(selector, defaultValue) {
+            return flatpickr(selector, {
+                dateFormat: "d/m/Y",
+                locale: "es",
+                defaultDate: defaultValue || null,
+                onChange: function (selectedDates, dateStr, instance) {
+                    instance.input.value = dateStr;
+                    instance.input.dataset.userModified = 'true';
+                    instance.input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        const fechaPicker = setupDatepicker("#id_fecha", fechaValue);
+
+        if (fechaValue) {
+            document.querySelector("#id_fecha").value = fechaValue;
+        }
+    });
+
+</script>
 {% endblock %}

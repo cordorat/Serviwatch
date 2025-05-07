@@ -15,6 +15,20 @@ class EgresoForm(forms.ModelForm):
             for field in self.fields:
                 if field in self.errors:
                      self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
+                     
+    fecha = forms.DateField(
+        input_formats=['%d/%m/%Y'],
+        required=True,
+        widget=forms.DateInput(
+            attrs={
+                'type': 'text',
+                'id': 'id_fecha',
+                'class': 'form-control text-secondary',
+                'placeholder': 'Fecha',
+            }
+        )
+    )    
+    
     class Meta:
 
         model = Egreso
@@ -66,6 +80,10 @@ class EgresoForm(forms.ModelForm):
         Valida que la fecha no sea en el futuro ni anterior a 7 días desde hoy.
         """
         fecha = self.cleaned_data.get('fecha')
+        
+        if fecha is None:
+            raise forms.ValidationError("La fecha es obligatoria")
+        
         hoy = timezone.now().date()
         hace_una_semana = hoy - timedelta(days=7)
 
@@ -73,4 +91,5 @@ class EgresoForm(forms.ModelForm):
             raise forms.ValidationError("La fecha no puede ser en el futuro")
         if fecha < hace_una_semana:
             raise forms.ValidationError("La fecha no puede ser anterior a una semana")
+        
         return fecha
