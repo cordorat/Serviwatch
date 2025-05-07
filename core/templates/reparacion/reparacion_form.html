@@ -213,26 +213,41 @@
             const btnGuardar = document.getElementById('btnGuardar');
             const reparacionForm = document.getElementById('reparacionForm');
             const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-
-            btnGuardar.addEventListener('click', function (event) {
-                event.preventDefault(); // Evita el envío inmediato del formulario
-
-                // Agregar un campo oculto solo si no existe
-                if (!document.querySelector('input[name="confirmar"]')) {
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'confirmar';
-                    hiddenInput.value = 'true';
-                    reparacionForm.appendChild(hiddenInput);
+    
+            btnGuardar.addEventListener('click', async function (event) {
+                event.preventDefault();
+    
+                // Validar el formulario
+                const isValid = validateForm(); // Usa la función validateForm que ya tienes
+    
+                if (isValid) {
+                    // Solo si el formulario es válido:
+                    // 1. Agregar campo oculto de confirmación
+                    if (!document.querySelector('input[name="confirmar"]')) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'confirmar';
+                        hiddenInput.value = 'true';
+                        reparacionForm.appendChild(hiddenInput);
+                    }
+    
+                    // 2. Mostrar el modal
+                    modal.show();
+    
+                    // 3. Enviar el formulario después de 3 segundos
+                    setTimeout(function () {
+                        reparacionForm.submit();
+                    }, 3000);
+                } else {
+                    // Si no es válido, mostrar mensaje de error general (opcional)
+                    console.log('Por favor, complete todos los campos correctamente');
+                    
+                    // Hacer scroll al primer error
+                    const firstError = document.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
-
-                // Mostrar el modal
-                modal.show();
-
-                // Enviar el formulario después de 3 segundos
-                setTimeout(function () {
-                    reparacionForm.submit();
-                }, 3000);
             });
         });
     </script>
