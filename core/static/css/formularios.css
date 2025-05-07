@@ -225,11 +225,24 @@ input.form-control {
 
 .toggle-password {
   position: absolute;
-  right: 10px;
   top: 50%;
+  right: 12px;
   transform: translateY(-50%);
+  font-size: 18px;
+  color: #555; 
   cursor: pointer;
-  z-index: 10;
+}
+
+.toggle-password:hover {
+  color: #000; 
+}
+
+.toggle-password.fa-eye {
+  color: #cce064;
+}
+
+.toggle-password.fa-eye-slash {
+  color: #cce064; 
 }
 
 /* Añadir al final de formularios.css */

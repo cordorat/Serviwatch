@@ -102,10 +102,11 @@
 
 /* Ícono de lápiz */
 .custom-table td a {
-    display: flex;
+    display: initial;
     align-items: right;
     justify-content: right;
     text-decoration: none;
+    font-size: medium;
 }
 
 /* Botón editar */

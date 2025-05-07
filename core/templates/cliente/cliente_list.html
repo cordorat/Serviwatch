@@ -3,7 +3,7 @@
 {% block content %}
 <style>
   .custom-table-usuario td a {
-    display: inherit;
+    display: initial;
   }
 </style>
 
@@ -45,9 +45,9 @@
           <td>{{ cliente.nombre }}</td>
           <td>{{ cliente.apellido }}</td>
           <td>{{ cliente.telefono }}</td>
-          <td>
+          <td >
             <a href="{% url 'cliente_editar' id=cliente.id %}" class="btn btn-sm btn-outline-primary" title="Editar cliente">
-              <i class="bi bi-pencil-square"></i>
+              <i class="bi bi-pencil fs-4"></i>
             </a>
           </td>
         </tr>

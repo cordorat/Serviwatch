@@ -22,23 +22,27 @@
       </thead>
       <tbody>
         {% for usuario in usuarios %}
+        {% if not usuario.is_superuser %}
         <tr>
-          <td style="padding-right: 60%;">
-            <i class="bi bi-person fs-4"></i>
-            {{ usuario.username }}
-          </td>
-          <td style="padding-right: 0 !important; border-right: none !important;">
-            <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm fs-4" title="Editar usuario">
-              <i class="bi bi-pencil"></i>
-            </a>
-          </td>
-          <td style="padding-left: 0 !important; border-left: none !important;">
-            <a class="btn btn-sm fs-4" data-bs-toggle = "modal" data-bs-target="#confirmDeleteModal" data-user-id="{{usuario.pk}}" data-username="{{usuario.username}}" data-email="{{usuario.email}}" title="Eliminar usuario">
-              <i class="bi bi-trash"></i>
-            </a>
+            <td style="padding-right: 60%;">
+                <i class="bi bi-person fs-4"></i>
+                {{ usuario.username }}
+            </td>
+            <td style="text-align: right; padding-right: 0 !important; border-right: none !important;">
+                <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm btn-outline-primary" title="Editar usuario">
+                    <i class="bi bi-pencil fs-4"></i>
+                </a>
+            </td>
+            <td style="text-align: right; padding-left: 0 !important; border-left: none !important;">
+                <a class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-user-id="{{usuario.pk}}" data-username="{{usuario.username}}" data-email="{{usuario.email}}" title="Eliminar usuario">
+                    <i class="bi bi-trash fs-4"></i>
+                </a>
+            </td>
         </tr>
+        {% endif %}
         {% endfor %}
-      </tbody>
+    </tbody>
+
     </table>
 
     {% if messages %}

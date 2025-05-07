@@ -19,71 +19,86 @@
     {% csrf_token %}
 
     <div class="form-group">
-        <div class="input-group mb-3">
-            <span class="input-group-text form-span" id="basic-addon1">
-              <i class="bi bi-person-fill fs-4 text-secondary"></i>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group mb-3 flex-grow-1">
+                <span class="input-group-text form-span">
+                    <i class="bi bi-person-fill fs-4 text-secondary"></i>
+                </span>
+                {{ form.username }}
+            </div>
+            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.username.help_text }}">
+                <i class="bi bi-question-circle-fill"></i>
             </span>
-            {{ form.username }}
         </div>
-            
-          <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"  title="{{ form.username.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
-  
-        
         {% if form.username.errors %}
             <div class="form-error">{{ form.username.errors.0 }}</div>
         {% endif %}
-        
-        
     </div>
+    
+    
 
     <div class="form-group">
-        <div class="input-group mb-3">
-            <span class="input-group-text form-span" id="basic-addon1">
-                <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group mb-3 flex-grow-1">
+                <span class="input-group-text form-span">
+                    <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
+                </span>
+                {{ form.email }}
+            </div>
+            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}">
+                <i class="bi bi-question-circle-fill"></i>
             </span>
-            {{ form.email }}
         </div>
-        
-        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
-
         {% if form.email.errors %}
             <div class="form-error">{{ form.email.errors.0 }}</div>
         {% endif %}
     </div>
+    
+    
     {% if not modo == 'editar'  %}
     <div class="form-group">
-        <div class="input-group mb-3">
-            <span class="input-group-text form-span" id="basic-addon1">
-                <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group mb-3 password-container flex-grow-1">
+                <span class="input-group-text form-span">
+                    <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+                </span>
+                {{ form.password1 }}
+                <span>
+                    <i class="fa fa-eye toggle-password" id="togglePassword"></i>
+                </span>
+            </div>
+            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}">
+                <i class="bi bi-question-circle-fill"></i>
             </span>
-            {{ form.password1 }}
-            <i class="toggle-password bi bi-eye" id="togglePassword"></i>
         </div>
-        
-        
-        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
-
         {% if form.password1.errors %}
-        <div class="form-error">{{ form.password1.errors.0 }}</div>
+            <div class="form-error">{{ form.password1.errors.0 }}</div>
         {% endif %}
     </div>
+    
+    
 
     <div class="form-group">
-        <div class="input-group mb-3">
-            <span class="input-group-text form-span" id="basic-addon1">
-                <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group mb-3 password-container flex-grow-1">
+                <span class="input-group-text form-span">
+                    <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+                </span>
+                {{ form.password2 }}
+                <span>
+                    <i class="fa fa-eye toggle-password" id="togglePassword2"></i>
+                </span>
+            </div>
+            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}">
+                <i class="bi bi-question-circle-fill"></i>
             </span>
-            {{ form.password2 }}
-            <i class="toggle-password bi bi-eye" id="togglePassword"></i>
         </div>
-        
-        
-        <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
-
         {% if form.password2.errors %}
-        <div class="form-error">{{ form.password2.errors.0 }}</div>
+            <div class="form-error">{{ form.password2.errors.0 }}</div>
         {% endif %}
     </div>
+    
+    
     {% endif %}
 
     {% if form.non_field_errors %}
@@ -284,18 +299,18 @@
             password1Field.setAttribute('type', type);
             
             // Cambia el icono entre ojo y ojo tachado
-            if (this.classList.contains('bi-eye')) {
-                this.classList.remove('bi-eye');
-                this.classList.add('bi-eye-slash');
+            if (this.classList.contains('fa-eye')) {
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
             } else {
-                this.classList.remove('bi-eye-slash');
-                this.classList.add('bi-eye');
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
             }
         });
     }
 
     const password2Toggle = document.createElement('i');
-    password2Toggle.className = 'toggle-password bi-eye';
+    password2Toggle.className = 'toggle-password fa-eye';
     password2Toggle.id = 'togglePassword2';
     password2Field.parentElement.appendChild(password2Toggle);
 
@@ -303,12 +318,12 @@
         const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
         password2Field.setAttribute('type', type);
         
-        if (this.classList.contains('bi-eye')) {
-                this.classList.remove('bi-eye');
-                this.classList.add('bi-eye-slash');
+        if (this.classList.contains('fa-eye')) {
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
             } else {
-                this.classList.remove('bi-eye-slash');
-                this.classList.add('bi-eye');
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
             }
 });
 });
