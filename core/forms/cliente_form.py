@@ -84,5 +84,4 @@ class ClienteForm(forms.ModelForm):
                 self.add_error(
                     'nombre', "Este cliente ya esta registrado."
                     )
-        
         return cleaned_data
