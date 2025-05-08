@@ -8,6 +8,7 @@ import json
 from unittest.mock import patch, MagicMock
 from django.test import TestCase, RequestFactory
 from core.views.Cliente.cliente_view import cliente_search_view
+
 class ClienteModelTest(TestCase):
 
     def test_crear_cliente_valido(self):
@@ -251,11 +252,8 @@ class ClienteCreateViewTest(TestCase):
     
     def test_view_mode_is_editar_for_existing_client(self):
         """Test that the view mode is 'editar' for an existing client"""
-        url = reverse('cliente_editar', kwargs={
-            'nombre': self.test_cliente.nombre,
-            'apellido': self.test_cliente.apellido,
-            'telefono': self.test_cliente.telefono
-        })
+        url = reverse('cliente_editar', kwargs={'id': self.test_cliente.id})
+        
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['modo'], 'editar')
@@ -282,11 +280,9 @@ class ClienteCreateViewTest(TestCase):
     
     def test_edit_existing_client(self):
         """Test editing an existing client"""
-        url = reverse('cliente_editar', kwargs={
-            'nombre': self.test_cliente.nombre,
-            'apellido': self.test_cliente.apellido,
-            'telefono': self.test_cliente.telefono
-        })
+        # Use the client's ID instead of name/surname/phone
+        url = reverse('cliente_editar', kwargs={'id': self.test_cliente.id})
+        
         form_data = {
             'nombre': 'Editado',
             'apellido': 'Actualizado',
@@ -468,5 +464,14 @@ class ClienteSearchViewTests(TestCase):
             {'term': 'juan'}
         )
         data = json.loads(response.content)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(data), 2)
+        
+        # Check the structure of the first result
+        self.assertIn('id', data[0])
+        self.assertIn('label', data[0])
+        self.assertIn('value', data[0])
+        self.assertIn('telefono', data[0])
+        
+        # Check the content of the first result
+        self.assertEqual(data[0]['label'], 'Juan Pérez - 3001234567')
+        self.assertEqual(data[0]['value'], 'Juan Pérez')
+        self.assertEqual(data[0]['telefono'], '3001234567')

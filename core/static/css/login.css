@@ -82,7 +82,7 @@ body {
 
 .divider {
     width: 5px;
-    background-color: #696f2f;
+    background-color: #626E15;
     height: 80%;
     align-self: center;
 }
@@ -110,7 +110,7 @@ body {
 .input-group input {
     width: 100%;
     padding: 15px 15px 15px 50px;
-    border: 2px solid #696f2e;
+    border: 2px solid #626E15;
     border-radius: 5px;
     font-size: 16px;
     outline: none;
@@ -141,7 +141,7 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: #696f2e;
+    color: #626E15;
     font-size: 20px;
     cursor: pointer;
     transition: color 0.3s;
@@ -161,9 +161,10 @@ body {
 }
 
 .login-button {
-    background-color: #d8e562;
+    background-color: #D4E484;
     color: #333;
-    border: none;
+    border-color: #626E15;
+    border-width: 1.5px;
     border-radius: 5px;
     padding: 15px;
     font-size: 16px;

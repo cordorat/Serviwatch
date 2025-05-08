@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 
 class Empleado(models.Model):
@@ -42,3 +43,10 @@ class Empleado(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellidos} - {self.cedula}"
+    
+    def clean(self):
+        super().clean()
+        
+        # Validar salario
+        if self.salario and not self.salario.isdigit():
+            raise ValidationError({'salario': "El salario debe ser numérico."})

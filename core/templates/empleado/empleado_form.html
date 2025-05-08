@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    input.is-invalid,
+    select.is-invalid,
+    textarea.is-invalid {
+        border: 1px solid red;
+        box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
+    }
+
+    .custom-form-empleados {
+        max-width: 800px !important;
+    }
+
+    /* Estilos específicos para selects con error */
+    select.is-invalid {
+        background-color: #fff8f8 !important;
+        /* Fondo ligeramente rosado */
+        border-color: #dc3545 !important;
+        /* Borde rojo */
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        /* Sombra roja */
+    }
+
+    /* Asegurar que el ícono del select no tape el borde rojo */
+    .input-group select.is-invalid {
+        padding-right: 2.5rem !important;
+    }
+</style>
+
+<div class="container">
+    <div class="form-header">
+        <h2 class="titulo">{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Empleado</h2>
+    </div>
+
+    <div class="form-content">
+        <form method="post" id="empleadoForm" class="custom-form custom-form-empleados" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-6">
+                <div class="col-md-6">
+                    <!-- Cedula -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon1">
+                            <i class="bi bi-person-vcard fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.cedula }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.cedula.errors %}
+                        {% for error in form.cedula.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <!-- Nombre -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon1">
+                            <i class="bi bi-person fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.nombre }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.nombre.errors %}
+                        {% for error in form.nombre.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Apellidos -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon2">
+                            <i class="bi bi-person fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.apellidos }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.apellidos.errors %}
+                        {% for error in form.apellidos.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Telefono -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon3">
+                            <i class="bi bi-telephone fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.celular }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.celular.errors %}
+                        {% for error in form.celular.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+
+                    <!-- Fecha Ingreso -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon3">
+                            <i class="bi bi-calendar-date fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.fecha_ingreso }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.fecha_ingreso.errors %}
+                        {% for error in form.fecha_ingreso.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- Fecha Nacimiento -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon3">
+                            <i class="bi bi-calendar-check fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.fecha_nacimiento }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.fecha_nacimiento.errors %}
+                        {% for error in form.fecha_nacimiento.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+
+                    <!-- Cargo -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon3">
+                            <i class="bi bi-briefcase fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.cargo }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.cargo.errors %}
+                        {% for error in form.cargo.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+
+
+
+                    <!-- Salario -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon4">
+                            <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.salario }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.salario.errors %}
+                        {% for error in form.salario.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon5">
+                            <i class="bi bi-building-check fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.estado }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.estado.errors %}
+                        {% for error in form.estado.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-buttons mt-4">
+                <button class="btn save" id="btnGuardarEmpleado">GUARDAR</button>
+                <a href="{% url 'empleado_list' %}">
+                    <button type="button" class="btn cancel">CANCELAR</button>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de confirmación simplificado -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center" style="background-color: #f1f1f1;">
+            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+                {% if form.instance.id %}
+                <h4 class="titulo m-0" id="modalMessage">EMPLEADO ACTUALIZADO CORRECTAMENTE</h4>
+                {% else %}
+                <h4 class="titulo m-0" id="modalMessage">EMPLEADO AGREGADO CORRECTAMENTE</h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnGuardarEmpleado = document.getElementById('btnGuardarEmpleado');
+        const empleadoForm = document.getElementById('empleadoForm');
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+        btnGuardarEmpleado.addEventListener('click', function (event) {
+            event.preventDefault(); // Evita el envío inmediato del formulario
+
+            // Agregar un campo oculto solo si no existe
+            if (!document.querySelector('input[name="confirmar"]')) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'confirmar';
+                hiddenInput.value = 'true';
+                empleadoForm.appendChild(hiddenInput);
+            }
+
+            // Mostrar el modal
+            modal.show();
+
+            // Enviar el formulario después de 3 segundos
+            setTimeout(function () {
+                empleadoForm.submit();
+            }, 3000);
+        });
+    });
+</script>
+
+<script>
+    var hasServerErrorsValue = "{% if form.errors %}true{% else %}false{% endif %}";
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // ===== VARIABLES INICIALES =====
+        const hasServerErrors = (hasServerErrorsValue === "true");
+
+        const fechaNacimientoValue = "{{ form.fecha_nacimiento.value|date:'d/m/Y' }}";
+        const fechaIngresoValue = "{{ form.fecha_ingreso.value|date:'d/m/Y' }}";
+
+        // ===== CONFIGURACIÓN DE DATEPICKERS =====
+        function setupDatepicker(selector, defaultValue) {
+            return flatpickr(selector, {
+                dateFormat: "d/m/Y",
+                locale: "es",
+                defaultDate: defaultValue || null,
+                onChange: function (selectedDates, dateStr, instance) {
+                    instance.input.value = dateStr;
+                    instance.input.dataset.userModified = 'true';
+                    instance.input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        const nacimientoPicker = setupDatepicker("#id_fecha_nacimiento", fechaNacimientoValue);
+        const ingresoPicker = setupDatepicker("#id_fecha_ingreso", fechaIngresoValue);
+
+        if (fechaNacimientoValue) {
+            document.querySelector("#id_fecha_nacimiento").value = fechaNacimientoValue;
+        }
+
+        if (fechaIngresoValue) {
+            document.querySelector("#id_fecha_ingreso").value = fechaIngresoValue;
+        }
+
+        // ===== CAMPOS DEL FORMULARIO =====
+        const formFields = {
+            cedula: document.querySelector('#id_cedula'),
+            nombre: document.querySelector('#id_nombre'),
+            apellidos: document.querySelector('#id_apellidos'),
+            cargo: document.querySelector('#id_cargo'),
+            celular: document.querySelector('#id_celular'),
+            fecha_nacimiento: document.querySelector('#id_fecha_nacimiento'),
+            fecha_ingreso: document.querySelector('#id_fecha_ingreso'),
+            salario: document.querySelector('#id_salario'),
+            estado: document.querySelector('#id_estado')
+        };
+
+        // ===== MARCAR ERRORES DEL SERVIDOR =====
+        document.querySelectorAll('.error-message .text-danger').forEach(function (span) {
+            span.dataset.serverError = 'true';
+
+            const errorDiv = span.closest('.error-message');
+            if (errorDiv) {
+                const inputGroup = errorDiv.previousElementSibling;
+                if (inputGroup && inputGroup.classList.contains('input-group')) {
+                    const input = inputGroup.querySelector('input, select, textarea');
+                    if (input) {
+                        // Agregar clase de error al campo
+                        input.classList.add('is-invalid');
+                    }
+                }
+            }
+        });
+
+        // ===== EVENTOS DE MODIFICACIÓN =====
+        for (const fieldName in formFields) {
+            const field = formFields[fieldName];
+            if (field) {
+                field.addEventListener('input', function () {
+                    this.dataset.userModified = 'true';
+                });
+            }
+        }
+
+        // ===== LIMPIAR ERRORES =====
+        function clearAllErrors() {
+            if (hasServerErrors) return;
+
+            for (const fieldName in formFields) {
+                const field = formFields[fieldName];
+                if (field) {
+                    field.classList.remove('is-invalid');
+                    const errorDiv = field.parentElement.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('error-message')) {
+                        errorDiv.innerHTML = '';
+                    }
+                }
+            }
+        }
+
+        // ===== VALIDACIÓN DE CAMPO =====
+        function validateField(field) {
+            const fieldName = field.id.replace('id_', '');
+            let errorDiv = field.parentElement.nextElementSibling;
+
+            const hasServerError = errorDiv &&
+                errorDiv.querySelector('.text-danger') &&
+                errorDiv.querySelector('.text-danger').dataset.serverError === 'true' &&
+                !field.dataset.userModified;
+
+            if (hasServerError) return false;
+
+            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                field.parentElement.after(errorDiv);
+            }
+
+            if (!hasServerError || field.dataset.userModified) {
+                errorDiv.innerHTML = '';
+            }
+
+            const value = field.value.trim();
+            let isValid = true;
+            let errorMessage = '';
+
+            // Validaciones según el campo
+            switch (fieldName) {
+                case 'cedula':
+                    if (!value) {
+                        errorMessage = 'La cédula es obligatoria';
+                        isValid = false;
+                    } else if (!/^\d+$/.test(value)) {
+                        errorMessage = 'La cédula debe contener solo números';
+                        isValid = false;
+                    } else if (value.length > 15) {
+                        errorMessage = 'La cédula no puede tener más de 15 dígitos';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'nombre':
+                    if (!value) {
+                        errorMessage = 'El nombre es obligatorio';
+                        isValid = false;
+                    } else if (value.length < 2) {
+                        errorMessage = 'El nombre debe tener al menos 2 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'apellidos':
+                    if (!value) {
+                        errorMessage = 'Los apellidos son obligatorios';
+                        isValid = false;
+                    } else if (value.length < 2) {
+                        errorMessage = 'Los apellidos deben tener al menos 2 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'cargo':
+                    if (!value) {
+                        errorMessage = 'Debe seleccionar un cargo';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'celular':
+                    if (!value) {
+                        errorMessage = 'El teléfono es obligatorio';
+                        isValid = false;
+                    } else if (!/^\d{10}$/.test(value)) {
+                        errorMessage = 'El teléfono debe tener exactamente 10 dígitos numéricos';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'fecha_nacimiento':
+                    if (!value) {
+                        errorMessage = 'La fecha de nacimiento es obligatoria';
+                        isValid = false;
+                    } else {
+                        try {
+                            // Parsear la fecha en formato d/m/Y
+                            const parts = value.split('/');
+                            if (parts.length !== 3) throw new Error('Formato de fecha inválido');
+
+                            const day = parseInt(parts[0], 10);
+                            const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
+                            const year = parseInt(parts[2], 10);
+
+                            const nacimientoDate = new Date(year, month, day);
+
+                            // Verificar que sea mayor de edad (18 años)
+                            const hoy = new Date();
+                            let edad = hoy.getFullYear() - nacimientoDate.getFullYear();
+                            const mes = hoy.getMonth() - nacimientoDate.getMonth();
+
+                            if (mes < 0 || (mes === 0 && hoy.getDate() < nacimientoDate.getDate())) {
+                                edad--;
+                            }
+
+                            if (edad < 18) {
+                                errorMessage = 'El empleado debe ser mayor de edad (18 años)';
+                                isValid = false;
+                            }
+                        } catch (e) {
+                            errorMessage = 'Fecha de nacimiento inválida';
+                            isValid = false;
+                        }
+                    }
+                    break;
+
+                case 'fecha_ingreso':
+                    if (!value) {
+                        errorMessage = 'La fecha de ingreso es obligatoria';
+                        isValid = false;
+                    } else {
+                        try {
+                            // Parsear la fecha en formato d/m/Y
+                            const parts = value.split('/');
+                            if (parts.length !== 3) throw new Error('Formato de fecha inválido');
+
+                            const day = parseInt(parts[0], 10);
+                            const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
+                            const year = parseInt(parts[2], 10);
+
+                            const ingresoDate = new Date(year, month, day);
+                            const hoy = new Date();
+
+                            // Verificar que no sea una fecha futura
+                            if (ingresoDate > hoy) {
+                                errorMessage = 'La fecha de ingreso no puede ser futura';
+                                isValid = false;
+                            }
+
+                            // Verificar que no sea demasiado antigua
+                            const cincuentaAniosAtras = new Date();
+                            cincuentaAniosAtras.setFullYear(hoy.getFullYear() - 50);
+                            if (ingresoDate < cincuentaAniosAtras) {
+                                errorMessage = 'La fecha de ingreso parece demasiado antigua';
+                                isValid = false;
+                            }
+                        } catch (e) {
+                            errorMessage = 'Fecha de ingreso inválida';
+                            isValid = false;
+                        }
+                    }
+                    break;
+
+                case 'salario':
+                    if (!value) {
+                        errorMessage = 'El salario es obligatorio';
+                        isValid = false;
+                    } else if (!/^\d+$/.test(value)) {
+                        errorMessage = 'El salario debe ser numérico';
+                        isValid = false;
+                    } else if (value.length > 8) {
+                        errorMessage = 'El salario no puede tener más de 8 dígitos';
+                        isValid = false;
+                    } else if (parseInt(value) < 1000) {
+                        errorMessage = 'El salario parece demasiado bajo';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'estado':
+                    if (!value) {
+                        errorMessage = 'Debe seleccionar un estado';
+                        isValid = false;
+                    }
+                    break;
+
+            }
+
+            if (!isValid) {
+                field.classList.add('is-invalid');
+                if (!hasServerError || field.dataset.userModified) {
+                    errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+                }
+            } else {
+                field.classList.remove('is-invalid');
+            }
+
+            return isValid;
+        }
+
+        // ===== VALIDACIÓN DE FORMULARIO =====
+        function validateForm() {
+            let isValid = true;
+            for (const fieldName in formFields) {
+                const field = formFields[fieldName];
+                if (field && !validateField(field)) {
+                    isValid = false;
+                }
+            }
+            return isValid;
+        }
+
+        // ===== ASIGNAR EVENTOS =====
+        for (const fieldName in formFields) {
+            const field = formFields[fieldName];
+            if (field) {
+                field.addEventListener('blur', function () {
+                    if (this.dataset.userModified || !hasServerErrors) {
+                        validateField(this);
+                    }
+                });
+
+                field.addEventListener('input', function () {
+                    this.dataset.userModified = 'true';
+                    this.classList.remove('is-invalid');
+                    const errorDiv = this.parentElement.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('error-message')) {
+                        errorDiv.innerHTML = '';
+                    }
+                });
+            }
+        }
+
+        // ===== VALIDAR AL ENVIAR =====
+        const form = document.querySelector('#empleadoForm');
+        form.addEventListener('submit', function (e) {
+            if (!validateForm()) {
+                e.preventDefault();
+            }
+        });
+
+        // ===== INICIALIZACIÓN =====
+        if (!hasServerErrors) {
+            clearAllErrors();
+        }
+    });
+</script>
+{% endblock %}

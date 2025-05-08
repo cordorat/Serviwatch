@@ -8,6 +8,9 @@ from core.models.cliente import Cliente
 from core.models.empleado import Empleado
 from django.core.paginator import Paginator
 from django.db.models import Q
+from core.services import reparacion_service
+
+
 
 
 @login_required
@@ -70,3 +73,59 @@ def reparacion_create_view(request):
         'tecnicos': Empleado.objects.filter(cargo='Técnico')
     }
     return render(request, 'reparacion/reparacion_form.html', context)
+
+@login_required
+def reparacion_edit_view(request, pk):
+    try:
+        # Obtener la reparación usando el servicio
+        reparacion = reparacion_service.get_reparacion_by_id(pk)
+        if not reparacion:
+            messages.error(request, "La reparación no existe.")
+            return redirect('reparacion_list')
+    
+        if request.method == 'POST':
+            # Remove extra fields that aren't part of the model
+            post_data = request.POST.copy()
+            if 'cliente_nombre' in post_data:
+                del post_data['cliente_nombre']
+            if 'celular_cliente' in post_data:
+                del post_data['celular_cliente']
+            
+            form = ReparacionForm(post_data, instance=reparacion)
+            if form.is_valid():
+                try:
+                    # Aquí debe usar el servicio actualizar_reparacion
+                    reparacion = reparacion_service.actualizar_reparacion(form, pk)
+                    messages.success(request, "Reparación actualizada correctamente.")
+                    return redirect('reparacion_list')
+                except Exception as e:
+                    print("Error al guardar:", str(e))
+                    messages.error(request, f"Error al actualizar: {str(e)}")
+            else:
+                print("Errores en el formulario:", form.errors)
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Error en {field}: {error}")
+        else:
+            form = ReparacionForm(instance=reparacion)
+
+        
+        # Prepara datos adicionales para el frontend
+        cliente_actual = reparacion.cliente
+        cliente_nombre = f"{cliente_actual.nombre}" if cliente_actual else ""
+        cliente_telefono = cliente_actual.telefono if cliente_actual else ""
+        
+        context = {
+            'form': form,
+            'clientes': Cliente.objects.all(),
+            'tecnicos': Empleado.objects.filter(cargo='Técnico'),
+            'editing': True,
+            'reparacion': reparacion,
+            'cliente_nombre': cliente_nombre,
+            'cliente_telefono': cliente_telefono
+        }
+        return render(request, 'reparacion/reparacion_form.html', context)
+    except Exception as e:
+        print("Excepción general:", str(e))
+        messages.error(request, f"Error inesperado: {str(e)}")
+        return redirect('reparacion_list')
