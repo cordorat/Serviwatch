@@ -381,82 +381,69 @@
             // Limpiar errores al cargar la página
             clearAllErrors();
 
-            // Validación por campo
-            function validateField(field) {
-                // Obtener el div de error existente o crear uno nuevo
+            // Extraer la lógica de validación a una función separada
+            function getFieldErrorMessage(fieldName, value) {
+                switch (fieldName) {
+                    case 'marca_reloj':
+                        return !value ? 'La marca del reloj es obligatoria' : '';
+                        
+                    case 'descripcion':
+                        if (!value) return 'La descripción es obligatoria';
+                        if (value.length < 10) return 'La descripción debe tener al menos 10 caracteres';
+                        return '';
+                        
+                    case 'codigo_orden':
+                        return !value ? 'El código de orden es obligatorio' : '';
+                        
+                    case 'fecha_entrega_estimada':
+                        return !value ? 'La fecha de entrega estimada es obligatoria' : '';
+                        
+                    case 'precio':
+                        if (!value) return 'El precio es obligatorio';
+                        if (isNaN(value) || parseInt(value) <= 0) return 'El precio debe ser un número mayor a cero';
+                        return '';
+                        
+                    case 'espacio_fisico':
+                        return !value ? 'El espacio físico es obligatorio' : '';
+                        
+                    case 'tecnico':
+                        return !value ? 'El técnico es obligatorio' : '';
+                        
+                    default:
+                        return '';
+                }
+            }
+
+            // Función para obtener o crear un div de error
+            function getErrorDiv(field) {
                 let errorDiv = field.parentElement.nextElementSibling;
                 if (!errorDiv || !errorDiv.classList.contains('error-message')) {
                     errorDiv = document.createElement('div');
                     errorDiv.className = 'error-message';
                     field.parentElement.after(errorDiv);
                 }
+                return errorDiv;
+            }
 
+            // Función principal refactorizada
+            function validateField(field) {
+                // Obtener el div de error
+                const errorDiv = getErrorDiv(field);
+                
                 // Limpiar errores anteriores
                 errorDiv.innerHTML = '';
 
+                // Obtener el nombre del campo y su valor
                 const fieldName = field.id.replace('id_', '');
                 const value = field.value.trim();
-                let isValid = true;
-                let errorMessage = '';
-
-                // Validaciones específicas por campo
-                switch (fieldName) {
-                    case 'marca_reloj':
-                        if (!value) {
-                            errorMessage = 'La marca del reloj es obligatoria';
-                            isValid = false;
-                        }
-                        break;
-
-                    case 'descripcion':
-                        if (!value) {
-                            errorMessage = 'La descripción es obligatoria';
-                            isValid = false;
-                        } else if (value.length < 10) {
-                            errorMessage = 'La descripción debe tener al menos 10 caracteres';
-                            isValid = false;
-                        }
-                        break;
-
-                    case 'codigo_orden':
-                        if (!value) {
-                            errorMessage = 'El código de orden es obligatorio';
-                            isValid = false;
-                        }
-                        break;
-
-                    case 'fecha_entrega_estimada':
-                        if (!value) {
-                            errorMessage = 'La fecha de entrega estimada es obligatoria';
-                            isValid = false;
-                        }
-                        break;
-
-                    case 'precio':
-                        if (!value) {
-                            errorMessage = 'El precio es obligatorio';
-                            isValid = false;
-                        } else if (isNaN(value) || parseInt(value) <= 0) {
-                            errorMessage = 'El precio debe ser un número mayor a cero';
-                            isValid = false;
-                        }
-                        break;
-
-                    case 'espacio_fisico':
-                        if (!value) {
-                            errorMessage = 'El espacio físico es obligatorio';
-                            isValid = false;
-                        }
-                        break;
-                    case 'tecnico':
-                        if (!value) {
-                            errorMessage = 'El técnico es obligatorio';
-                            isValid = false;
-                        }
-                        break;
-                }
-
-                // Mostrar mensaje de error si existe
+                
+                // Obtener mensaje de error según el campo
+                const errorMessage = getFieldErrorMessage(fieldName, value);
+                
+                // Definir si el campo es válido
+                const isValid = !errorMessage;
+                
+                // Actualizar la UI según la validación
                 if (!isValid) {
                     field.classList.add('is-invalid');
                     errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
