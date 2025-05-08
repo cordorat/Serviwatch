@@ -9,74 +9,74 @@ class PasswordChangeFormTest(TestCase):
     
     def test_form_valid(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'NewSecurePass2!',
-            'confirmacion_contraseña': 'NewSecurePass2!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'NewSecurePass2!',
+            'confirmacion_contrasenia': 'NewSecurePass2!'
         })
         self.assertTrue(form.is_valid())
     
     def test_password_too_short(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'Short1!',
-            'confirmacion_contraseña': 'Short1!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'Short1!',
+            'confirmacion_contrasenia': 'Short1!'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['contraseña_nueva'][0], 'La contraseña debe tener al menos 8 caracteres')
+        self.assertEqual(form.errors['contrasenia_nueva'][0], 'La contraseña debe tener al menos 8 caracteres')
     
     def test_password_too_long(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'ThisPasswordIsTooLongForTheSystem123!',
-            'confirmacion_contraseña': 'ThisPasswordIsTooLongForTheSystem123!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'ThisPasswordIsTooLongForTheSystem123!',
+            'confirmacion_contrasenia': 'ThisPasswordIsTooLongForTheSystem123!'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['contraseña_nueva'][0], 'La contraseña no puede tener más de 16 caracteres')
+        self.assertEqual(form.errors['contrasenia_nueva'][0], 'La contraseña no puede tener más de 16 caracteres')
     
     def test_passwords_dont_match(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'NewSecurePass2!',
-            'confirmacion_contraseña': 'DifferentPass3!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'NewSecurePass2!',
+            'confirmacion_contrasenia': 'DifferentPass3!'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['confirmacion_contraseña'][0], 'Las contraseñas no coinciden')
+        self.assertEqual(form.errors['confirmacion_contrasenia'][0], 'Las contraseñas no coinciden')
     
     def test_new_password_no_letter(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': '12345678!',
-            'confirmacion_contraseña': '12345678!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': '12345678!',
+            'confirmacion_contrasenia': '12345678!'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['contraseña_nueva'][0], 'La contraseña debe tener al menos una letra')
+        self.assertEqual(form.errors['contrasenia_nueva'][0], 'La contraseña debe tener al menos una letra')
     
     def test_new_password_no_number(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'SecurePass!',
-            'confirmacion_contraseña': 'SecurePass!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'SecurePass!',
+            'confirmacion_contrasenia': 'SecurePass!'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['contraseña_nueva'][0], 'La contraseña debe tener al menos un número')
+        self.assertEqual(form.errors['contrasenia_nueva'][0], 'La contraseña debe tener al menos un número')
     
     def test_new_password_no_special_char(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'SecurePass1',
-            'confirmacion_contraseña': 'SecurePass1'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'SecurePass1',
+            'confirmacion_contrasenia': 'SecurePass1'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['contraseña_nueva'][0], 'La contraseña debe tener al menos un caracter especial')
+        self.assertEqual(form.errors['contrasenia_nueva'][0], 'La contraseña debe tener al menos un caracter especial')
     
     def test_new_password_same_as_current(self):
         form = PasswordChangeForm(data={
-            'contraseña_actual': 'SecurePass1!',
-            'contraseña_nueva': 'SecurePass1!',
-            'confirmacion_contraseña': 'SecurePass1!'
+            'contrasenia_actual': 'SecurePass1!',
+            'contrasenia_nueva': 'SecurePass1!',
+            'confirmacion_contrasenia': 'SecurePass1!'
         })
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['contraseña_nueva'][0], 'La contraseña nueva no puede ser igual a la anterior')
+        self.assertEqual(form.errors['contrasenia_nueva'][0], 'La contraseña nueva no puede ser igual a la anterior')
 
 
 class PasswordChangeServiceTest(TestCase):
@@ -138,9 +138,9 @@ class PasswordChangeViewTest(TestCase):
     def test_post_valid_data_changes_password(self):
         """Prueba que se cambia la contraseña correctamente si los datos son válidos."""
         response = self.client.post(self.url, {
-            'contraseña_actual': 'OldPassword1!',
-            'contraseña_nueva': 'NewPassword2!',
-            'confirmacion_contraseña': 'NewPassword2!'
+            'contrasenia_actual': 'OldPassword1!',
+            'contrasenia_nueva': 'NewPassword2!',
+            'confirmacion_contrasenia': 'NewPassword2!'
         })
         self.assertEqual(response.status_code, 200)
         self.assertIn('success', response.context)
@@ -153,9 +153,9 @@ class PasswordChangeViewTest(TestCase):
     def test_post_invalid_form_shows_errors(self):
         """Prueba que muestra errores si el formulario es inválido."""
         response = self.client.post(self.url, {
-            'contraseña_actual': 'OldPassword1!',
-            'contraseña_nueva': 'short',
-            'confirmacion_contraseña': 'short'
+            'contrasenia_actual': 'OldPassword1!',
+            'contrasenia_nueva': 'short',
+            'confirmacion_contrasenia': 'short'
         })
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['form'].is_valid())
@@ -163,21 +163,21 @@ class PasswordChangeViewTest(TestCase):
     def test_post_wrong_current_password(self):
         """Prueba que muestra un error si la contraseña actual es incorrecta."""
         response = self.client.post(self.url, {
-            'contraseña_actual': 'WrongPassword!',
-            'contraseña_nueva': 'NewPassword2!',
-            'confirmacion_contraseña': 'NewPassword2!'
+            'contrasenia_actual': 'WrongPassword!',
+            'contrasenia_nueva': 'NewPassword2!',
+            'confirmacion_contrasenia': 'NewPassword2!'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertIn('contraseña_actual', response.context['form'].errors)
-        self.assertEqual(response.context['form'].errors['contraseña_actual'][0], 'Contraseña incorrecta')
+        self.assertIn('contrasenia_actual', response.context['form'].errors)
+        self.assertEqual(response.context['form'].errors['contrasenia_actual'][0], 'Contraseña incorrecta')
     
     def test_post_new_password_same_as_current(self):
         """Prueba que muestra un error si la nueva contraseña es igual a la actual."""
         response = self.client.post(self.url, {
-            'contraseña_actual': 'OldPassword1!',
-            'contraseña_nueva': 'OldPassword1!',
-            'confirmacion_contraseña': 'OldPassword1!'
+            'contrasenia_actual': 'OldPassword1!',
+            'contrasenia_nueva': 'OldPassword1!',
+            'confirmacion_contrasenia': 'OldPassword1!'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertIn('contraseña_nueva', response.context['form'].errors)
-        self.assertEqual(response.context['form'].errors['contraseña_nueva'][0], 'La contraseña nueva no puede ser igual a la anterior')
+        self.assertIn('contrasenia_nueva', response.context['form'].errors)
+        self.assertEqual(response.context['form'].errors['contrasenia_nueva'][0], 'La contraseña nueva no puede ser igual a la anterior')

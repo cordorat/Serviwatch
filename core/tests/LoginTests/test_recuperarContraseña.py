@@ -67,61 +67,61 @@ class TestRecuperacionService:
         return get_user_model().objects.create_user(username='testuser', email='test@example.com', password='password123')
 
     def test_get_user_by_username_found(self, user):
-        result, error = service.get_user_by_username('testuser')
+        result, error = get_user_by_username('testuser')
         assert result == user
         assert error is None
 
     def test_get_user_by_username_not_found(self):
-        result, error = service.get_user_by_username('nonexistent')
+        result, error = get_user_by_username('nonexistent')
         assert result is None
         assert error == "Usuario inexistente"
 
     def test_is_email_matching_true(self, user):
-        assert service.is_email_matching(user, 'test@example.com') is True
+        assert is_email_matching(user, 'test@example.com') is True
 
     def test_is_email_matching_false(self, user):
-        assert service.is_email_matching(user, 'wrong@example.com') is False
+        assert is_email_matching(user, 'wrong@example.com') is False
 
     def test_generate_password_reset_token_creates_token(self, user):
-        token = service.generate_password_reset_token(user)
+        token = generate_password_reset_token(user)
         assert isinstance(token, str)
         assert PasswordResetToken.objects.filter(user=user, token=token).exists()
 
     def test_get_token_valid(self, user):
-        token_str = service.generate_password_reset_token(user)
-        token_obj, error = service.get_token(token_str)
+        token_str = generate_password_reset_token(user)
+        token_obj, error = get_token(token_str)
         assert token_obj is not None
         assert error is None
 
     def test_get_token_invalid(self):
-        token_obj, error = service.get_token('nonexistenttoken')
+        token_obj, error = get_token('nonexistenttoken')
         assert token_obj is None
         assert error == 'Token inválido'
 
     def test_get_token_expired(self, user):
-        token_str = service.generate_password_reset_token(user)
+        token_str = generate_password_reset_token(user)
         token_obj = PasswordResetToken.objects.get(token=token_str)
         token_obj.created_at = timezone.now() - timezone.timedelta(hours=25)
         token_obj.save()
-        result, error = service.get_token(token_str)
+        result, error = get_token(token_str)
         assert result is None
         assert error == 'Token expirado'
 
     def test_update_user_password_changes_password(self, user):
-        service.update_user_password(user, 'newpassword123')
+        update_user_password(user, 'newpassword123')
         assert user.check_password('newpassword123')
 
     def test_mark_token_as_used_sets_flag(self, user):
-        token_str = service.generate_password_reset_token(user)
+        token_str = generate_password_reset_token(user)
         token_obj = PasswordResetToken.objects.get(token=token_str)
-        service.mark_token_as_used(token_obj)
+        mark_token_as_used(token_obj)
         token_obj.refresh_from_db()
         assert token_obj.used is True
 
     @patch('core.services.recuperacion_service.send_mail')
     def test_send_password_reset_email_sends_email(self, mock_send_mail):
         url = "http://example.com/reset"
-        service.send_password_reset_email('test@example.com', url)
+        send_password_reset_email('test@example.com', url)
         mock_send_mail.assert_called_once()
         assert 'test@example.com' in mock_send_mail.call_args[1]['recipient_list']
 
