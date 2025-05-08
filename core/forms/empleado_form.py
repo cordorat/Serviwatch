@@ -5,6 +5,7 @@ from datetime import date
 clase_formulario_validate = "validate form-control"
 clase_formulario_control = 'form-control text-secondary'
 clase_formulario_control_span = 'form-control form-span text-secondary'
+mensaje_tamaño_celular = "El celular debe tener exactamente 10 dígitos."
 
 class EmpleadoForm(forms.ModelForm):
     cedula = forms.CharField(
@@ -26,8 +27,8 @@ class EmpleadoForm(forms.ModelForm):
         max_length=10,
         min_length=10,
         error_messages={
-            'max_length': "El celular debe tener exactamente 10 dígitos.",
-            'min_length': "El celular debe tener exactamente 10 dígitos."
+            'max_length': mensaje_tamaño_celular,
+            'min_length': mensaje_tamaño_celular
         },
         widget=forms.TextInput(attrs={
             'class': clase_formulario_validate,
@@ -147,7 +148,7 @@ class EmpleadoForm(forms.ModelForm):
                 "El celular debe contener solo números.")
         if len(celular) != 10:
             raise forms.ValidationError(
-                "El celular debe tener exactamente 10 dígitos.")
+                mensaje_tamaño_celular)
         return celular
 
     def clean_salario(self):

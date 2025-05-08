@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 
+formato_fecha = '%d/%m/%Y'
+
 @login_required
 def confirmar_egreso_view(request):
     egreso_data = request.session.get('egreso_data')
@@ -17,7 +19,7 @@ def confirmar_egreso_view(request):
                 fecha = datetime.strptime(egreso_data['fecha'], '%Y-%m-%d').date()
             except ValueError:
                 try:
-                    fecha = datetime.strptime(egreso_data['fecha'], '%d/%m/%Y').date()
+                    fecha = datetime.strptime(egreso_data['fecha'], formato_fecha).date()
                 except ValueError:
                     fecha = datetime.strptime(egreso_data['fecha'], '%d-%m-%Y').date()
             datos = {
@@ -51,9 +53,9 @@ def confirmar_egreso_view(request):
             fecha_obj = datetime.strptime(egreso_data['fecha'], '%d-%m-%Y').date()
         except ValueError:
             # Intenta el formato con barras
-            fecha_obj = datetime.strptime(egreso_data['fecha'], '%d/%m/%Y').date()
+            fecha_obj = datetime.strptime(egreso_data['fecha'], formato_fecha).date()
     
-    fecha_formateada = fecha_obj.strftime('%d/%m/%Y')
+    fecha_formateada = fecha_obj.strftime(formato_fecha)
     egreso_data_formateado = {
         'fecha': fecha_formateada,
         'valor': egreso_data['valor'],
