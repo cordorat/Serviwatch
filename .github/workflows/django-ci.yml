@@ -62,7 +62,7 @@
                 -Dsonar.projectKey=cordorat_Serviwatch
                 -Dsonar.python.coverage.reportPaths=coverage.xml
                 -Dsonar.sources=.
-                -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**
+                -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**,**/js/**,**/static/js/**,**/node_modules/**
                 -Dsonar.host.url=https://sonarcloud.io
                 -Dsonar.organization=desprogramadores
                 -Dsonar.branch.name=development

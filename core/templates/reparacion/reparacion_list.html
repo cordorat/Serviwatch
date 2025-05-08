@@ -19,7 +19,6 @@
         gap: 0px;
         justify-content: start;
     }
-
 </style>
 
 <div class="main-content">
@@ -28,8 +27,8 @@
         <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
         <form method="get" action="{% url 'reparacion_list' %}" class="search-form">
             <div class="input-group input-group-reparacion" style="gap: 10px;">
-                <input type="text" name="search" class="form-control form-control-reparacion" placeholder="Buscar reparación"
-                    value="{{ request.GET.search }}">
+                <input type="text" name="search" class="form-control form-control-reparacion"
+                    placeholder="Buscar reparación" value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
                     <i class="bi bi-search text-secondary"></i>
                 </button>
