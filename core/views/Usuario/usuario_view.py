@@ -35,7 +35,7 @@ def usuario_create_view(request):
         if form.is_valid():
             try:
                 data = form.cleaned_data
-                user = crear_usuario(
+                crear_usuario(
                     username=data['username'],
                     password=data['password1'],
                     email=data['email']
