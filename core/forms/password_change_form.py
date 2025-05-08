@@ -66,7 +66,7 @@ class PasswordChangeForm(forms.Form):
 
     def clean_confirmacion_contrasenia(self):
         contrasenia_nueva = self.cleaned_data.get(contrasenia_nueva_parametro)
-        confirmacion_contrasenia = self.cleaned_data.get('confirmacion_contraseña')
+        confirmacion_contrasenia = self.cleaned_data.get('confirmacion_contrasenia')
         
         if contrasenia_nueva and confirmacion_contrasenia and contrasenia_nueva != confirmacion_contrasenia:
             raise forms.ValidationError('Las contraseñas no coinciden')
