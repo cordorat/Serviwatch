@@ -1,7 +1,9 @@
 import re
 from django import forms
 
-class recuperarContrasenaForm(forms.Form):
+mensaje_tamaño_contraseña = 'La contraseña debe tener entre 8 y 20 caracteres'
+
+class RecuperarContrasenaForm(forms.Form):
     usuario = forms.CharField(
         required = True,
         max_length=20,
@@ -49,8 +51,8 @@ class CambiarContrasenaForm(forms.Form):
         required=True,
         error_messages={
             'required': 'ingrese una contraseña',
-            'min_length': 'La contraseña debe tener entre 8 y 20 caracteres',
-            'max_length': 'La contraseña debe tener entre 8 y 20 caracteres',
+            'min_length': mensaje_tamaño_contraseña,
+            'max_length': mensaje_tamaño_contraseña,
         }
     )
     confirm_password = forms.CharField(
@@ -63,8 +65,8 @@ class CambiarContrasenaForm(forms.Form):
         required=True,
         error_messages={
             'required': 'Confirme su contraseña',
-            'min_length': 'La contraseña debe tener entre 8 y 20 caracteres',
-            'max_length': 'La contraseña debe tener entre 8 y 20 caracteres',
+            'min_length': mensaje_tamaño_contraseña,
+            'max_length': mensaje_tamaño_contraseña,
         }
     )
     
@@ -74,7 +76,7 @@ class CambiarContrasenaForm(forms.Form):
             raise forms.ValidationError('La contraseña debe contener al menos una letra mayúscula')
         if not re.search(r'[a-z]', password):
             raise forms.ValidationError('La contraseña debe contener al menos una letra minúscula')
-        if not re.search(r'[0-9]', password):
+        if not re.search(r'\d', password):
             raise forms.ValidationError('La contraseña debe contener al menos un número')
         if not re.search(r'[\W_]', password):
             raise forms.ValidationError('La contraseña debe contener al menos un carácter especial')

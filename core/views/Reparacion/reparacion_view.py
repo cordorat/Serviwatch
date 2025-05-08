@@ -44,29 +44,40 @@ def reparacion_list_view(request):
 
 @login_required
 def reparacion_create_view(request):
+    """Vista para crear una nueva reparación."""
     if request.method == 'POST':
-        # Remove extra fields that aren't part of the model
-        post_data = request.POST.copy()
-        if 'cliente_nombre' in post_data:
-            del post_data['cliente_nombre']
-        if 'celular_cliente' in post_data:
-            del post_data['celular_cliente']
-        
-        form = ReparacionForm(post_data)
-        if form.is_valid():
-            try:
-                reparacion = form.save()
-                messages.success(request, "Reparación agregada correctamente.")
-                return redirect('reparacion_list')
-            except Exception as e:
-                messages.error(request, f"Error al guardar: {str(e)}")
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"Error en {field}: {error}")
+        return _handle_create_post(request)
     else:
-        form = ReparacionForm()
+        return _handle_create_get(request)
 
+
+def _handle_create_post(request):
+    """Maneja las solicitudes POST para crear una reparación."""
+    # Limpiar datos del formulario
+    post_data = _clean_post_data(request.POST.copy())
+    
+    form = ReparacionForm(post_data)
+    if form.is_valid():
+        try:
+            form.save()
+            messages.success(request, "Reparación agregada correctamente.")
+            return redirect('reparacion_list')
+        except Exception as e:
+            messages.error(request, f"Error al guardar: {str(e)}")
+    else:
+        _add_form_errors_to_messages(form, request)
+    
+    return _render_create_form(request, form)
+
+
+def _handle_create_get(request):
+    """Maneja las solicitudes GET para mostrar el formulario de creación."""
+    form = ReparacionForm()
+    return _render_create_form(request, form)
+
+
+def _render_create_form(request, form):
+    """Renderiza el formulario de creación con el contexto apropiado."""
     context = {
         'form': form,
         'clientes': Cliente.objects.all(),
