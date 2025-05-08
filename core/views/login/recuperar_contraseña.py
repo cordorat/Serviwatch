@@ -59,6 +59,7 @@ def recuperar_contrasenia(request):
         'success': 'Se ha enviado un enlace a tu correo para cambiar la contraseña'
     })
 
+@require_http_methods(["GET", "POST"])
 def cambiar_contrasenia(request, token):
     token_obj, error = get_token(token)
     if error == 'Token inválido':
