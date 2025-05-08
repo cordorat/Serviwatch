@@ -381,37 +381,72 @@
             // Limpiar errores al cargar la página
             clearAllErrors();
 
-            // Extraer la lógica de validación a una función separada
-            function getFieldErrorMessage(fieldName, value) {
-                switch (fieldName) {
-                    case 'marca_reloj':
-                        return !value ? 'La marca del reloj es obligatoria' : '';
-                        
-                    case 'descripcion':
-                        if (!value) return 'La descripción es obligatoria';
-                        if (value.length < 10) return 'La descripción debe tener al menos 10 caracteres';
-                        return '';
-                        
-                    case 'codigo_orden':
-                        return !value ? 'El código de orden es obligatorio' : '';
-                        
-                    case 'fecha_entrega_estimada':
-                        return !value ? 'La fecha de entrega estimada es obligatoria' : '';
-                        
-                    case 'precio':
-                        if (!value) return 'El precio es obligatorio';
-                        if (isNaN(value) || parseInt(value) <= 0) return 'El precio debe ser un número mayor a cero';
-                        return '';
-                        
-                    case 'espacio_fisico':
-                        return !value ? 'El espacio físico es obligatorio' : '';
-                        
-                    case 'tecnico':
-                        return !value ? 'El técnico es obligatorio' : '';
-                        
-                    default:
-                        return '';
+            // Objeto de configuración de validaciones
+            const fieldValidations = {
+                marca_reloj: {
+                    required: true,
+                    message: 'La marca del reloj es obligatoria'
+                },
+                descripcion: {
+                    required: true,
+                    minLength: 10,
+                    messages: {
+                        required: 'La descripción es obligatoria',
+                        minLength: 'La descripción debe tener al menos 10 caracteres'
+                    }
+                },
+                codigo_orden: {
+                    required: true,
+                    message: 'El código de orden es obligatorio'
+                },
+                fecha_entrega_estimada: {
+                    required: true,
+                    message: 'La fecha de entrega estimada es obligatoria'
+                },
+                precio: {
+                    required: true,
+                    numeric: true,
+                    positive: true,
+                    messages: {
+                        required: 'El precio es obligatorio',
+                        invalid: 'El precio debe ser un número mayor a cero'
+                    }
+                },
+                espacio_fisico: {
+                    required: true,
+                    message: 'El espacio físico es obligatorio'
+                },
+                tecnico: {
+                    required: true,
+                    message: 'El técnico es obligatorio'
                 }
+            };
+
+            // Función refactorizada para reducir complejidad
+            function getFieldErrorMessage(fieldName, value) {
+                // Si no hay configuración para este campo, no hay error
+                if (!fieldValidations[fieldName]) {
+                    return '';
+                }
+                
+                const config = fieldValidations[fieldName];
+                
+                // Verificar si es requerido y está vacío
+                if (config.required && !value) {
+                    return config.messages?.required || config.message;
+                }
+                
+                // Si tiene longitud mínima y no la cumple
+                if (config.minLength && value.length < config.minLength) {
+                    return config.messages?.minLength;
+                }
+                
+                // Si debe ser numérico y no lo es, o debe ser positivo y no lo es
+                if (config.numeric && (isNaN(value) || (config.positive && parseInt(value) <= 0))) {
+                    return config.messages?.invalid;
+                }
+                
+                return '';
             }
 
             // Función para obtener o crear un div de error
