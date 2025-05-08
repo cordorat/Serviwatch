@@ -13,8 +13,15 @@ def confirmar_egreso_view(request):
     if request.method == 'POST':
         if 'confirmar' in request.POST:
             # Preparar datos para el servicio
+            try:
+                fecha = datetime.strptime(egreso_data['fecha'], '%Y-%m-%d').date()
+            except ValueError:
+                try:
+                    fecha = datetime.strptime(egreso_data['fecha'], '%d/%m/%Y').date()
+                except ValueError:
+                    fecha = datetime.strptime(egreso_data['fecha'], '%d-%m-%Y').date()
             datos = {
-                'fecha': datetime.strptime(egreso_data['fecha'], '%Y-%m-%d').date(),
+                'fecha': fecha,
                 'valor': egreso_data['valor'],
                 'descripcion': egreso_data['descripcion']
             }
@@ -35,7 +42,18 @@ def confirmar_egreso_view(request):
             return redirect('egreso')
 
     # Formatear fecha para mostrar en la plantilla
-    fecha_formateada = datetime.strptime(egreso_data['fecha'], '%Y-%m-%d').date().strftime('%d/%m/%Y')
+    try:
+        # Intenta primero el formato previo
+        fecha_obj = datetime.strptime(egreso_data['fecha'], '%Y-%m-%d').date()
+    except ValueError:
+        try:
+            # Intenta el formato con guiones
+            fecha_obj = datetime.strptime(egreso_data['fecha'], '%d-%m-%Y').date()
+        except ValueError:
+            # Intenta el formato con barras
+            fecha_obj = datetime.strptime(egreso_data['fecha'], '%d/%m/%Y').date()
+    
+    fecha_formateada = fecha_obj.strftime('%d/%m/%Y')
     egreso_data_formateado = {
         'fecha': fecha_formateada,
         'valor': egreso_data['valor'],

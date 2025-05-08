@@ -2,11 +2,13 @@ from django.test import TestCase
 from core.models import Reparacion, Cliente, Empleado
 from datetime import date, timedelta
 from core.forms.reparacion_form import ReparacionForm
-from core.services.reparacion_service import get_all_reparaciones, crear_reparacion
+from core.services.reparacion_service import get_all_reparaciones, crear_reparacion, get_reparacion_by_id, actualizar_reparacion
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.test import Client
 from django.contrib.messages import get_messages
+from unittest.mock import patch
+from django.http import Http404
 
 
 class ReparacionModelTest(TestCase):
@@ -21,8 +23,8 @@ class ReparacionModelTest(TestCase):
             cedula="1234567890",
             nombre="Juan",
             apellidos="Pérez",
-            fecha_ingreso=date(2024, 1, 10),
-            fecha_nacimiento=date(1990, 5, 20),
+            fecha_ingreso=date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
             celular="3216549870",
             cargo="técnico",
             salario="2500000",
@@ -34,10 +36,10 @@ class ReparacionModelTest(TestCase):
             marca_reloj="Casio",
             descripcion="Cambio de batería",
             codigo_orden="1001",
-            fecha_entrega_estimada=date.today(),
+            fecha_entrega_estimada=date.today() + timedelta(days=5),
             precio=45000,
             espacio_fisico="A1",
-            estado="cotización",
+            estado="Cotización",
             tecnico=tecnico
         )
 
@@ -57,8 +59,8 @@ class ReparacionFormTest(TestCase):
             cedula="1234567890",
             nombre="Tech",
             apellidos="Support",
-            fecha_ingreso=date.today(),
-            fecha_nacimiento=date(1990, 5, 20),
+            fecha_ingreso= date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
             celular="3216549870",
             cargo="Técnico",
             salario=2500000,
@@ -70,7 +72,7 @@ class ReparacionFormTest(TestCase):
             'marca_reloj': "Rolex",
             'descripcion': "Reparación de cristal y ajuste de hora",
             'codigo_orden': "12345",
-            'fecha_entrega_estimada': date(2025, 6, 10),
+            'fecha_entrega_estimada':(date.today() + timedelta(days=5)).strftime('%d/%m/%Y'),
             'precio': 100,
             'espacio_fisico': "Caja 1",
             'estado': "Reparación",
@@ -113,13 +115,26 @@ class ReparacionFormTest(TestCase):
 
     def test_fecha_futura(self):
         self.valid_data['fecha_entrega_estimada'] = (
-            date.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+            date.today() - timedelta(days=1)).strftime('%d/%m/%Y')
         form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
         self.assertIn('fecha_entrega_estimada', form.errors)
 
     def test_codigo_orden_unico(self):
-        Reparacion.objects.create(**self.valid_data)
+        # Crear un objeto del modelo directamente
+        Reparacion.objects.create(
+            cliente=self.cliente,
+            marca_reloj=self.valid_data['marca_reloj'],
+            descripcion=self.valid_data['descripcion'],
+            codigo_orden=self.valid_data['codigo_orden'],
+            fecha_entrega_estimada=date.today() + timedelta(days=5),  # Usar objeto date directamente 
+            precio=self.valid_data['precio'],
+            espacio_fisico=self.valid_data['espacio_fisico'],
+            estado=self.valid_data['estado'],
+            tecnico=self.tecnico
+        )
+        
+        # Verificar que el formulario detecta el código duplicado
         form = ReparacionForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
         self.assertIn('codigo_orden', form.errors)
@@ -139,8 +154,8 @@ class ReparacionServiceTest(TestCase):
             cedula="1234567890",
             nombre="Juan",
             apellidos="Pérez",
-            fecha_ingreso="2024-01-10",
-            fecha_nacimiento="1990-05-20",
+            fecha_ingreso=date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
             celular="3216549870",
             cargo="Técnico",
             salario=2500000,
@@ -153,10 +168,10 @@ class ReparacionServiceTest(TestCase):
             marca_reloj="Casio",
             descripcion="Cambio de batería",
             codigo_orden="1001",
-            fecha_entrega_estimada=date(2025, 6, 10),
+            fecha_entrega_estimada=(date.today() + timedelta(days=5)).strftime('%Y-%m-%d'),
             precio=45000,
             espacio_fisico="A1",
-            estado="cotización",
+            estado="Cotización",
             tecnico=self.tecnico
         )
 
@@ -179,7 +194,7 @@ class ReparacionServiceTest(TestCase):
             'marca_reloj': 'Rolex',
             'descripcion': 'Limpieza general',
             'codigo_orden': '1002',
-            'fecha_entrega_estimada': date.today(),
+            'fecha_entrega_estimada':(date.today() + timedelta(days=5)).strftime('%d/%m/%Y'),
             'precio': 75000,
             'espacio_fisico': 'B2',
             'estado': 'Cotización',
@@ -254,8 +269,8 @@ class ReparacionViewsTest(TestCase):
             cedula="1234567890",
             nombre="Juan",
             apellidos="Pérez",
-            fecha_ingreso=date(2024, 1, 10),
-            fecha_nacimiento=date(1990, 5, 20),
+            fecha_ingreso=date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
             celular="3216549870",
             cargo="Técnico",
             salario=2500000,
@@ -265,8 +280,8 @@ class ReparacionViewsTest(TestCase):
             cedula="0987654321",
             nombre="María",
             apellidos="López",
-            fecha_ingreso=date(2023, 6, 15),
-            fecha_nacimiento=date(1985, 10, 12),
+            fecha_ingreso=date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
             celular="3001234567",
             cargo="Técnico",
             salario=2700000,
@@ -284,7 +299,7 @@ class ReparacionViewsTest(TestCase):
                 marca_reloj=f"Marca{i}",
                 descripcion=f"Descripción detallada del reloj {i}",
                 codigo_orden=f"10{i:02d}",
-                fecha_entrega_estimada='2025-05-01',
+                fecha_entrega_estimada=(date.today() + timedelta(days=5)).strftime('%Y-%m-%d'),
                 precio=45000 + (i * 1000),
                 espacio_fisico=f"A{i}",
                 estado=estado,
@@ -486,7 +501,7 @@ class ReparacionViewsTest(TestCase):
                     marca_reloj='Seiko',
                     descripcion='Reparación completa del mecanismo automático. Descripción detallada para test.',
                     codigo_orden='2001',
-                    fecha_entrega_estimada=fecha_futura,
+                    fecha_entrega_estimada=(date.today() + timedelta(days=5)).strftime('%d/%m/%Y'),
                     precio=85000,
                     espacio_fisico='B5',
                     estado='Cotización',
@@ -545,7 +560,7 @@ class ReparacionViewsTest(TestCase):
             marca_reloj="Prueba",
             descripcion="Descripción de prueba para excepción",
             codigo_orden="3001",
-            fecha_entrega_estimada=date.today(),
+            fecha_entrega_estimada=(date.today() + timedelta(days=5)).strftime('%Y-%m-%d'),
             precio=50000,
             espacio_fisico="C1",
             estado="Cotización",
@@ -558,7 +573,7 @@ class ReparacionViewsTest(TestCase):
             'marca_reloj': 'Omega',
             'descripcion': 'Esta reparación provocará una excepción',
             'codigo_orden': '3001',  # Código duplicado
-            'fecha_entrega_estimada': date.today().strftime('%Y-%m-%d'),
+            'fecha_entrega_estimada':(date.today() + timedelta(days=5)).strftime('%d/%m/%Y'),
             'precio': 95000,
             'espacio_fisico': 'D3',
             'estado': 'Cotización',
@@ -585,3 +600,277 @@ class ReparacionViewsTest(TestCase):
         # Verificar redirección al login
         self.assertEqual(response.status_code, 302)
         self.assertTrue('/login/' in response.url)
+
+
+### Tests para actualizar reparación Service
+
+class ReparacionServiceUpdateTest(TestCase):
+    def setUp(self):
+        # Crear un cliente para la prueba
+        self.cliente = Cliente.objects.create(
+            nombre="Cliente Test",
+            apellido="Apellido",
+            telefono="1234567890"
+        )
+        
+        # Crear un técnico para la prueba
+        self.tecnico = Empleado.objects.create(
+            cedula="1234567890",
+            nombre="Juan",
+            apellidos="Pérez",
+            fecha_ingreso=date.today(),
+            fecha_nacimiento=date(1990, 5, 20),
+            celular="3216549870",
+            cargo="Técnico",
+            salario=2500000,
+            estado="Activo"
+        )
+        
+        # Crear una reparación para editar
+        self.reparacion = Reparacion.objects.create(
+            cliente=self.cliente,
+            marca_reloj="Casio",
+            descripcion="Cambio de pila y limpieza general del mecanismo",
+            codigo_orden="12345",
+            fecha_entrega_estimada=date.today() + timedelta(days=5),
+            precio=5000,
+            espacio_fisico="Caja 1",
+            estado="Cotización",
+            tecnico=self.tecnico
+        )
+        
+        # Datos actualizados para el formulario
+        self.datos_actualizados = {
+            'cliente': self.cliente.id,
+            'marca_reloj': "Casio G-Shock",
+            'descripcion': "Cambio de pila, limpieza y ajuste de correa",
+            'codigo_orden': "12345",  # Mismo código
+            'fecha_entrega_estimada': (date.today() + timedelta(days=10)).strftime('%d/%m/%Y'),
+            'precio': 8000,
+            'espacio_fisico': "Caja 2",
+            'estado': "Cotización",
+            'tecnico': self.tecnico.id
+        }
+    
+    def test_actualizar_reparacion_exitoso(self):
+        """Prueba actualización exitosa de una reparación"""
+        # Crear el formulario con los datos actualizados
+        form = ReparacionForm(data=self.datos_actualizados, instance=self.reparacion)
+        
+        # Asegurar que el formulario es válido
+        self.assertTrue(form.is_valid(), f"Errores del formulario: {form.errors}")
+        
+        # Actualizar la reparación
+        reparacion_actualizada = actualizar_reparacion(form, self.reparacion.id)
+        
+        # Verificar los cambios
+        self.assertEqual(reparacion_actualizada.marca_reloj, "Casio G-Shock")
+        self.assertEqual(reparacion_actualizada.descripcion, "Cambio de pila, limpieza y ajuste de correa")
+        self.assertEqual(reparacion_actualizada.precio, 8000)
+        self.assertEqual(reparacion_actualizada.espacio_fisico, "Caja 2")
+    
+    def test_actualizar_reparacion_no_existente(self):
+        """Prueba actualizar una reparación que no existe"""
+        # Crear un formulario válido
+        form = ReparacionForm(data=self.datos_actualizados, instance=self.reparacion)
+        self.assertTrue(form.is_valid())
+        
+        # Intentar actualizar con un ID que no existe
+        with self.assertRaises(Http404):
+            actualizar_reparacion(form, 999)
+    
+    @patch('core.services.reparacion_service.get_object_or_404')
+    def test_actualizar_reparacion_excepcion(self, mock_get_object):
+        """Prueba manejo de excepciones en actualizar_reparacion"""
+        # Configurar el mock para que lance una excepción
+        mock_get_object.side_effect = Exception("Error de prueba")
+        
+        # Crear un formulario válido
+        form = ReparacionForm(data=self.datos_actualizados, instance=self.reparacion)
+        self.assertTrue(form.is_valid())
+        
+        # Verificar que la excepción se propaga
+        with self.assertRaises(Exception):
+            actualizar_reparacion(form, self.reparacion.id)
+            
+
+### Test para actualizar_reparacion_view
+
+class ReparacionEditViewTest(TestCase):
+    def setUp(self):
+        # Crear un usuario para el login
+        self.username = 'testuser'
+        self.password = 'testpassword'
+        self.user = User.objects.create_user(username=self.username, password=self.password)
+        
+        # Crear un cliente
+        self.cliente = Cliente.objects.create(
+            nombre="Cliente Test",
+            apellido="Apellido",
+            telefono="1234567890"
+        )
+        
+        # Crear un técnico
+        self.tecnico = Empleado.objects.create(
+            cedula="1234567890",
+            nombre="Juan",
+            apellidos="Pérez",
+            fecha_ingreso=date.today(),
+            fecha_nacimiento=date(1990, 5, 20),
+            celular="3216549870",
+            cargo="Técnico",
+            salario=2500000,
+            estado="Activo"
+        )
+        
+        # Crear una reparación
+        self.reparacion = Reparacion.objects.create(
+            cliente=self.cliente,
+            marca_reloj="Casio",
+            descripcion="Cambio de pila y limpieza general del mecanismo",
+            codigo_orden="12345",
+            fecha_entrega_estimada=date.today() + timedelta(days=5),
+            precio=5000,
+            espacio_fisico="Caja 1",
+            estado="Cotización",
+            tecnico=self.tecnico
+        )
+        
+        # Datos actualizados para el formulario
+        self.datos_actualizados = {
+            'cliente': self.cliente.id,
+            'marca_reloj': "Casio G-Shock",
+            'descripcion': "Cambio de pila, limpieza y ajuste de correa",
+            'codigo_orden': "12345",  # Mismo código
+            'fecha_entrega_estimada': (date.today() + timedelta(days=10)).strftime('%d/%m/%Y'),
+            'precio': 8000,
+            'espacio_fisico': "Caja 2",
+            'estado': "Cotización",
+            'tecnico': self.tecnico.id
+        }
+        
+        # URLs
+        self.edit_url = reverse('reparacion_edit', kwargs={'pk': self.reparacion.id})
+        self.list_url = reverse('reparacion_list')
+        
+        # Cliente HTTP
+        self.client = Client()
+    
+    def test_reparacion_edit_view_requiere_login(self):
+        """Prueba que la vista requiere login"""
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login/', response.url)
+    
+    def test_reparacion_edit_view_get(self):
+        """Prueba que la vista muestra el formulario de edición"""
+        # Login
+        self.client.login(username=self.username, password=self.password)
+        
+        # Acceder a la vista
+        response = self.client.get(self.edit_url)
+        
+        # Verificar que se muestra el formulario
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'reparacion/reparacion_form.html')
+        self.assertTrue(response.context['editing'])
+        self.assertEqual(response.context['reparacion'].id, self.reparacion.id)
+        self.assertEqual(response.context['cliente_nombre'], "Cliente Test")
+    
+    def test_reparacion_edit_view_post_exitoso(self):
+        """Prueba actualización exitosa mediante POST"""
+        # Login
+        self.client.login(username=self.username, password=self.password)
+        
+        # Enviar datos POST
+        response = self.client.post(self.edit_url, self.datos_actualizados)
+        
+        # Si la prueba falla, mostrar errores del formulario
+        if response.status_code != 302:
+            form = response.context.get('form')
+            if form and not form.is_valid():
+                print(f"Errores del formulario: {form.errors}")
+                print(f"Datos enviados: {self.datos_actualizados}")
+        
+        # Verificar redirección
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.list_url)
+        
+        # Verificar que la reparación se actualizó
+        reparacion_actualizada = Reparacion.objects.get(id=self.reparacion.id)
+        self.assertEqual(reparacion_actualizada.marca_reloj, "Casio G-Shock")
+        self.assertEqual(reparacion_actualizada.precio, 8000)
+    
+    def test_reparacion_edit_view_post_invalido(self):
+        """Prueba manejo de POST con datos inválidos"""
+        # Login
+        self.client.login(username=self.username, password=self.password)
+        
+        # Datos inválidos (descripción muy corta)
+        datos_invalidos = self.datos_actualizados.copy()
+        datos_invalidos['descripcion'] = "Corto"
+        
+        # Enviar datos inválidos
+        response = self.client.post(self.edit_url, datos_invalidos)
+        
+        # Verificar que se muestra el formulario con errores
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertIn('descripcion', response.context['form'].errors)
+    
+    def test_reparacion_edit_view_reparacion_no_existente(self):
+        """Prueba acceder a una reparación que no existe"""
+        # Login
+        self.client.login(username=self.username, password=self.password)
+        
+        # URL con ID que no existe
+        url = reverse('reparacion_edit', kwargs={'pk': 999})
+        
+        # Acceder a la URL
+        response = self.client.get(url)
+        
+        # Verificar redirección
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.list_url)
+    
+    @patch('core.services.reparacion_service.actualizar_reparacion')
+    def test_reparacion_edit_view_usa_servicio(self, mock_actualizar):
+        """Prueba que la vista usa el servicio actualizar_reparacion"""
+        # Configurar el mock
+        mock_actualizar.return_value = self.reparacion
+        
+        # Login
+        self.client.login(username=self.username, password=self.password)
+        
+        # Enviar datos POST
+        self.client.post(self.edit_url, self.datos_actualizados)
+        
+        # Verificar que se llamó al servicio
+        mock_actualizar.assert_called_once()
+        
+        # Verificar los argumentos
+        args, kwargs = mock_actualizar.call_args
+        self.assertTrue(isinstance(args[0], ReparacionForm))
+        self.assertEqual(args[1], self.reparacion.id)
+    
+    @patch('core.services.reparacion_service.actualizar_reparacion')
+    def test_reparacion_edit_view_maneja_excepcion(self, mock_actualizar):
+        """Prueba manejo de excepciones al actualizar"""
+        # Configurar el mock para que lance una excepción
+        mock_actualizar.side_effect = Exception("Error de prueba")
+        
+        # Login
+        self.client.login(username=self.username, password=self.password)
+        
+        # Enviar datos POST
+        response = self.client.post(self.edit_url, self.datos_actualizados)
+        
+        # Verificar que se muestra el formulario con mensaje de error
+        self.assertEqual(response.status_code, 200)
+        
+        # Verificar que se llamó al servicio
+        mock_actualizar.assert_called_once()
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any('Error' in str(message) for message in messages))

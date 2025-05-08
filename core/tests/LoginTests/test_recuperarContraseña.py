@@ -134,7 +134,7 @@ class RecuperarContrasenaViewTests(TestCase):
             email='testuser@example.com',
             password='securepassword123'
         )
-        self.url = reverse('recuperar_contraseña')  # Cambia esto si el nombre de la URL es diferente
+        self.url = reverse('recuperar_contraseña') 
 
     def test_get_request(self):
         """Prueba que la vista devuelve un formulario en una solicitud GET."""

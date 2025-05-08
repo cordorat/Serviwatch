@@ -42,31 +42,6 @@
     </table>
   </div>
 
-  {% if messages %}
-  {% for message in messages %}
-  {% if message.tags == "success" %}
-  <!-- Mostrar el modal SOLO si el mensaje es de tipo "success" -->
-  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-      <div class="modal-content">
-        <div class="modal-header justify-content-center">
-          <h5 class="modal-title" id="confirmModalLabel">PILA AGREGADA</h5>
-        </div>
-        <div class="modal-footer justify-content-center">
-          <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-    modal.show();
-  </script>
-  {% endif %}
-  {% endfor %}
-  {% endif %}
-
   <!-- Paginación -->
   {% if pilas.has_other_pages %}
   <div class="custom-pagination-container">
