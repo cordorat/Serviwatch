@@ -96,8 +96,6 @@
         </div>
     </div>
     
-    
-
     <br>
 
     <!-- Tabla de empleados -->
@@ -147,37 +145,6 @@
             </tbody>
         </table>
     </div>
-
-    {% if messages %}
-    {% for message in messages %}
-    {% if message.tags == "success" %}
-    <!-- Modal de confirmación -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-                <div class="modal-header justify-content-center">
-                    <h5 class="modal-title" id="confirmModalLabel">
-                        {% if 'editado' in message.message %}
-                        EMPLEADO EDITADO
-                        {% else %}
-                        EMPLEADO AGREGADO
-                        {% endif %}
-                    </h5>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-        modal.show();
-    </script>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
 
     <!-- Paginación -->
     {% if is_paginated %}

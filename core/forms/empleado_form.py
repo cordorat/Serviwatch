@@ -2,6 +2,9 @@ from django import forms
 from core.models.empleado import Empleado
 from datetime import date
 
+clase_formulario_validate = "validate form-control"
+clase_formulario_control = 'form-control text-secondary'
+clase_formulario_control_span = 'form-control form-span text-secondary'
 
 class EmpleadoForm(forms.ModelForm):
     cedula = forms.CharField(
@@ -13,7 +16,7 @@ class EmpleadoForm(forms.ModelForm):
             'max_length': "La cédula no puede tener más de 15 dígitos."
         },
         widget=forms.TextInput(attrs={
-            'class': 'validate form-control',
+            'class': clase_formulario_validate,
             'placeholder': 'Cédula'
         })
     )
@@ -27,7 +30,7 @@ class EmpleadoForm(forms.ModelForm):
             'min_length': "El celular debe tener exactamente 10 dígitos."
         },
         widget=forms.TextInput(attrs={
-            'class': 'validate form-control',
+            'class': clase_formulario_validate,
             'placeholder': 'Teléfono'
         })
     )
@@ -39,7 +42,7 @@ class EmpleadoForm(forms.ModelForm):
             'max_length': "El salario no puede tener más de 8 dígitos."
         },
         widget=forms.TextInput(attrs={
-            'class': 'validate form-control',
+            'class': clase_formulario_validate,
             'placeholder': 'Salario'
         })
     )
@@ -51,7 +54,7 @@ class EmpleadoForm(forms.ModelForm):
             attrs={
                 'type': 'text',
                 'id': 'id_fecha_nacimiento',
-                'class': 'form-control text-secondary',
+                'class': clase_formulario_control,
                 'placeholder': 'Fecha de nacimiento',
             }
         )
@@ -64,7 +67,7 @@ class EmpleadoForm(forms.ModelForm):
             attrs={
                 'type': 'text',
                 'id': 'id_fecha_ingreso',
-                'class': 'form-control text-secondary',
+                'class': clase_formulario_control,
                 'placeholder': 'Fecha de ingreso',
             }
         )
@@ -74,7 +77,7 @@ class EmpleadoForm(forms.ModelForm):
         choices=[('', 'Seleccione un cargo')] + list(Empleado.CARGO_CHOICES),
         required=False,
         widget=forms.Select(attrs={
-            'class': 'form-control form-span text-secondary',
+            'class': clase_formulario_control_span,
             'placeholder': 'Cargo'
         })
     )
@@ -88,21 +91,21 @@ class EmpleadoForm(forms.ModelForm):
         ]
         widgets = {
             'nombre': forms.TextInput(attrs={
-                'class': 'validate form-control',
+                'class': clase_formulario_validate,
                 'placeholder': 'Nombre(s)'
             }),
             'apellidos': forms.TextInput(attrs={
-                'class': 'validate form-control',
+                'class': clase_formulario_validate,
                 'placeholder': 'Apellido(s)'
             }),
             'celular': forms.TextInput(attrs={
-                'class': 'validate form-control',
+                'class': clase_formulario_validate,
                 'placeholder': 'Teléfono'
             }),
-            'fecha_ingreso': forms.DateInput(attrs={'type': 'date', 'class': 'form-control text-secondary', 'placeholder': 'Fecha de ingreso'}),
-            'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control text-secondary'}),
-            'cargo': forms.Select(attrs={'class': 'form-control form-span text-secondary'}),
-            'estado': forms.Select(attrs={'class': 'form-control form-span text-secondary'}),
+            'fecha_ingreso': forms.DateInput(attrs={'type': 'date', 'class': clase_formulario_control, 'placeholder': 'Fecha de ingreso'}),
+            'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'class': clase_formulario_control}),
+            'cargo': forms.Select(attrs={'class': clase_formulario_control_span}),
+            'estado': forms.Select(attrs={'class': clase_formulario_control_span}),
         }
 
     def clean_nombre(self):
