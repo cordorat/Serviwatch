@@ -16,6 +16,8 @@ from core.services.recuperar_service import (
     update_user_password, mark_token_as_used
 )
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
 
 url_recuperar_contrasenia = 'login/recuperar_contraseña.html'
 url_cambiar_contrasenia = 'login/cambiar_contraseña.html'
@@ -59,6 +61,8 @@ def recuperar_contrasenia(request):
         'success': 'Se ha enviado un enlace a tu correo para cambiar la contraseña'
     })
 
+@never_cache
+@sensitive_post_parameters('password', 'confirm_password')
 @require_http_methods(["GET", "POST"])
 def cambiar_contrasenia(request, token):
     token_obj, error = get_token(token)
