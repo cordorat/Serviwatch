@@ -384,7 +384,9 @@
                 if (edad < 18) return { isValid: false, message: 'El empleado debe ser mayor de edad (18 años)' };
                 return { isValid: true, message: '' };
             } catch (e) {
-                return { isValid: false, message: 'Fecha de nacimiento inválida' };
+                // Manejo adecuado de la excepción
+                console.error("Error al validar fecha de nacimiento:", e);
+                return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de nacimiento inválida'}` };
             }
         },
         
@@ -407,7 +409,9 @@
                 
                 return { isValid: true, message: '' };
             } catch (e) {
-                return { isValid: false, message: 'Fecha de ingreso inválida' };
+                // Manejo adecuado de la excepción
+                console.error("Error al validar fecha de ingreso:", e);
+                return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de ingreso inválida'}` };
             }
         },
         

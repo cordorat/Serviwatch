@@ -137,6 +137,20 @@
       }
     });
 
+    function getErrorMessage(fieldName, value) {
+      if (!value) {
+        // Manejar campos vacíos
+        if (fieldName === 'codigo') return 'El código es obligatorio.';
+        if (fieldName === 'precio') return 'El precio es obligatorio.';
+        if (fieldName === 'cantidad') return 'La cantidad es obligatoria.';
+      } else if ((fieldName === 'precio' || fieldName === 'cantidad') && !/^\d+$/.test(value)) {
+        // Validación numérica para precio y cantidad
+        return `El ${fieldName} solo debe contener números.`;
+      }
+      
+      return ''; // Sin error
+    }
+
     function validateField(field) {
       // Remover error anterior
       const errorElement = field.closest('.mb-4').querySelector('.error-message');
@@ -145,21 +159,10 @@
       }
 
       const value = field.value.trim();
-      let errorMessage = '';
-
-      if (!value) {
-        if (field.name === 'codigo') errorMessage = 'El código es obligatorio.';
-        if (field.name === 'precio') errorMessage = 'El precio es obligatorio.';
-        if (field.name === 'cantidad') errorMessage = 'La cantidad es obligatoria.';
-      } else {
-        if (field.name === 'precio' || field.name === 'cantidad') {
-          if (!/^\d+$/.test(value)) {
-            errorMessage = `El ${field.name} solo debe contener números.`;
-          }
-        }
-      }
+      const errorMessage = getErrorMessage(field.name, value);
 
       if (errorMessage) {
+        // Crear y mostrar mensaje de error
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message mt-2';
         const errorSpan = document.createElement('span');
