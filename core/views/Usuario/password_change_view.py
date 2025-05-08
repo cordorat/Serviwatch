@@ -16,20 +16,20 @@ def password_change_view(request):
     if not form.is_valid():
         return render(request, 'usuario/password_change.html', {'form': form})
 
-    contraseña_actual = form.cleaned_data.get('contraseña_actual')
-    contraseña_nueva = form.cleaned_data.get('contraseña_nueva')
+    contrasenia_actual = form.cleaned_data.get('contrasenia_actual')
+    contrasenia_nueva = form.cleaned_data.get('contrasenia_nueva')
     
-    is_valid_current, error = validate_current_password(request.user, contraseña_actual)
+    is_valid_current, error = validate_current_password(request.user, contrasenia_actual)
     if not is_valid_current:
-        form.add_error('contraseña_actual', error)
+        form.add_error('contrasenia_actual', error)
         return render(request, 'usuario/password_change.html', {'form': form})
     
-    is_valid_new, error = validate_new_password(contraseña_actual, contraseña_nueva)
+    is_valid_new, error = validate_new_password(contrasenia_actual, contrasenia_nueva)
     if not is_valid_new:
-        form.add_error('contraseña_nueva', error)
+        form.add_error('contrasenia_nueva', error)
         return render(request, 'usuario/password_change.html', {'form': form})
     
-    success, message = change_password(request.user, contraseña_nueva)
+    success, message = change_password(request.user, contrasenia_nueva)
     if not success:
         return render(request, 'usuario/password_change.html', {
             'form': form,

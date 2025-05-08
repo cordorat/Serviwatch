@@ -3,6 +3,8 @@ from core.models.egreso import Egreso
 from django.utils import timezone
 from datetime import timedelta
 
+clase_formulario = 'form-control text-secondary'
+
 class EgresoForm(forms.ModelForm):
     """
     Formulario para gestionar el registro de egresos.
@@ -23,7 +25,7 @@ class EgresoForm(forms.ModelForm):
             attrs={
                 'type': 'text',
                 'id': 'id_fecha',
-                'class': 'form-control text-secondary',
+                'class': clase_formulario,
                 'placeholder': 'Fecha',
             }
         )
@@ -35,18 +37,18 @@ class EgresoForm(forms.ModelForm):
         fields = ['fecha', 'valor', 'descripcion']
         widgets = {
             'fecha': forms.DateInput(attrs={
-                'class': 'form-control text-secondary',
+                'class': clase_formulario,
                 'type': 'date',
                 'placeholder': 'Ingrese la fecha del egreso'
             }), 
             'valor': forms.NumberInput(attrs={
-                'class': 'form-control text-secondary',
+                'class': clase_formulario,
                 'min': '0',
                 'step': '1',  # Para enteros, no decimales
                 'placeholder': 'Valor'
             }),
             'descripcion': forms.Textarea(attrs={
-                'class': 'form-control text-secondary',
+                'class': clase_formulario,
                 'rows': 3,
                 'placeholder': 'Descripción'
             }),
