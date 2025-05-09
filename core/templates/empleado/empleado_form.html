@@ -214,41 +214,17 @@
 
 {% block javascript %}
 <script>
+    // Variable global para errores del servidor
+    var hasServerErrorsValue = "{% if form.errors %}true{% else %}false{% endif %}";
+
     document.addEventListener("DOMContentLoaded", function () {
+        // ===== REFERENCIAS ELEMENTOS DOM =====
         const btnGuardarEmpleado = document.getElementById('btnGuardarEmpleado');
         const empleadoForm = document.getElementById('empleadoForm');
         const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-
-        btnGuardarEmpleado.addEventListener('click', function (event) {
-            event.preventDefault(); // Evita el envío inmediato del formulario
-
-            // Agregar un campo oculto solo si no existe
-            if (!document.querySelector('input[name="confirmar"]')) {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'confirmar';
-                hiddenInput.value = 'true';
-                empleadoForm.appendChild(hiddenInput);
-            }
-
-            // Mostrar el modal
-            modal.show();
-
-            // Enviar el formulario después de 3 segundos
-            setTimeout(function () {
-                empleadoForm.submit();
-            }, 3000);
-        });
-    });
-</script>
-
-<script>
-    var hasServerErrorsValue = "{% if form.errors %}true{% else %}false{% endif %}";
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // ===== VARIABLES INICIALES =====
         const hasServerErrors = (hasServerErrorsValue === "true");
 
+        // ===== VALORES INICIALES =====
         const fechaNacimientoValue = "{{ form.fecha_nacimiento.value|date:'d/m/Y' }}";
         const fechaIngresoValue = "{{ form.fecha_ingreso.value|date:'d/m/Y' }}";
 
@@ -266,8 +242,8 @@
             });
         }
 
-        const nacimientoPicker = setupDatepicker("#id_fecha_nacimiento", fechaNacimientoValue);
-        const ingresoPicker = setupDatepicker("#id_fecha_ingreso", fechaIngresoValue);
+        setupDatepicker("#id_fecha_nacimiento", fechaNacimientoValue);
+        setupDatepicker("#id_fecha_ingreso", fechaIngresoValue);
 
         if (fechaNacimientoValue) {
             document.querySelector("#id_fecha_nacimiento").value = fechaNacimientoValue;
@@ -333,193 +309,175 @@
             }
         }
 
-        // ===== VALIDACIÓN DE CAMPO =====
-        function validateField(field) {
-            const fieldName = field.id.replace('id_', '');
-            let errorDiv = field.parentElement.nextElementSibling;
-
-            const hasServerError = errorDiv &&
-                errorDiv.querySelector('.text-danger') &&
-                errorDiv.querySelector('.text-danger').dataset.serverError === 'true' &&
-                !field.dataset.userModified;
-
-            if (hasServerError) return false;
-
-            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-                errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                field.parentElement.after(errorDiv);
-            }
-
-            if (!hasServerError || field.dataset.userModified) {
-                errorDiv.innerHTML = '';
-            }
-
-            const value = field.value.trim();
-            let isValid = true;
-            let errorMessage = '';
-
-            // Validaciones según el campo
-            switch (fieldName) {
-                case 'cedula':
-                    if (!value) {
-                        errorMessage = 'La cédula es obligatoria';
-                        isValid = false;
-                    } else if (!/^\d+$/.test(value)) {
-                        errorMessage = 'La cédula debe contener solo números';
-                        isValid = false;
-                    } else if (value.length > 15) {
-                        errorMessage = 'La cédula no puede tener más de 15 dígitos';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'nombre':
-                    if (!value) {
-                        errorMessage = 'El nombre es obligatorio';
-                        isValid = false;
-                    } else if (value.length < 2) {
-                        errorMessage = 'El nombre debe tener al menos 2 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'apellidos':
-                    if (!value) {
-                        errorMessage = 'Los apellidos son obligatorios';
-                        isValid = false;
-                    } else if (value.length < 2) {
-                        errorMessage = 'Los apellidos deben tener al menos 2 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'cargo':
-                    if (!value) {
-                        errorMessage = 'Debe seleccionar un cargo';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'celular':
-                    if (!value) {
-                        errorMessage = 'El teléfono es obligatorio';
-                        isValid = false;
-                    } else if (!/^\d{10}$/.test(value)) {
-                        errorMessage = 'El teléfono debe tener exactamente 10 dígitos numéricos';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'fecha_nacimiento':
-                    if (!value) {
-                        errorMessage = 'La fecha de nacimiento es obligatoria';
-                        isValid = false;
-                    } else {
-                        try {
-                            // Parsear la fecha en formato d/m/Y
-                            const parts = value.split('/');
-                            if (parts.length !== 3) throw new Error('Formato de fecha inválido');
-
-                            const day = parseInt(parts[0], 10);
-                            const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
-                            const year = parseInt(parts[2], 10);
-
-                            const nacimientoDate = new Date(year, month, day);
-
-                            // Verificar que sea mayor de edad (18 años)
-                            const hoy = new Date();
-                            let edad = hoy.getFullYear() - nacimientoDate.getFullYear();
-                            const mes = hoy.getMonth() - nacimientoDate.getMonth();
-
-                            if (mes < 0 || (mes === 0 && hoy.getDate() < nacimientoDate.getDate())) {
-                                edad--;
-                            }
-
-                            if (edad < 18) {
-                                errorMessage = 'El empleado debe ser mayor de edad (18 años)';
-                                isValid = false;
-                            }
-                        } catch (e) {
-                            errorMessage = 'Fecha de nacimiento inválida';
-                            isValid = false;
-                        }
-                    }
-                    break;
-
-                case 'fecha_ingreso':
-                    if (!value) {
-                        errorMessage = 'La fecha de ingreso es obligatoria';
-                        isValid = false;
-                    } else {
-                        try {
-                            // Parsear la fecha en formato d/m/Y
-                            const parts = value.split('/');
-                            if (parts.length !== 3) throw new Error('Formato de fecha inválido');
-
-                            const day = parseInt(parts[0], 10);
-                            const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
-                            const year = parseInt(parts[2], 10);
-
-                            const ingresoDate = new Date(year, month, day);
-                            const hoy = new Date();
-
-                            // Verificar que no sea una fecha futura
-                            if (ingresoDate > hoy) {
-                                errorMessage = 'La fecha de ingreso no puede ser futura';
-                                isValid = false;
-                            }
-
-                            // Verificar que no sea demasiado antigua
-                            const cincuentaAniosAtras = new Date();
-                            cincuentaAniosAtras.setFullYear(hoy.getFullYear() - 50);
-                            if (ingresoDate < cincuentaAniosAtras) {
-                                errorMessage = 'La fecha de ingreso parece demasiado antigua';
-                                isValid = false;
-                            }
-                        } catch (e) {
-                            errorMessage = 'Fecha de ingreso inválida';
-                            isValid = false;
-                        }
-                    }
-                    break;
-
-                case 'salario':
-                    if (!value) {
-                        errorMessage = 'El salario es obligatorio';
-                        isValid = false;
-                    } else if (!/^\d+$/.test(value)) {
-                        errorMessage = 'El salario debe ser numérico';
-                        isValid = false;
-                    } else if (value.length > 8) {
-                        errorMessage = 'El salario no puede tener más de 8 dígitos';
-                        isValid = false;
-                    } else if (parseInt(value) < 1000) {
-                        errorMessage = 'El salario parece demasiado bajo';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'estado':
-                    if (!value) {
-                        errorMessage = 'Debe seleccionar un estado';
-                        isValid = false;
-                    }
-                    break;
-
-            }
-
-            if (!isValid) {
-                field.classList.add('is-invalid');
-                if (!hasServerError || field.dataset.userModified) {
-                    errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+        // ===== VALIDADORES ESPECÍFICOS POR CAMPO =====
+    const fieldValidators = {
+        cedula: function(value) {
+            if (!value) return { isValid: false, message: 'La cédula es obligatoria' };
+            if (!/^\d+$/.test(value)) return { isValid: false, message: 'La cédula debe contener solo números' };
+            if (value.length > 15) return { isValid: false, message: 'La cédula no puede tener más de 15 dígitos' };
+            return { isValid: true, message: '' };
+        },
+        
+        nombre: function(value) {
+            if (!value) return { isValid: false, message: 'El nombre es obligatorio' };
+            if (value.length < 2) return { isValid: false, message: 'El nombre debe tener al menos 2 caracteres' };
+            return { isValid: true, message: '' };
+        },
+        
+        apellidos: function(value) {
+            if (!value) return { isValid: false, message: 'Los apellidos son obligatorios' };
+            if (value.length < 2) return { isValid: false, message: 'Los apellidos deben tener al menos 2 caracteres' };
+            return { isValid: true, message: '' };
+        },
+        
+        cargo: function(value) {
+            if (!value) return { isValid: false, message: 'Debe seleccionar un cargo' };
+            return { isValid: true, message: '' };
+        },
+        
+        celular: function(value) {
+            if (!value) return { isValid: false, message: 'El teléfono es obligatorio' };
+            if (!/^\d{10}$/.test(value)) return { isValid: false, message: 'El teléfono debe tener exactamente 10 dígitos numéricos' };
+            return { isValid: true, message: '' };
+        },
+        
+        fecha_nacimiento: function(value) {
+            if (!value) return { isValid: false, message: 'La fecha de nacimiento es obligatoria' };
+            
+            try {
+                const {isValid, date} = parseAndValidateDate(value);
+                if (!isValid) return { isValid: false, message: 'Fecha de nacimiento inválida' };
+                
+                // Verificar mayoría de edad
+                const hoy = new Date();
+                let edad = hoy.getFullYear() - date.getFullYear();
+                const mes = hoy.getMonth() - date.getMonth();
+                
+                if (mes < 0 || (mes === 0 && hoy.getDate() < date.getDate())) {
+                    edad--;
                 }
-            } else {
-                field.classList.remove('is-invalid');
+                
+                if (edad < 18) return { isValid: false, message: 'El empleado debe ser mayor de edad (18 años)' };
+                return { isValid: true, message: '' };
+            } catch (e) {
+                // Manejo adecuado de la excepción
+                console.error("Error al validar fecha de nacimiento:", e);
+                return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de nacimiento inválida'}` };
             }
-
-            return isValid;
+        },
+        
+        fecha_ingreso: function(value) {
+            if (!value) return { isValid: false, message: 'La fecha de ingreso es obligatoria' };
+            
+            try {
+                const {isValid, date} = parseAndValidateDate(value);
+                if (!isValid) return { isValid: false, message: 'Fecha de ingreso inválida' };
+                
+                const hoy = new Date();
+                
+                // Verificar que no sea futura
+                if (date > hoy) return { isValid: false, message: 'La fecha de ingreso no puede ser futura' };
+                
+                // Verificar que no sea muy antigua
+                const cincuentaAniosAtras = new Date();
+                cincuentaAniosAtras.setFullYear(hoy.getFullYear() - 50);
+                if (date < cincuentaAniosAtras) return { isValid: false, message: 'La fecha de ingreso parece demasiado antigua' };
+                
+                return { isValid: true, message: '' };
+            } catch (e) {
+                // Manejo adecuado de la excepción
+                console.error("Error al validar fecha de ingreso:", e);
+                return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de ingreso inválida'}` };
+            }
+        },
+        
+        salario: function(value) {
+            if (!value) return { isValid: false, message: 'El salario es obligatorio' };
+            if (!/^\d+$/.test(value)) return { isValid: false, message: 'El salario debe ser numérico' };
+            if (value.length > 8) return { isValid: false, message: 'El salario no puede tener más de 8 dígitos' };
+            if (parseInt(value) < 1000) return { isValid: false, message: 'El salario parece demasiado bajo' };
+            return { isValid: true, message: '' };
+        },
+        
+        estado: function(value) {
+            if (!value) return { isValid: false, message: 'Debe seleccionar un estado' };
+            return { isValid: true, message: '' };
         }
+    };
+
+    // Función auxiliar para parsear y validar fechas
+    function parseAndValidateDate(dateString) {
+        // Parsear la fecha en formato d/m/Y
+        const parts = dateString.split('/');
+        if (parts.length !== 3) return { isValid: false };
+        
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
+        const year = parseInt(parts[2], 10);
+        
+        const date = new Date(year, month, day);
+        
+        // Verificar que sea una fecha válida
+        if (isNaN(date.getTime())) return { isValid: false };
+        
+        return { isValid: true, date };
+    }
+
+    // Función para obtener el div de error
+    function getErrorDiv(field) {
+        let errorDiv = field.parentElement.nextElementSibling;
+        
+        if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            field.parentElement.after(errorDiv);
+        }
+        
+        return errorDiv;
+    }
+
+    // Función para verificar si hay un error de servidor
+    function hasServerErrorMessage(errorDiv) {
+        return errorDiv && 
+            errorDiv.querySelector('.text-danger') && 
+            errorDiv.querySelector('.text-danger').dataset.serverError === 'true';
+    }
+
+    // Función principal refactorizada
+    function validateField(field) {
+        const fieldName = field.id.replace('id_', '');
+        const errorDiv = getErrorDiv(field);
+        const value = field.value.trim();
+        
+        // Verificar si hay un error de servidor que no debemos sobreescribir
+        const hasServerError = hasServerErrorMessage(errorDiv) && !field.dataset.userModified;
+        if (hasServerError) return false;
+        
+        // Limpiar mensajes anteriores si el usuario ha modificado el campo o no hay errores del servidor
+        if (!hasServerError || field.dataset.userModified) {
+            errorDiv.innerHTML = '';
+        }
+        
+        // Validar el campo usando el validador específico
+        if (!fieldValidators[fieldName]) {
+            console.warn(`No validator defined for field: ${fieldName}`);
+            return true;
+        }
+        
+        const validationResult = fieldValidators[fieldName](value);
+        
+        // Actualizar UI según el resultado
+        if (!validationResult.isValid) {
+            field.classList.add('is-invalid');
+            if (!hasServerError || field.dataset.userModified) {
+                errorDiv.innerHTML = `<span class="text-danger">${validationResult.message}</span>`;
+            }
+            return false;
+        } else {
+            field.classList.remove('is-invalid');
+            return true;
+        }
+    }
 
         // ===== VALIDACIÓN DE FORMULARIO =====
         function validateForm() {
@@ -554,10 +512,47 @@
             }
         }
 
+        // ===== EVENTO CLIC EN BOTÓN GUARDAR =====
+        // PUNTO CLAVE: Modificado para validar antes de mostrar el modal
+        btnGuardarEmpleado.addEventListener('click', function (event) {
+            event.preventDefault(); // Evita el envío inmediato del formulario
+
+            // VALIDAR FORMULARIO PRIMERO
+            if (validateForm()) {
+                console.log("Formulario válido, mostrando modal...");
+
+                // Agregar un campo oculto solo si no existe
+                if (!document.querySelector('input[name="confirmar"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'confirmar';
+                    hiddenInput.value = 'true';
+                    empleadoForm.appendChild(hiddenInput);
+                }
+
+                // Mostrar el modal SOLO si el formulario es válido
+                modal.show();
+
+                // Enviar el formulario después de 3 segundos
+                setTimeout(function () {
+                    empleadoForm.submit();
+                }, 3000);
+            } else {
+                console.log("Formulario inválido, no se muestra el modal");
+
+                // Hacer scroll al primer campo con error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+
         // ===== VALIDAR AL ENVIAR =====
-        const form = document.querySelector('#empleadoForm');
-        form.addEventListener('submit', function (e) {
-            if (!validateForm()) {
+        empleadoForm.addEventListener('submit', function (e) {
+            // Esta validación es un respaldo para cuando se envía con Enter
+            if (!document.querySelector('input[name="confirmar"]') && !validateForm()) {
                 e.preventDefault();
             }
         });

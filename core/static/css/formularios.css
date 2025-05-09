@@ -137,13 +137,6 @@ h4{
   font-size: 24px;
 }
 
-.help-text {
-  color: #6c757d;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: block;
-}
-
 .form-error {
   color: #dc3545;
   font-size: 0.875rem;
@@ -151,12 +144,6 @@ h4{
   display: block;
   font-weight: bold;
   width: 100%;
-  border-radius: 4px;
-}
-
-.form-group:has(.form-error) input {
-  border: 2px solid #dc3545;
-  background-color: #fff8f8;
   border-radius: 4px;
 }
 
@@ -203,16 +190,6 @@ input.form-control {
   display: block;
 }
 
-.form-error {
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: block;
-  font-weight: bold;
-  width: 100%;
-  border-radius: 4px;
-}
-
 .form-group:has(.form-error) input {
   border: 2px solid #dc3545;
   background-color: #fff8f8;
@@ -222,15 +199,6 @@ input.form-control {
 .is-invalid {
   border: 2px solid #dc3545;
   border-radius: 4px;
-}
-
-.toggle-password {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  z-index: 10;
 }
 
 /* Añadir al final de formularios.css */

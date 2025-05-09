@@ -7,7 +7,7 @@ class LoginFormTest(TestCase):
     def test_loginform_valido(self):
         form = LoginForm(data={
             'usuario': 'lucasPrueba',
-            'contraseña': 'lucasPrueba1@'
+            'contrasenia': 'lucasPrueba1@'
         })
         self.assertTrue(form.is_valid())
 
@@ -15,31 +15,31 @@ class LoginFormTest(TestCase):
         form = LoginForm(data={})
         self.assertFalse(form.is_valid())
         self.assertIn('usuario', form.errors)
-        self.assertIn('contraseña', form.errors)
+        self.assertIn('contrasenia', form.errors)
 
-    def test_loginform_contraseñaSinNumero(self):
+    def test_loginform_contraseniaSinNumero(self):
         form = LoginForm(data={
             'usuario': 'lucasPrueba',
-            'contraseña': 'pruebaaa@'
+            'contrasenia': 'pruebaaa@'
         })
         self.assertFalse(form.is_valid())
-        self.assertIn('contraseña', form.errors)
+        self.assertIn('contrasenia', form.errors)
 
-    def test_loginform_contraseñaSinLetras(self):
+    def test_loginform_contraseniaSinLetras(self):
         form = LoginForm(data={
             'usuario': 'lucasPrueba',
-            'contraseña': '12345678@'
+            'contrasenia': '12345678@'
         })
         self.assertFalse(form.is_valid())
-        self.assertIn('contraseña', form.errors)
+        self.assertIn('contrasenia', form.errors)
 
-    def test_loginform_contraseñaSinCaracterEspecial(self):
+    def test_loginform_contraseniaSinCaracterEspecial(self):
         form = LoginForm(data={
             'usuario': 'lucasPrueba',
-            'contraseña': 'prueba1234'
+            'contrasenia': 'prueba1234'
         })
         self.assertFalse(form.is_valid())
-        self.assertIn('contraseña', form.errors)
+        self.assertIn('contrasenia', form.errors)
 
 class LoginViewTest(TestCase):
     def setUp(self):
@@ -49,12 +49,12 @@ class LoginViewTest(TestCase):
 
         self.user = self.User.objects.create_user(
             username='usuarioNormal',
-            password='contraseña123@'
+            password='contrasenia123@'
         )
 
         self.superuser = self.User.objects.create_superuser(
             username='usuarioAdmin',
-            password='contraseña123@' 
+            password='contrasenia123@' 
         )
         
     def test_loginView_get(self):
@@ -66,15 +66,15 @@ class LoginViewTest(TestCase):
     def test_loginView_usuarioInexistente(self):
         response = self.client.post(self.url, {
             'usuario': 'noExiste',
-            'contraseña': 'noExiste123@'
+            'contrasenia': 'noExiste123@'
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Usuario inexistente')
 
-    def test_loginView_contraseñaIncorrecta(self):
+    def test_loginView_contraseniaIncorrecta(self):
         response = self.client.post(self.url, {
             'usuario': 'usuarioNormal',
-            'contraseña': 'contraseñaMala1@'
+            'contrasenia': 'contraseniaMala1@'
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Usuario o contraseña incorrectos')
@@ -82,13 +82,13 @@ class LoginViewTest(TestCase):
     def test_loginView_redireccionDeUsuario(self):
         response = self.client.post(self.url, {
             'usuario': 'usuarioNormal',
-            'contraseña': 'contraseña123@'
+            'contrasenia': 'contrasenia123@'
         })
         self.assertRedirects(response, reverse('cliente_list'))
 
     def test_loginView_redireccionDeAdmin(self):
         response = self.client.post(self.url, {
             'usuario': 'usuarioAdmin',
-            'contraseña': 'contraseña123@'
+            'contrasenia': 'contrasenia123@'
         })
         self.assertRedirects(response, reverse('usuario_list'))

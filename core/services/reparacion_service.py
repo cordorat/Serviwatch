@@ -37,16 +37,5 @@ def actualizar_reparacion(form, reparacion_id):
     Raises:
         ValueError: Si la reparación no existe
     """
-    reparacion = get_object_or_404(Reparacion, pk=reparacion_id)
+    get_object_or_404(Reparacion, pk=reparacion_id)
     return form.save()
-
-"""
-
-def eliminar_reparacion(reparacion_id):
-    try:
-        reparacion = Reparacion.objects.get(pk=reparacion_id)
-        reparacion.delete()
-        return True
-    except Reparacion.DoesNotExist:
-        return False
-"""

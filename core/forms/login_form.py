@@ -16,7 +16,7 @@ class LoginForm(forms.Form):
             'max_length': 'El usuario no puede tener más de 16 caracteres',
         }
     )
-    contraseña = forms.CharField(
+    contrasenia = forms.CharField(
         required=True,
         min_length=8,
         max_length=16,
@@ -37,18 +37,18 @@ class LoginForm(forms.Form):
             raise forms.ValidationError('El usuario debe contener solo letras.')
         return usuario
 
-    def clean_contraseña(self):
-        contraseña = self.cleaned_data.get('contraseña')
+    def clean_contrasenia(self):
+        contrasenia = self.cleaned_data.get('contrasenia')
 
-        if not re.search(r'[A-Za-z]', contraseña):
+        if not re.search(r'[A-Za-z]', contrasenia):
             raise forms.ValidationError('La contraseña debe tener al menos una letra')
         
-        if not re.search(r'\d', contraseña):
+        if not re.search(r'\d', contrasenia):
             raise forms.ValidationError('La contraseña debe tener al menos un numero')
         
-        if not re.search(r'[!@#$%^&*?]', contraseña):
+        if not re.search(r'[!@#$%^&*?]', contrasenia):
             raise forms.ValidationError('La contraseña debe tener al menos un caracter especial')
         
-        return contraseña
+        return contrasenia
     
     
