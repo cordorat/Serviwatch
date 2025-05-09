@@ -27,49 +27,26 @@
             <i class="bi bi-person fs-4"></i>
             {{ usuario.username }}
           </td>
-          <td style="padding-right: 0 !important; border-right: none !important;">
-            <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm fs-4" title="Editar usuario">
-              <i class="bi bi-pencil"></i>
+          <td style="text-align: right; padding-right: 0 !important; border-right: none !important;">
+            <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm btn-outline-primary"
+              title="Editar usuario">
+              <i class="bi bi-pencil fs-4"></i>
             </a>
           </td>
-          <td style="padding-left: 0 !important; border-left: none !important;">
-            <a class="btn btn-sm fs-4" data-bs-toggle = "modal" data-bs-target="#confirmDeleteModal" data-user-id="{{usuario.pk}}" data-username="{{usuario.username}}" data-email="{{usuario.email}}" title="Eliminar usuario">
-              <i class="bi bi-trash"></i>
+          <td style="text-align: right; padding-left: 0 !important; border-left: none !important;">
+            <a class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+              data-user-id="{{usuario.pk}}" data-username="{{usuario.username}}" data-email="{{usuario.email}}"
+              title="Eliminar usuario">
+              <i class="bi bi-trash fs-4"></i>
             </a>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
-    {% if messages %}
-    {% for message in messages %}
-    {% if message.tags == "success" %}
-    <!-- Mostrar el modal SOLO si el mensaje es de tipo "success" -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-          <div class="modal-header justify-content-center">
-            <h5 class="modal-title" id="confirmModalLabel">
-              {{ message }}
-            </h5>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button type="button" class="btn-cerrar" data-bs-dismiss="modal">VOLVER</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-      modal.show();
-    </script>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
-
     <!-- Modal de Confirmación de Eliminación -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-delete-modal">
           <div class="modal-header">
@@ -85,7 +62,8 @@
             </div>
           </div>
           <div class="modal-footer justify-content-center">
-            <form method="POST" id="deleteUserForm" class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+            <form method="POST" id="deleteUserForm"
+              class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
               {% csrf_token %}
               <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
                 <button type="submit" class="btn save m-0">SÍ</button>
@@ -97,7 +75,21 @@
       </div>
     </div>
 
+    <!-- Modal de confirmación de eliminación exitosa -->
+    <div class="modal fade" id="successDeleteModal" tabindex="-1" aria-labelledby="successDeleteModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center" style="background-color: #f1f1f1;">
+          <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+            <h4 class="titulo m-0">USUARIO ELIMINADO CORRECTAMENTE</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <script>
+      // Para inicializar el modal cuando se hace clic en el botón
       const confirmModal = document.getElementById('confirmDeleteModal');
       confirmModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
@@ -115,35 +107,63 @@
         const form = confirmModal.querySelector('#deleteUserForm');
         form.action = `/usuarios/eliminar/${userId}/`;
       });
+
+      // Manejar el envío del formulario y mostrar modal de éxito
+      document.addEventListener('DOMContentLoaded', function () {
+        const deleteForm = document.getElementById('deleteUserForm');
+
+        // Inicializar modales explícitamente
+        const successModal = new bootstrap.Modal(document.getElementById('successDeleteModal'));
+
+        deleteForm.addEventListener('submit', function (e) {
+          e.preventDefault(); // Prevenir el envío inmediato
+
+          // Crear una instancia nueva del modal de confirmación
+          const deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal'));
+
+          // Ocultar el modal de confirmación
+          deleteModal.hide();
+
+          // Mostrar el modal de éxito
+          successModal.show();
+
+          // Enviar el formulario después de 3 segundos
+          setTimeout(function () {
+            deleteForm.submit();
+          }, 3000);
+        });
+      });
     </script>
 
     <!-- Paginación -->
     {% if is_paginated %}
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                
-                <li class="page-item">
-                    <a class="page-link" href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }} {% endif %}">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
 
-                {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-                {% endfor %}
+        <li class="page-item">
+          <a class="page-link"
+            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }} {% endif %}">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
 
-                <li class="page-item">
-                    <a class="page-link" href="{% if page_obj.has_next %} ?page={{ page_obj.next_page_number }} {% endif %}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-                
-            </ul>
-        </nav>
-        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        <li class="page-item">
+          <a class="page-link" href="{% if page_obj.has_next %} ?page={{ page_obj.next_page_number }} {% endif %}"
+            aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

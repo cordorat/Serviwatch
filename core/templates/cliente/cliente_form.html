@@ -81,9 +81,9 @@
     <div class="modal-content text-center" style="background-color: #f1f1f1;">
       <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
         {% if modo == 'editar' %}
-        <h4 class="titulo m-0" id="modalMessage">REPARACIÓN ACTUALIZADA CORRECTAMENTE</h4>
+        <h4 class="titulo m-0" id="modalMessage">CLIENTE ACTUALIZADO CORRECTAMENTE</h4>
         {% else %}
-        <h4 class="titulo m-0" id="modalMessage">REPARACIÓN AGREGADA CORRECTAMENTE</h4>
+        <h4 class="titulo m-0" id="modalMessage">CLIENTE AGREGADO CORRECTAMENTE</h4>
         {% endif %}
       </div>
     </div>
@@ -98,41 +98,16 @@
     const btnGuardarcliente = document.getElementById('btnGuardarcliente');
     const clienteForm = document.getElementById('clienteForm');
     const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-
-    btnGuardarcliente.addEventListener('click', function (event) {
-      event.preventDefault(); // Evita el envío inmediato del formulario
-
-      // Agregar un campo oculto solo si no existe
-      if (!document.querySelector('input[name="confirmar"]')) {
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'confirmar';
-        hiddenInput.value = 'true';
-        clienteForm.appendChild(hiddenInput);
-      }
-
-      // Mostrar el modal
-      modal.show();
-
-      // Enviar el formulario después de 3 segundos
-      setTimeout(function () {
-        clienteForm.submit();
-      }, 3000);
-    });
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
+    
+    // Referencias a los campos
     const nombreField = document.querySelector('input[name="nombre"]');
     const apellidoField = document.querySelector('input[name="apellido"]');
     const telefonoField = document.querySelector('input[name="telefono"]');
-
     const allFields = [nombreField, apellidoField, telefonoField];
 
     // Marcar campos con errores del servidor
     document.querySelectorAll('.form-error').forEach(function (errorMessage) {
-      var input = errorMessage.closest('.input-group')?.querySelector('input');
+      var input = errorMessage.closest('.form-group')?.querySelector('input');
       if (input) {
         input.classList.add('is-invalid');
       }
@@ -176,7 +151,8 @@
     // Función para validar un campo
     function validateField(field) {
       // Remover error anterior
-      const errorElement = field.parentElement.querySelector('.form-error');
+      const formGroup = field.closest('.form-group');
+      let errorElement = formGroup.querySelector('.form-error');
       if (errorElement) {
         errorElement.remove();
       }
@@ -187,7 +163,11 @@
         
       // Mostrar error o marcar como válido
       if (errorMessage) {
-        showFieldError(field, errorMessage);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-error';
+        errorDiv.textContent = errorMessage;
+        formGroup.appendChild(errorDiv);
+        field.classList.add('is-invalid');
         return false;
       } else {
         field.classList.remove('is-invalid');
@@ -203,23 +183,67 @@
 
       field.addEventListener('input', function () {
         this.classList.remove('is-invalid');
-        const error = this.parentElement.querySelector('.form-error');
+        const formGroup = this.closest('.form-group');
+        const error = formGroup.querySelector('.form-error');
         if (error) error.remove();
       });
     });
 
-    const form = document.querySelector('#clienteForm');
-    form.addEventListener('submit', function (e) {
+    // Función para validar todos los campos
+    function validateAllFields() {
       let isValid = true;
       allFields.forEach(field => {
         if (!validateField(field)) {
           isValid = false;
         }
       });
+      return isValid;
+    }
 
-      if (!isValid) e.preventDefault();
+    // IMPORTANTE: Manejar el clic del botón con validación
+    btnGuardarcliente.addEventListener('click', function (event) {
+      event.preventDefault(); // Evita el envío inmediato
+      
+      // Validar todos los campos primero
+      const isValid = validateAllFields();
+      
+      if (isValid) {
+        // Agregar un campo oculto solo si no existe
+        if (!document.querySelector('input[name="confirmar"]')) {
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'confirmar';
+          hiddenInput.value = 'true';
+          clienteForm.appendChild(hiddenInput);
+        }
+        
+        console.log("Formulario válido, mostrando modal...");
+        // Mostrar el modal
+        modal.show();
+        
+        // Enviar el formulario después de 3 segundos
+        setTimeout(function () {
+          clienteForm.submit();
+        }, 3000);
+      } else {
+        console.log("Formulario inválido, no se muestra el modal");
+        // Hacer scroll al primer error
+        const firstError = document.querySelector('.is-invalid');
+        if (firstError) {
+          firstError.focus();
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     });
 
+    // Evitar que el formulario se envíe automáticamente
+    clienteForm.addEventListener('submit', function(e) {
+      // Solo permitir envío automático si viene del botón guardar
+      if (!document.querySelector('input[name="confirmar"]')) {
+        e.preventDefault();
+      }
+    });
+    
     // Limpiar campos al recargar
     window.addEventListener('pageshow', function (event) {
       if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {

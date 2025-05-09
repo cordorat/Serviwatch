@@ -102,7 +102,8 @@
 
 /* Ícono de lápiz */
 .custom-table td a {
-    display: flex;
+    display: initial;
+    font-size: medium;
     align-items: right;
     justify-content: right;
     text-decoration: none;
