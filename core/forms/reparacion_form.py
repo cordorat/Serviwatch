@@ -42,7 +42,7 @@ class ReparacionForm(forms.ModelForm):
             attrs={
                 'class': 'form-control',
                 'id': 'id_fecha_entrega_estimada',
-                'placeholder': 'dd/mm/aaaa',
+                'placeholder': 'Fecha estimada entrega dd/mm/aaaa',
                 'autocomplete': 'off'
             }
         )

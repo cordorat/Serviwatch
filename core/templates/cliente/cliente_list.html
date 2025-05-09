@@ -2,8 +2,16 @@
 {% load static %}
 {% block content %}
 <style>
-  .custom-table-usuario td a {
-    display: inherit;
+  .search-container {
+    max-width: 500px;
+  }
+
+  #search-cliente {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .btn-primary {
+    border-radius: 0 4px 4px 0;
   }
 
   .search-container {
@@ -28,16 +36,16 @@
   <br>
 
   <!-- Campo de búsqueda AJAX -->
-  <div class="search-container mb-3">
-    <div class="input-group">
+  <div class="search-container mb-3 search-form">
+    <div class="input-group gap-2">
       <input type="text" id="search-cliente" class="form-control" placeholder="Buscar cliente">
-      <button id="btn-search" class="btn btn-searchf" type="button">
-        <i class="bi bi-search"></i> Buscar
+      <button id="btn-search" class="btn btn-search" type="button">
+        <i class="bi bi-search text-secondary"></i>
       </button>
     </div>
   </div>
 
-  <!-- Lista de reparaciones -->
+  <!-- Lista de clientes -->
   <div class="table-container">
     <div id="no-results-message" class="alert alert-info text-center" style="display: none;">
       <i class="bi bi-exclamation-circle me-2"></i> El cliente no existe
@@ -58,9 +66,9 @@
           <td>{{ cliente.apellido }}</td>
           <td>{{ cliente.telefono }}</td>
           <td>
-            <a href="{% url 'cliente_editar' id=cliente.id %}" class="btn btn-sm btn-outline-primary"
+            <a href="{% url 'cliente_editar' cliente.id %}" class="btn btn-sm btn-outline-primary"
               title="Editar cliente">
-              <i class="bi bi-pencil-square"></i>
+              <i class="bi bi-pencil fs-4"></i>
             </a>
           </td>
         </tr>
@@ -68,7 +76,6 @@
       </tbody>
     </table>
   </div>
-  
   <!-- Paginación -->
   {% if is_paginated %}
   <nav aria-label="Page navigation">
@@ -137,31 +144,44 @@
 
     // Función para filtrar la tabla según el término de búsqueda
     function buscarClientes() {
-      var searchTerm = $("#search-cliente").val().toLowerCase();
-      var found = false;
+      var searchTerm = $("#search-cliente").val();
 
-      // Si está vacío, mostrar todos
       if (searchTerm.length < 2) {
-        $("table tbody tr").show();
-        $("#no-results-message").hide();
+        location.reload(); // Volver al listado original si se limpia el campo
         return;
       }
 
-      $("table tbody tr").each(function () {
-        var nombre = $(this).find("td:nth-child(1)").text().toLowerCase();
-        var apellido = $(this).find("td:nth-child(2)").text().toLowerCase();
-        var telefono = $(this).find("td:nth-child(3)").text().toLowerCase();
+      $.ajax({
+        url: "{% url 'cliente_search' %}",
+        data: { term: searchTerm },
+        dataType: "json",
+        success: function (data) {
+          const $tbody = $("table tbody");
+          $tbody.empty();
 
-        if (
-          nombre.includes(searchTerm) ||
-          apellido.includes(searchTerm) ||
-          telefono.includes(searchTerm) ||
-          (nombre + " " + apellido).includes(searchTerm)
-        ) {
-          $(this).show();
-          found = true;
-        } else {
-          $(this).hide();
+          if (data.length === 0) {
+            $("#no-results-message").show();
+          } else {
+            $("#no-results-message").hide();
+            data.forEach(cliente => {
+              const row = `
+            <tr>
+              <td>${cliente.nombre}</td>
+              <td>${cliente.apellido}</td>
+              <td>${cliente.telefono}</td>
+              <td>
+                <a href="/cliente/editar/${cliente.id}/" class="btn btn-sm btn-outline-primary" title="Editar cliente">
+                  <i class="bi bi-pencil fs-4"></i>
+                </a>
+              </td>
+            </tr>
+          `;
+              $tbody.append(row);
+            });
+          }
+        },
+        error: function () {
+          alert("Error al buscar clientes.");
         }
       });
 

@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
 from django.contrib.auth import get_user_model
-from core.forms.recuperar_contraseña_form import recuperarContrasenaForm, CambiarContrasenaForm
+from core.forms.recuperar_contraseña_form import RecuperarContrasenaForm, CambiarContrasenaForm
 from core.models import PasswordResetToken
 from django.utils.crypto import get_random_string
 from django.utils import timezone
@@ -15,14 +15,14 @@ import datetime
 class RecuperarContrasenaFormTest(TestCase):
 
     def test_form_valid(self):
-        form = recuperarContrasenaForm(data = {
+        form = RecuperarContrasenaForm(data = {
             'usuario': 'usuarioValido',
             'email': 'usuario@dominio.com',
         })
         self.assertTrue(form.is_valid())
 
     def test_username_too_short(self):
-        form = recuperarContrasenaForm(data = {
+        form = RecuperarContrasenaForm(data = {
             'usuario': 'usr',
             'email': 'usuario@dominio.com',
         })
@@ -30,7 +30,7 @@ class RecuperarContrasenaFormTest(TestCase):
         self.assertEqual(form.errors['usuario'][0], 'El usuario debe tener entre 8 y 20 caracteres')
 
     def test_username_too_long(self):
-        form = recuperarContrasenaForm(data = {
+        form = RecuperarContrasenaForm(data = {
             'usuario': 'usuarioConNombreMuyLargo',
             'email': 'usuario@dominio.com',
         })
@@ -38,7 +38,7 @@ class RecuperarContrasenaFormTest(TestCase):
         self.assertEqual(form.errors['usuario'][0], 'El usuario debe tener entre 8 y 20 caracteres')
 
     def test_username_invalid_characters(self):
-        form = recuperarContrasenaForm(data = {
+        form = RecuperarContrasenaForm(data = {
             'usuario': 'usuario@2025',
             'email': 'usuario@dominio.com',
         })
@@ -46,7 +46,7 @@ class RecuperarContrasenaFormTest(TestCase):
         self.assertEqual(form.errors['usuario'][0], 'El usuario debe contener solo letras.')
 
     def test_email_invalid_format(self):
-        form = recuperarContrasenaForm(data = {
+        form = RecuperarContrasenaForm(data = {
             'usuario': 'usuario@2025',
             'email': 'usuario@dominio',
         })
@@ -54,7 +54,7 @@ class RecuperarContrasenaFormTest(TestCase):
         self.assertEqual(form.errors['email'][0], 'Debe cumplir con el formato abc@nnn.com/.co')
 
     def test_email_missing_at_symbol(self):
-        form = recuperarContrasenaForm(data = {
+        form = RecuperarContrasenaForm(data = {
             'usuario': 'usuario@2025',
             'email': 'usuario.dominio.com',
         })
@@ -140,7 +140,7 @@ class RecuperarContrasenaViewTests(TestCase):
         """Prueba que la vista devuelve un formulario en una solicitud GET."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.context['form'], recuperarContrasenaForm)
+        self.assertIsInstance(response.context['form'], RecuperarContrasenaForm)
 
     def test_post_valid_data(self):
         """Prueba que se envía un correo cuando los datos son válidos."""
