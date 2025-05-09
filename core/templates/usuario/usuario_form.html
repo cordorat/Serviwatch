@@ -8,34 +8,35 @@
 
 <style>
     /* Sobrescribe el estilo de Bootstrap para los inputs de contraseña */
-    .input-group:has(input[type="password"]) > input[type="password"],
-    .input-group:has(input[name="password1"]) > input[name="password1"],
-    .input-group:has(input[name="password2"]) > input[name="password2"] {
-      border-top-right-radius: 4px !important;
-      border-bottom-right-radius: 4px !important;
+    .input-group:has(input[type="password"])>input[type="password"],
+    .input-group:has(input[name="password1"])>input[name="password1"],
+    .input-group:has(input[name="password2"])>input[name="password2"] {
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
     }
-    
+
     /* También asegura que el borde izquierdo tenga el mismo radio */
-    .input-group:has(input[type="password"]) > .input-group-text,
-    .input-group:has(input[name="password1"]) > .input-group-text,
-    .input-group:has(input[name="password2"]) > .input-group-text {
-      border-top-left-radius: 0px !important;
-      border-bottom-left-radius: 0px !important;
+    .input-group:has(input[type="password"])>.input-group-text,
+    .input-group:has(input[name="password1"])>.input-group-text,
+    .input-group:has(input[name="password2"])>.input-group-text {
+        border-top-left-radius: 0px !important;
+        border-bottom-left-radius: 0px !important;
     }
-    
+
     /* Ajusta el icono para que no rompa el radio */
     .toggle-password {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 10;
-      cursor: pointer;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        cursor: pointer;
     }
-    
+
     /* Añade padding extra a la derecha para que el texto no se sobreponga con el icono */
-    input[name="password1"], input[name="password2"] {
-      padding-right: 35px !important;
+    input[name="password1"],
+    input[name="password2"] {
+        padding-right: 35px !important;
     }
 
     .toggle-password:hover {
@@ -53,137 +54,154 @@
 
 <h2 class="titulo">
     {% if modo == 'editar' %}
-        EDITAR USUARIO
+    EDITAR USUARIO
     {% else %}
-        AGREGAR USUARIO
+    AGREGAR USUARIO
     {% endif %}
 </h2>
 <h4>DATOS</h4>
 
 <div>
-<div class="left-column">
-    <form method="POST" class="custom-form" novalidate>
-    {% csrf_token %}
+    <div class="left-column">
+        <form method="POST" class="custom-form" novalidate>
+            {% csrf_token %}
 
-    <div class="form-group">
-        <div class="d-flex align-items-center gap-2">
-            <div class="input-group mb-3 flex-grow-1">
-                <span class="input-group-text form-span">
-                    <i class="bi bi-person-fill fs-4 text-secondary"></i>
-                </span>
-                {{ form.username }}
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <span class="input-group-text form-span" id="basic-addon1">
+                        <i class="bi bi-person-fill fs-4 text-secondary"></i>
+                    </span>
+                    {{ form.username }}
+                </div>
+
+                <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="{{ form.username.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
+
+
+                {% if form.username.errors %}
+                <div class="form-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+
+
             </div>
-            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.username.help_text }}">
-                <i class="bi bi-question-circle-fill"></i>
-            </span>
-        </div>
-        {% if form.username.errors %}
-            <div class="form-error">{{ form.username.errors.0 }}</div>
-        {% endif %}
-    </div>
-    
-    
 
-    <div class="form-group">
-        <div class="d-flex align-items-center gap-2">
-            <div class="input-group mb-3 flex-grow-1">
-                <span class="input-group-text form-span">
-                    <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
-                </span>
-                {{ form.email }}
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <span class="input-group-text form-span" id="basic-addon1">
+                        <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
+                    </span>
+                    {{ form.email }}
+                </div>
+
+                <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}"><i
+                        class="bi bi-question-circle-fill"></i></span>
+
+                {% if form.email.errors %}
+                <div class="form-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
             </div>
-            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}">
-                <i class="bi bi-question-circle-fill"></i>
-            </span>
-        </div>
-        {% if form.email.errors %}
-            <div class="form-error">{{ form.email.errors.0 }}</div>
-        {% endif %}
-    </div>
-    
-    
-    {% if not modo == 'editar'  %}
-    <div class="form-group">
-        <div class="d-flex align-items-center gap-2">
-            <div class="input-group mb-3 password-container flex-grow-1">
-                <span class="input-group-text form-span">
-                    <i class="bi bi-lock-fill fs-4 text-secondary"></i>
-                </span>
-                {{ form.password1 }}
-                <span>
-                    <i class="fa fa-eye toggle-password" id="togglePassword"></i>
-                </span>
+            {% if not modo == 'editar' %}
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <span class="input-group-text form-span" id="basic-addon1">
+                        <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+                    </span>
+                    {{ form.password1 }}
+                    <i class="toggle-password bi bi-eye" id="togglePassword"></i>
+                </div>
+
+
+                <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}"><i
+                        class="bi bi-question-circle-fill"></i></span>
+
+                {% if form.password1.errors %}
+                <div class="form-error">{{ form.password1.errors.0 }}</div>
+                {% endif %}
             </div>
-            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}">
-                <i class="bi bi-question-circle-fill"></i>
-            </span>
-        </div>
-        {% if form.password1.errors %}
-            <div class="form-error">{{ form.password1.errors.0 }}</div>
-        {% endif %}
-    </div>
-    
-    
 
-    <div class="form-group">
-        <div class="d-flex align-items-center gap-2">
-            <div class="input-group mb-3 password-container flex-grow-1">
-                <span class="input-group-text form-span">
-                    <i class="bi bi-lock-fill fs-4 text-secondary"></i>
-                </span>
-                {{ form.password2 }}
-                <span>
-                    <i class="fa fa-eye toggle-password" id="togglePassword2"></i>
-                </span>
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <span class="input-group-text form-span" id="basic-addon1">
+                        <i class="bi bi-lock-fill fs-4 text-secondary"></i>
+                    </span>
+                    {{ form.password2 }}
+                    <i class="toggle-password bi bi-eye" id="togglePassword"></i>
+                </div>
+
+
+                <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}"><i
+                        class="bi bi-question-circle-fill"></i></span>
+
+                {% if form.password2.errors %}
+                <div class="form-error">{{ form.password2.errors.0 }}</div>
+                {% endif %}
             </div>
-            <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}">
-                <i class="bi bi-question-circle-fill"></i>
-            </span>
-        </div>
-        {% if form.password2.errors %}
-            <div class="form-error">{{ form.password2.errors.0 }}</div>
-        {% endif %}
-    </div>
-    
-    
-    {% endif %}
+            {% endif %}
 
-    {% if form.non_field_errors %}
-        {% for error in form.non_field_errors %}
-        <div class="form-error">{{ error }}</div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="form-buttons">
-        <button class="btn save" type="submit">GUARDAR</button> 
-        <a href="{% url 'usuario_list' %}">
-        <button type="button" class="btn cancel">CANCELAR</button>
-        </a>
-    </div>
-    </form>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
+            {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+            <div class="form-error">{{ error }}</div>
             {% endfor %}
-        </ul>
-    {% endif %}
+            {% endif %}
+
+            <div class="form-buttons">
+                <button class="btn save" type="submit">GUARDAR</button>
+                <a href="{% url 'usuario_list' %}">
+                    <button type="button" class="btn cancel">CANCELAR</button>
+                </a>
+            </div>
+        </form>
+
+    </div>
+
+    <div class="right-column">
+        <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
+    </div>
 </div>
 
-<div class="right-column">
-    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
-</div>
-</div>  
+<!-- Añadir este código al final del formulario, justo antes del cierre del div right-column -->
 
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center" style="background-color: #f1f1f1;">
+            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+                {% if modo == 'editar' %}
+                <h4 class="titulo m-0">USUARIO ACTUALIZADO CORRECTAMENTE</h4>
+                {% else %}
+                <h4 class="titulo m-0">USUARIO AGREGADO CORRECTAMENTE</h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
 <script>
    document.addEventListener('DOMContentLoaded', function() {
+    // Eliminar cualquier estado de mensaje almacenado en el historial de sesión
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
 
+    // Referencias a elementos del DOM
+    const form = document.querySelector('form.custom-form');
+    const saveButton = form.querySelector('.btn.save');
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    
     const usernameField = document.querySelector('input[name="username"]');
     const emailField = document.querySelector('input[name="email"]');
     const password1Field = document.querySelector('input[name="password1"]');
     const password2Field = document.querySelector('input[name="password2"]');
     
-    const allFields = [usernameField, emailField, password1Field, password2Field];
+    const allFields = [usernameField, emailField];
+    
+    // Si estamos en modo crear, añadir campos de contraseña a la validación
+    if (password1Field && password2Field) {
+        allFields.push(password1Field, password2Field);
+    }
     
     // Aplicar clase de error a los campos con errores del servidor
     document.querySelectorAll('.form-error').forEach(function(errorMessage) {
@@ -199,7 +217,8 @@
     // Función para validar cada campo y mostrar errores personalizados
     function validateField(field) {
         // Eliminar errores anteriores
-        const errorElement = field.parentElement.querySelector('.form-error:not(.password-match-error)');
+        const formGroup = field.closest('.form-group');
+        const errorElement = formGroup.querySelector('.form-error:not(.password-match-error)');
         if (errorElement) {
             errorElement.remove();
         }
@@ -222,7 +241,7 @@
             }
             
             // Añadir el mensaje de error al grupo del campo
-            field.parentElement.appendChild(errorDiv);
+            formGroup.appendChild(errorDiv);
             field.classList.add('is-invalid');
             return false;
         } else {
@@ -244,7 +263,8 @@
     emailField.addEventListener('blur', function() {
         if (this.value && !validateEmail(this.value)) {
             // Eliminar errores anteriores
-            const existingError = this.parentElement.querySelector('.form-error');
+            const formGroup = this.closest('.form-group');
+            const existingError = formGroup.querySelector('.form-error');
             if (existingError) {
                 existingError.remove();
             }
@@ -253,7 +273,7 @@
             const errorDiv = document.createElement('div');
             errorDiv.className = 'form-error';
             errorDiv.textContent = 'Introduzca un correo electrónico válido.';
-            this.parentElement.appendChild(errorDiv);
+            formGroup.appendChild(errorDiv);
             this.classList.add('is-invalid');
         }
     });
@@ -269,7 +289,8 @@
             // Si el campo tiene valor, quitar la clase de error
             if (this.value) {
                 this.classList.remove('is-invalid');
-                const errorElement = this.parentElement.querySelector('.form-error:not(.password-match-error)');
+                const formGroup = this.closest('.form-group');
+                const errorElement = formGroup.querySelector('.form-error:not(.password-match-error)');
                 if (errorElement) {
                     errorElement.remove();
                 }
@@ -281,7 +302,8 @@
     if (password1Field && password2Field) {
         password2Field.addEventListener('input', function() {
             if (password1Field.value && password2Field.value) {
-                const errorElement = password2Field.parentElement.querySelector('.password-match-error');
+                const formGroup = this.closest('.form-group');
+                const errorElement = formGroup.querySelector('.password-match-error');
                 
                 if (password1Field.value !== password2Field.value) {
                     // Mostrar error de coincidencia
@@ -289,7 +311,7 @@
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'form-error password-match-error';
                         errorDiv.textContent = 'Las contraseñas no coinciden';
-                        password2Field.parentElement.appendChild(errorDiv);
+                        formGroup.appendChild(errorDiv);
                     }
                     password2Field.classList.add('is-invalid');
                 } else {
@@ -303,12 +325,11 @@
         });
     }
     
-    // Validar formulario completo al enviar
-    const form = document.querySelector('form.custom-form');
-    form.addEventListener('submit', function(e) {
+    // Validar todos los campos
+    function validateForm() {
         let isValid = true;
-
-
+        
+        // Validar campos individuales
         allFields.forEach(field => {
             if (!validateField(field)) {
                 isValid = false;
@@ -316,8 +337,10 @@
         });
         
         // Validar coincidencia de contraseñas
-        if (password1Field.value && password2Field.value && password1Field.value !== password2Field.value) {
-            isValid = false;
+        if (password1Field && password2Field) {
+            if (password1Field.value && password2Field.value && password1Field.value !== password2Field.value) {
+                isValid = false;
+            }
         }
         
         // Validar formato de email
@@ -325,19 +348,55 @@
             isValid = false;
         }
         
-        // Detener envío si hay errores
-        if (!isValid) {
-            e.preventDefault();
+        return isValid;
+    }
+    
+    // Modificar el comportamiento del botón Guardar
+    saveButton.addEventListener('click', function(e) {
+        e.preventDefault(); // Evitar el envío inmediato
+        
+        // Validar el formulario
+        if (validateForm()) {
+            console.log("Formulario válido, mostrando modal");
+            
+            // Agregar un campo oculto para confirmar
+            if (!document.querySelector('input[name="confirmar"]')) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'confirmar';
+                hiddenInput.value = 'true';
+                form.appendChild(hiddenInput);
+            }
+            
+            // Mostrar el modal SOLO si el formulario es válido
+            modal.show();
+            
+            // Enviar el formulario después de 3 segundos
+            setTimeout(function() {
+                form.submit();
+            }, 3000);
+        } else {
+            console.log("Formulario inválido, no se muestra el modal");
+            
+            // Hacer scroll al primer campo con error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
         }
     });
+    
+    // Limpiar campos al recargar la página
     window.addEventListener('pageshow', function(event) {
         if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
             document.querySelectorAll('form.custom-form input').forEach(input => {
                 input.value = '';
             });
         }
-
     });
+    
+    // Funcionalidad para mostrar/ocultar contraseña
     const togglePassword = document.getElementById('togglePassword');
     if (togglePassword && password1Field) {
         togglePassword.addEventListener('click', function() {
@@ -356,23 +415,26 @@
         });
     }
 
-    const password2Toggle = document.createElement('i');
-    password2Toggle.className = 'toggle-password fa-eye';
-    password2Toggle.id = 'togglePassword2';
-    password2Field.parentElement.appendChild(password2Toggle);
-
-    password2Toggle.addEventListener('click', function() {
-        const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
-        password2Field.setAttribute('type', type);
+    // Toggle para el segundo campo de contraseña
+    if (password2Field) {
+        const password2Toggle = document.getElementById('togglePassword2') || 
+                                document.querySelector('#id_password2 + .toggle-password');
         
-        if (this.classList.contains('fa-eye')) {
-                this.classList.remove('fa-eye');
-                this.classList.add('fa-eye-slash');
-            } else {
-                this.classList.remove('fa-eye-slash');
-                this.classList.add('fa-eye');
-            }
-});
+        if (password2Toggle) {
+            password2Toggle.addEventListener('click', function() {
+                const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
+                password2Field.setAttribute('type', type);
+                
+                if (this.classList.contains('bi-eye')) {
+                    this.classList.remove('bi-eye');
+                    this.classList.add('bi-eye-slash');
+                } else {
+                    this.classList.remove('bi-eye-slash');
+                    this.classList.add('bi-eye');
+                }
+            });
+        }
+    }
 });
 </script>
 {% endblock %}

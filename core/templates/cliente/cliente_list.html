@@ -30,15 +30,15 @@
 
   <!-- Campo de búsqueda AJAX -->
   <div class="search-container mb-3 search-form">
-    <div class="input-group">
+    <div class="input-group gap-2">
       <input type="text" id="search-cliente" class="form-control" placeholder="Buscar cliente">
       <button id="btn-search" class="btn btn-search" type="button">
-        <i class="bi bi-search text-secondary"></i> 
+        <i class="bi bi-search text-secondary"></i>
       </button>
     </div>
   </div>
 
-  <!-- Lista de reparaciones -->
+  <!-- Lista de clientes -->
   <div class="table-container">
     <div id="no-results-message" class="alert alert-info text-center" style="display: none;">
       <i class="bi bi-exclamation-circle me-2"></i> El cliente no existe
@@ -54,25 +54,21 @@
       </thead>
       <tbody>
         {% for cliente in clientes %}
-          <tr>
-            <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.apellido }}</td>
-            <td>{{ cliente.telefono }}</td>
-            <td>
-              <a href="{% url 'cliente_editar' id=cliente.id %}" class="btn btn-sm btn-outline-primary" title="Editar cliente">
-                <i class="bi bi-pencil fs-4"></i>
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="4" class="text-center">No se encontraron resultados.</td>
-          </tr>
-          {% endfor %}
+        <tr>
+          <td>{{ cliente.nombre }}</td>
+          <td>{{ cliente.apellido }}</td>
+          <td>{{ cliente.telefono }}</td>
+          <td>
+            <a href="{% url 'cliente_editar' cliente.id %}" class="btn btn-sm btn-outline-primary"
+              title="Editar cliente">
+              <i class="bi bi-pencil fs-4"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
-  
   <!-- Paginación -->
   {% if is_paginated %}
   <nav aria-label="Page navigation">
@@ -141,27 +137,27 @@
 
     // Función para filtrar la tabla según el término de búsqueda
     function buscarClientes() {
-  var searchTerm = $("#search-cliente").val();
+      var searchTerm = $("#search-cliente").val();
 
-  if (searchTerm.length < 2) {
-    location.reload(); // Volver al listado original si se limpia el campo
-    return;
-  }
+      if (searchTerm.length < 2) {
+        location.reload(); // Volver al listado original si se limpia el campo
+        return;
+      }
+    };
+    $.ajax({
+        url: "{% url 'cliente_search' %}",
+        data: { term: searchTerm },
+        dataType: "json",
+        success: function (data) {
+          const $tbody = $("table tbody");
+          $tbody.empty();
 
-  $.ajax({
-    url: "{% url 'cliente_search' %}",
-    data: { term: searchTerm },
-    dataType: "json",
-    success: function (data) {
-      const $tbody = $("table tbody");
-      $tbody.empty();
-
-      if (data.length === 0) {
-        $("#no-results-message").show();
-      } else {
-        $("#no-results-message").hide();
-        data.forEach(cliente => {
-          const row = `
+          if (data.length === 0) {
+            $("#no-results-message").show();
+          } else {
+            $("#no-results-message").hide();
+            data.forEach(cliente => {
+              const row = `
             <tr>
               <td>${cliente.nombre}</td>
               <td>${cliente.apellido}</td>
@@ -173,16 +169,14 @@
               </td>
             </tr>
           `;
-          $tbody.append(row);
-        });
-      }
-    },
-    error: function () {
-      alert("Error al buscar clientes.");
-    }
-  });
-
-
+              $tbody.append(row);
+            });
+          }
+        },
+        error: function () {
+          alert("Error al buscar clientes.");
+        }
+      });
 
       // Mostrar u ocultar el mensaje
       if (found) {
@@ -190,7 +184,7 @@
       } else {
         $("#no-results-message").show();
       }
-    }
   });
+
 </script>
 {% endblock %}
