@@ -143,7 +143,6 @@
         location.reload(); // Volver al listado original si se limpia el campo
         return;
       }
-    };
     $.ajax({
         url: "{% url 'cliente_search' %}",
         data: { term: searchTerm },
@@ -184,6 +183,7 @@
       } else {
         $("#no-results-message").show();
       }
+    }
   });
 
 </script>
