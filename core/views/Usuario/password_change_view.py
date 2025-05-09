@@ -23,12 +23,12 @@ def password_change_view(request):
     
     # Validar contraseña actual
     if not request.user.check_password(contrasenia_actual):
-        form.add_error('contrasenia_actual', 'La contraseña actual es incorrecta.')
+        form.add_error('contrasenia_actual', 'Contraseña incorrecta')
         return render(request, url_cambiar_contrasenia, {'form': form})
     
     # Validar que la nueva contraseña sea diferente
     if contrasenia_actual == contrasenia_nueva:
-        form.add_error('contrasenia_nueva', 'La nueva contraseña debe ser diferente a la actual.')
+        form.add_error('contrasenia_nueva', 'La contraseña nueva no puede ser igual a la anterior')
         return render(request, url_cambiar_contrasenia, {'form': form})
     
     # Cambiar la contraseña
@@ -39,12 +39,11 @@ def password_change_view(request):
         # Actualizar la sesión para evitar cerrarla al cambiar la contraseña
         update_session_auth_hash(request, request.user)
         
+        # Devolver el formulario limpio con mensaje de éxito
         return render(request, url_cambiar_contrasenia, {
-            'form': PasswordChangeForm(),  # Limpia el formulario
-            'success': 'Contraseña actualizada correctamente'  # Muestra el modal
+            'form': PasswordChangeForm(),
+            'success': 'Su contraseña ha sido actualizada correctamente'
         })
     except Exception as e:
-        return render(request, url_cambiar_contrasenia, {
-            'form': form,
-            'error': f'Error al cambiar la contraseña: {str(e)}'
-        })
+        form.add_error(None, f'Error al cambiar la contraseña: {str(e)}')
+        return render(request, url_cambiar_contrasenia, {'form': form})

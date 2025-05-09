@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import check_password
 
 class PasswordChangeForm(forms.Form):
     """
-    Formulario para cambiar la contrasenia del usuario.
+    Formulario para cambiar la contraseña del usuario.
     """
 
     def __init__(self, *args, **kwargs):
@@ -24,13 +24,13 @@ class PasswordChangeForm(forms.Form):
         max_length=16,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'contrasenia ACTUAL',
+            'placeholder': 'Contraseña ACTUAL',
             'autocomplete': 'current-password'
         }),
         error_messages={
             'required': 'Este campo es obligatorio',
-            'min_length': 'La contrasenia debe tener al menos 8 caracteres',
-            'max_length': 'La contrasenia no puede tener más de 16 caracteres',
+            'min_length': 'La contraseña debe tener al menos 8 caracteres',
+            'max_length': 'La contraseña no puede tener más de 16 caracteres',
         }
     )
     
@@ -40,13 +40,13 @@ class PasswordChangeForm(forms.Form):
         max_length=16,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'contrasenia NUEVA',
+            'placeholder': 'Contraseña NUEVA',
             'autocomplete': 'new-password'
         }),
         error_messages={
             'required': 'Este campo es obligatorio',
-            'min_length': 'La contrasenia debe tener al menos 8 caracteres',
-            'max_length': 'La contrasenia no puede tener más de 16 caracteres',
+            'min_length': 'La contraseña debe tener al menos 8 caracteres',
+            'max_length': 'La contraseña no puede tener más de 16 caracteres',
         }
     )
     
@@ -56,30 +56,30 @@ class PasswordChangeForm(forms.Form):
         max_length=16,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'CONFIRMAR contrasenia',
+            'placeholder': 'CONFIRMAR contraseña',
             'autocomplete': 'new-password'
         }),
         error_messages={
             'required': 'Este campo es obligatorio',
-            'min_length': 'La contrasenia debe tener al menos 8 caracteres',
-            'max_length': 'La contrasenia no puede tener más de 16 caracteres',
+            'min_length': 'La contraseña debe tener al menos 8 caracteres',
+            'max_length': 'La contraseña no puede tener más de 16 caracteres',
         }
     )
 
     def clean_contrasenia_actual(self):
         """
-        Verifica que la contrasenia actual sea correcta.
+        Verifica que la contraseña actual sea correcta.
         """
         contrasenia_actual = self.cleaned_data.get('contrasenia_actual')
         
         if self.user and not self.user.check_password(contrasenia_actual):
-            raise forms.ValidationError('La contrasenia actual es incorrecta')
+            raise forms.ValidationError('Contraseña incorrecta')
             
         return contrasenia_actual
 
     def clean_contrasenia_nueva(self):
         """
-        Valida que la nueva contrasenia cumpla con los requisitos de seguridad.
+        Valida que la nueva contraseña cumpla con los requisitos de seguridad.
         """
         contrasenia_nueva = self.cleaned_data.get('contrasenia_nueva')
         
@@ -87,25 +87,25 @@ class PasswordChangeForm(forms.Form):
             return contrasenia_nueva  # El error required ya está manejado
         
         if not re.search(r'[A-Za-z]', contrasenia_nueva):
-            raise forms.ValidationError('La contrasenia debe tener al menos una letra')
+            raise forms.ValidationError('La contraseña debe tener al menos una letra')
         
         if not re.search(r'\d', contrasenia_nueva):
-            raise forms.ValidationError('La contrasenia debe tener al menos un número')
+            raise forms.ValidationError('La contraseña debe tener al menos un número')
         
         if not re.search(r'[!@#$%^&*?]', contrasenia_nueva):
-            raise forms.ValidationError('La contrasenia debe tener al menos un caracter especial')
+            raise forms.ValidationError('La contraseña debe tener al menos un caracter especial')
         
         return contrasenia_nueva
 
     def clean_confirmacion_contrasenia(self):
         """
-        Verifica que las contrasenias coincidan.
+        Verifica que las contraseñas coincidan.
         """
         contrasenia_nueva = self.cleaned_data.get('contrasenia_nueva')
         confirmacion_contrasenia = self.cleaned_data.get('confirmacion_contrasenia')
         
         if contrasenia_nueva and confirmacion_contrasenia and contrasenia_nueva != confirmacion_contrasenia:
-            raise forms.ValidationError('Las contrasenias no coinciden')
+            raise forms.ValidationError('Las contraseñas no coinciden')
         
         return confirmacion_contrasenia
 
@@ -118,15 +118,16 @@ class PasswordChangeForm(forms.Form):
         contrasenia_nueva = cleaned_data.get('contrasenia_nueva')
         
         if contrasenia_actual and contrasenia_nueva and contrasenia_actual == contrasenia_nueva:
-            self.add_error('contrasenia_nueva', 'La contrasenia nueva no puede ser igual a la anterior')
+            self.add_error('contrasenia_nueva', 'La contraseña nueva no puede ser igual a la anterior')
         
         return cleaned_data
         
     def save(self, commit=True):
         """
-        Guarda la nueva contrasenia para el usuario.
+        Guarda la nueva contraseña para el usuario.
         """
         if self.user and commit:
             self.user.set_password(self.cleaned_data.get('contrasenia_nueva'))
             self.user.save()
+            return 'Su contraseña ha sido actualizada correctamente'
         return self.user
