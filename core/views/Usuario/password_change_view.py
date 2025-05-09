@@ -8,33 +8,43 @@ from core.forms.password_change_form import PasswordChangeForm
 @login_required
 @require_http_methods(["GET", "POST"])
 def password_change_view(request):
-    """
-    Vista para cambiar la contraseña del usuario.
-    Utiliza el formulario PasswordChangeForm para validar y procesar el cambio.
-    """
+    url_cambiar_contrasenia = 'usuario/password_change.html'
     if request.method == 'GET':
-        # Pasar el usuario al formulario
-        form = PasswordChangeForm(user=request.user)
-        return render(request, 'usuario/password_change.html', {'form': form})
+        return render(request, url_cambiar_contrasenia, {'form': PasswordChangeForm()})
 
     # Pasar el usuario y los datos POST al formulario
     form = PasswordChangeForm(request.POST, user=request.user)
     
     if not form.is_valid():
-        return render(request, 'usuario/password_change.html', {'form': form})
-    
-    # El formulario ya realizó todas las validaciones necesarias
-    # Usar el método save del formulario para cambiar la contraseña
-    form.save()
-    
-    # Actualizar la sesión para evitar cerrarla al cambiar la contraseña
-    update_session_auth_hash(request, request.user)
+        return render(request, url_cambiar_contrasenia, {'form': form})
 
-    # Mensaje de éxito para el usuario
-    messages.success(request, "Tu contraseña ha sido cambiada correctamente.")
+    contrasenia_actual = form.cleaned_data.get('contrasenia_actual')
+    contrasenia_nueva = form.cleaned_data.get('contrasenia_nueva')
     
-    # Redirigir o mostrar el éxito con un formulario limpio
-    return render(request, 'usuario/password_change.html', {
-        'form': PasswordChangeForm(user=request.user),  # Formulario limpio
-        'success': "Contraseña actualizada correctamente"  # Para el modal
-    })
+    # Validar contraseña actual
+    if not request.user.check_password(contrasenia_actual):
+        form.add_error('contrasenia_actual', 'La contraseña actual es incorrecta.')
+        return render(request, url_cambiar_contrasenia, {'form': form})
+    
+    # Validar que la nueva contraseña sea diferente
+    if contrasenia_actual == contrasenia_nueva:
+        form.add_error('contrasenia_nueva', 'La nueva contraseña debe ser diferente a la actual.')
+        return render(request, url_cambiar_contrasenia, {'form': form})
+    
+    # Cambiar la contraseña
+    try:
+        request.user.set_password(contrasenia_nueva)
+        request.user.save()
+        
+        # Actualizar la sesión para evitar cerrarla al cambiar la contraseña
+        update_session_auth_hash(request, request.user)
+        
+        return render(request, url_cambiar_contrasenia, {
+            'form': PasswordChangeForm(),  # Limpia el formulario
+            'success': 'Contraseña actualizada correctamente'  # Muestra el modal
+        })
+    except Exception as e:
+        return render(request, url_cambiar_contrasenia, {
+            'form': form,
+            'error': f'Error al cambiar la contraseña: {str(e)}'
+        })

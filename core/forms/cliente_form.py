@@ -2,6 +2,8 @@ from django import forms
 from core.models import Cliente
 from django.db.models import Q
 
+clase_form_validate = 'validate form-control'
+
 class ClienteForm(forms.ModelForm):
     telefono = forms.CharField(
         label="Teléfono",
@@ -9,7 +11,7 @@ class ClienteForm(forms.ModelForm):
         max_length=10,
         min_length=10,
         widget=forms.TextInput(attrs={
-            'class': 'validate form-control',
+            'class': clase_form_validate,
             'placeholder': 'Telefono',
         }),
         error_messages={
@@ -24,11 +26,11 @@ class ClienteForm(forms.ModelForm):
         fields = ['nombre', 'apellido', 'telefono']
         widgets = {
             'nombre': forms.TextInput(attrs={
-                'class': 'validate form-control',
+                'class': clase_form_validate,
                 'placeholder': 'Nombre'
             }),
             'apellido': forms.TextInput(attrs={
-                'class': 'validate form-control',
+                'class': clase_form_validate,
                 'placeholder': 'Apellido'
             }),
         }

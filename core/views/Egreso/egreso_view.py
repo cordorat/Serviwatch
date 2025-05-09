@@ -13,7 +13,7 @@ def egreso_view(request):
         form = EgresoForm(request.POST)
         if form.is_valid():
             # Crea el objeto pero NO lo guarda
-            egreso = form.save(commit=False)
+            form.save(commit=False)
             # Pasa el objeto a la vista de confirmación
             request.session['egreso_data'] = {
                 'fecha': str(form.cleaned_data['fecha']),
