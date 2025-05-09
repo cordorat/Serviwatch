@@ -42,7 +42,7 @@ class ReparacionForm(forms.ModelForm):
             attrs={
                 'class': 'form-control',
                 'id': 'id_fecha_entrega_estimada',
-                'placeholder': 'dd/mm/aaaa',
+                'placeholder': 'Fecha estimada entrega dd/mm/aaaa',
                 'autocomplete': 'off'
             }
         )
@@ -136,15 +136,25 @@ class ReparacionForm(forms.ModelForm):
 
     def clean_codigo_orden(self):
         codigo = self.cleaned_data.get('codigo_orden')
+        
+        # Validaciones existentes
         if not codigo:
             raise forms.ValidationError("El código de orden es obligatorio.")
         if not str(codigo).isdigit():
             raise forms.ValidationError("El código de orden debe ser numérico.")
         if len(str(codigo)) > 10:
             raise forms.ValidationError("El código de orden no puede tener más de 10 dígitos.")
-        # Verificar si el código ya existe
-        if Reparacion.objects.filter(codigo_orden=codigo).exists():
+        
+        # Verificar si el código ya existe, excluyendo la instancia actual
+        existing_query = Reparacion.objects.filter(codigo_orden=codigo)
+        
+        # Si estamos editando una reparación existente, excluirla de la validación
+        if self.instance and self.instance.pk:
+            existing_query = existing_query.exclude(pk=self.instance.pk)
+        
+        if existing_query.exists():
             raise forms.ValidationError("Este código de orden ya existe.")
+        
         return codigo
 
     def clean_fecha_entrega_estimada(self):

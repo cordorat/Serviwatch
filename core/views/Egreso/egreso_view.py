@@ -13,7 +13,7 @@ def egreso_view(request):
         form = EgresoForm(request.POST)
         if form.is_valid():
             # Crea el objeto pero NO lo guarda
-            egreso = form.save(commit=False)
+            form.save(commit=False)
             # Pasa el objeto a la vista de confirmación
             request.session['egreso_data'] = {
                 'fecha': str(form.cleaned_data['fecha']),
@@ -28,7 +28,17 @@ def egreso_view(request):
             datos = request.session['egreso_data']
             
             # Convertir la fecha de string a date para el formulario
-            fecha = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+            # Por un manejo flexible de formatos:
+            try:
+                # Intenta primero el formato previo
+                fecha = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+            except ValueError:
+                try:
+                    # Intenta el formato con guiones
+                    fecha = datetime.strptime(datos['fecha'], '%d-%m-%Y').date()
+                except ValueError:
+                    # Intenta el formato con barras (Flatpickr)
+                    fecha = datetime.strptime(datos['fecha'], '%d/%m/%Y').date()
             
             # Pre-poblar el formulario con los datos guardados
             form = EgresoForm(initial={

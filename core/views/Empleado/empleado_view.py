@@ -58,13 +58,11 @@ def empleado_create_view(request, id=None):
         if form.is_valid():
             print("Formulario válido!")
             try:
-                if modo == 'editar':
-                    # Guardar directamente ya que el instance está establecido
-                    form.save()
-                    messages.success(
-                        request, f'Empleado {"editado" if modo == "editar" else "creado"} exitosamente.')
-                    return redirect('empleado_list')
-                
+                empleado = form.save()
+                messages.success(
+                    request, f'Empleado {"editado" if modo == "editar" else "creado"} exitosamente.')
+                return redirect('empleado_list')
+
             except Exception as e:
                 print(f"Error al guardar: {str(e)}")  # Depuración
                 messages.error(request, f'Error: {str(e)}')

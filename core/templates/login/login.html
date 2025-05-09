@@ -12,7 +12,7 @@
     <div class="login-container">
         <div class="brand-section">
 
-            <img src="{% static 'images/logo.png' %}" width="100%" height="1000px" alt="Logo" class="logo">
+            <img src="{% static 'images/logo.png' %}" width="100%" height="150px" alt="Logo" class="logo">
         
         </div>
         
@@ -35,7 +35,7 @@
                 
                 <div class="input-group">
                     <i class="icon fas fa-lock"></i>
-                    <input type="password" name="contraseña" placeholder="CONTRASEÑA" class="form-control {% if contraseña_error %}input-error{% endif %}">
+                    <input type="password" name="contrasenia" placeholder="CONTRASEÑA" class="form-control {% if contrasenia_error %}input-error{% endif %}">
                     <i class="toggle-password fas fa-eye" id="togglePassword"></i>
                 </div>
                 
@@ -50,12 +50,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Toggle password visibility
             const togglePassword = document.getElementById('togglePassword');
-            const contraseñaInput = document.querySelector('input[name="contraseña"]');
+            const contraseniaInput = document.querySelector('input[name="contrasenia"]');
             
-            if (togglePassword && contraseñaInput) {
+            if (togglePassword && contraseniaInput) {
                 togglePassword.addEventListener('click', function() {
-                    const type = contraseñaInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    contraseñaInput.setAttribute('type', type);
+                    const type = contraseniaInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    contraseniaInput.setAttribute('type', type);
                     this.classList.toggle('fa-eye');
                     this.classList.toggle('fa-eye-slash');
                 });

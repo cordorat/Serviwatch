@@ -19,7 +19,7 @@ def is_email_matching(user, email):
 
 def generate_password_reset_token(user):
     token = get_random_string(length=32)
-    reset_token = PasswordResetToken.objects.create(user=user, token=token)
+    PasswordResetToken.objects.create(user=user, token=token)
     return token
 
 
