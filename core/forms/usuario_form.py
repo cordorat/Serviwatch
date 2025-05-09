@@ -69,49 +69,57 @@ class FormularioRegistroUsuario(UserCreationForm):
         model = User
         fields = ("username", "email", "password1", "password2")
     
-    def clean_password1(self):
+    def _validar_longitud_password(self, password):
+        """Valida la longitud de la contraseña"""
+        if not password:
+            return
+            
+        if len(password) < 8:
+            raise ValidationError(
+                "La contraseña debe tener al menos 8 caracteres.",
+                code='password_too_short',
+            )
+        elif len(password) > 16:
+            raise ValidationError(
+                "La contraseña no puede tener más de 16 caracteres.",
+                code='password_too_long',
+            )
+    
+    def _validar_caracteres_password(self, password):
+        """Valida los requisitos de caracteres de la contraseña"""
+        if not password:
+            return
+            
+        # Lista de validaciones para hacer el código más limpio
+        validaciones = [
+            (not any(char.isupper() for char in password),
+            "La contraseña debe incluir al menos una letra mayúscula.",
+            'password_no_uppercase'),
+            
+            (not any(char.islower() for char in password),
+            "La contraseña debe incluir al menos una letra minúscula.",
+            'password_no_lowercase'),
+            
+            (not any(char.isdigit() for char in password),
+            "La contraseña debe incluir al menos un número.",
+            'password_no_numbers'),
+            
+            (all(char.isalnum() for char in password),
+            "La contraseña debe incluir al menos un carácter especial.",
+            'password_no_special')
+        ]
+        
+        # Realizar todas las validaciones
+        for condicion, mensaje, codigo in validaciones:
+            if condicion:
+                raise ValidationError(mensaje, code=codigo)
 
+    def clean_password1(self):
         password1 = self.cleaned_data.get("password1")
         
-        # Verificar que la contraseña tenga entre 8 y 16 caracteres
-        if password1 and (len(password1) < 8 or len(password1) > 16):
-            if len(password1) < 8:
-                raise ValidationError(
-                    "La contraseña debe tener al menos 8 caracteres.",
-                    code='password_too_short',
-                )
-            else:
-                raise ValidationError(
-                    "La contraseña no puede tener más de 16 caracteres.",
-                    code='password_too_long',
-                )
-                
-        # Verificar que la contraseña tenga letras
-        if password1 and not any(char.isupper() for char in password1):
-            raise ValidationError(
-                "La contraseña debe incluir al menos una letra mayúscula.",
-                code='password_no_uppercase',
-            )
-        
-        if password1 and not any(char.islower() for char in password1):
-            raise ValidationError(
-                "La contraseña debe incluir al menos una letra minúscula.",
-                code='password_no_lowercase',
-            )
-            
-        # Verificar que la contraseña tenga números
-        if password1 and not any(char.isdigit() for char in password1):
-            raise ValidationError(
-                "La contraseña debe incluir al menos un número.",
-                code='password_no_numbers',
-            )
-            
-        # Verificar que la contraseña tenga caracteres especiales
-        if password1 and all(char.isalnum() for char in password1):
-            raise ValidationError(
-                "La contraseña debe incluir al menos un carácter especial.",
-                code='password_no_special',
-            )
+        # Extraer las validaciones a funciones independientes
+        self._validar_longitud_password(password1)
+        self._validar_caracteres_password(password1)
         
         # Verificar que la contraseña no sea igual al nombre de usuario
         if password1 and self.cleaned_data.get("username") and password1.lower() == self.cleaned_data.get("username").lower():
@@ -126,7 +134,7 @@ class FormularioRegistroUsuario(UserCreationForm):
 
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
+        if (password1 and password2) and (password1 != password2):
             raise ValidationError(
                 "Las contraseñas no coinciden. Por favor, inténtalo de nuevo.",
                 code='password_mismatch',

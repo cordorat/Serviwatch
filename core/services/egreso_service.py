@@ -1,9 +1,8 @@
 from core.models.egreso import Egreso
 from django.db.models import Sum
 from datetime import date
-
-from core.models.egreso import Egreso
 from django.core.exceptions import ValidationError
+from django.db.utils import DatabaseError
 
 def crear_egreso(datos):
     """
@@ -40,7 +39,7 @@ def crear_egreso(datos):
         raise ve
     except Exception as e:
         # Manejar cualquier otro tipo de error
-        raise Exception(f"Error al crear el egreso: {str(e)}")
+        raise DatabaseError(f"Error al crear el egreso: {str(e)}")
     
     
 def obtener_total_egresos_dia(fecha=None):

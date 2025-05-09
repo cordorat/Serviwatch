@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model, login
 
-def validate_credentials(usuario, contraseña):
+def validate_credentials(usuario, contrasenia):
     """Valida que las credenciales no estén vacías"""
-    if not usuario or not contraseña:
+    if not usuario or not contrasenia:
         return False, "Ingrese las credenciales"
     return True, None
 
