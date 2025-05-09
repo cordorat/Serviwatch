@@ -4,10 +4,13 @@
 {% block title %}Agregar Pila{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="form-header">
-    <h2 class="titulo">AGREGAR PILA</h2>
-  </div>
+<h2 class="titulo">
+  {% if modo == 'editar' %}
+  EDITAR PILA
+  {% else %}
+  AGREGAR PILA
+  {% endif %}
+</h2>
 
   <div class="form-content">
     <form method="POST" id="pilaForm" class="custom-form form-reparacion" novalidate>
@@ -79,7 +82,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center" style="background-color: #f1f1f1;">
       <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
-        {% if form.instance.id %}
+        {% if modo == 'editar' %}
         <h4 class="titulo m-0" id="modalMessage">REFERENCIA DE PILA ACTUALIZADA CORRECTAMENTE</h4>
         {% else %}
         <h4 class="titulo m-0" id="modalMessage">REFERENCIA DE PILA ACTUALIZADA AGREGADA CORRECTAMENTE</h4>

@@ -28,7 +28,7 @@
           <td>${{ pila.precio }}</td>
           <td>{{ pila.cantidad }}</td>
           <td>
-            <a href="" class="btn btn-sm btn-outline-primary" title="Editar pila">
+            <a href="{% url 'pila_editar' id=pila.id %}" class="btn btn-sm btn-outline-primary" title="Editar pila">
               <i class="bi bi-pencil-square"></i>
             </a>
           </td>
