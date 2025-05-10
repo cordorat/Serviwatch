@@ -7,91 +7,36 @@
     position: relative;
   }
 
-  #search-cliente {
-    border-radius: 4px 0 0 4px;
-  }
-
-  .btn-primary {
-    border-radius: 0 4px 4px 0;
-  }
-  
-  /* Estilos para el dropdown personalizado */
-  .dropdown-container {
-    position: relative;
-  }
-  
-  .dropdown-results {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    z-index: 1000;
-    margin-top: 2px;
-  }
-  
-  .dropdown-results.show {
-    display: block;
-  }
-  
-  .dropdown-item {
-    padding: 10px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    transition: all 0.2s ease;
-  }
-  
-  /* Estilo mejorado para hover y elemento activo */
-  .dropdown-item:hover, .dropdown-item.active {
-    background-color: #f0f4f8;
-    font-weight: bold;
-    border-left: 4px solid #88991d;
-    padding-left: 11px; /* Compensar el borde izquierdo para mantener alineación */
-  }
-  
-  .dropdown-item:last-child {
-    border-bottom: none;
+  #search-cliente-cliente {
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
   }
 </style>
 
 <div class="main-content">
-  <!-- Botón Agregar reparación -->
   <div class="header-icons">
     <h2 class="titulo">CLIENTE</h2>
-    <a href="{% url 'cliente_create' %}" class="btn btn-add me-3"> Agregar Cliente</a>
   </div>
   <br>
 
-  <!-- Campo de búsqueda con dropdown personalizado -->
-  <form method="GET" action="{% url 'cliente_list' %}" class="search-form" id="search-form">
-    <div class="search-container mb-3">
-      <div class="input-group gap-2 dropdown-container">
-        <input type="text" id="search-cliente" name="term" class="form-control" 
-               placeholder="Buscar cliente" value="{{ search_term }}" 
-               autocomplete="off">
-        <button id="btn-search" class="btn btn-search" type="submit">
-          <i class="bi bi-search text-secondary"></i>
-        </button>
-        
-        <!-- Dropdown personalizado para reemplazar el datalist -->
-        <div id="dropdown-results" class="dropdown-results">
-          {% for cliente in all_clientes %}
-            <div class="dropdown-item" 
-                 data-value="{{ cliente.nombre }} {{ cliente.apellido }}"
-                 data-display="{{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.telefono }}">
-              {{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.telefono }}
-            </div>
-          {% endfor %}
+  <!-- Campo de búsqueda simple sin dropdown -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Campo de búsqueda -->
+    <form method="GET" action="{% url 'cliente_list' %}" class="search-form" id="search-form">
+      <div class="search-container">
+        <div class="input-group gap-2">
+          <input type="text" id="search-cliente-cliente" name="term" class="form-control" 
+                 placeholder="Buscar cliente" value="{{ search_term }}">
+          <button id="btn-search" class="btn btn-search" type="submit">
+            <i class="bi bi-search text-secondary"></i>
+          </button>
         </div>
       </div>
-    </div>
-  </form>
+    </form>
+
+    <!-- Botón Agregar Cliente alineado a la derecha -->
+    <a href="{% url 'cliente_create' %}" class="btn btn-add">Agregar Cliente</a>
+  </div>
 
   <!-- Lista de clientes -->
   <div class="table-container">
@@ -154,129 +99,4 @@
   </nav>
   {% endif %}
 </div>
-
-<!-- Script para el dropdown personalizado -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-cliente');
-    const dropdownResults = document.getElementById('dropdown-results');
-    const searchForm = document.getElementById('search-form');
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
-    let activeItemIndex = -1;
-    
-    // Función para filtrar resultados
-    function filterResults() {
-      const searchTerm = searchInput.value.toLowerCase();
-      let visibleItems = 0;
-      
-      dropdownItems.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-          item.style.display = 'block';
-          visibleItems++;
-        } else {
-          item.style.display = 'none';
-        }
-      });
-      
-      // Mostrar u ocultar el dropdown según si hay resultados
-      if (visibleItems > 0 && searchTerm.length > 0) {
-        dropdownResults.classList.add('show');
-      } else {
-        dropdownResults.classList.remove('show');
-      }
-      
-      // Resetear el índice activo
-      activeItemIndex = -1;
-      updateActiveItem();
-    }
-    
-    // Función para actualizar el elemento activo
-    function updateActiveItem() {
-      dropdownItems.forEach((item, index) => {
-        if (index === activeItemIndex && item.style.display !== 'none') {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
-        }
-      });
-    }
-    
-    // Función para navegar por los resultados con teclado
-    function navigateDropdown(direction) {
-      const visibleItems = Array.from(dropdownItems).filter(
-        item => item.style.display !== 'none'
-      );
-      
-      if (visibleItems.length === 0) return;
-      
-      if (direction === 'down') {
-        activeItemIndex = (activeItemIndex < visibleItems.length - 1) ? activeItemIndex + 1 : 0;
-      } else if (direction === 'up') {
-        activeItemIndex = (activeItemIndex > 0) ? activeItemIndex - 1 : visibleItems.length - 1;
-      }
-      
-      updateActiveItem();
-      
-      // Asegurar que el elemento activo sea visible en el dropdown
-      if (activeItemIndex >= 0) {
-        visibleItems[activeItemIndex].scrollIntoView({ block: 'nearest' });
-      }
-    }
-    
-    // Mostrar dropdown al enfocar el input
-    searchInput.addEventListener('focus', function() {
-      if (searchInput.value.length > 0) {
-        filterResults();
-      }
-    });
-    
-    // Filtrar resultados al escribir
-    searchInput.addEventListener('input', filterResults);
-    
-    // Ocultar dropdown al hacer clic fuera
-    document.addEventListener('click', function(e) {
-      if (!searchInput.contains(e.target) && !dropdownResults.contains(e.target)) {
-        dropdownResults.classList.remove('show');
-      }
-    });
-    
-    // Seleccionar elemento al hacer clic
-    dropdownItems.forEach(item => {
-      item.addEventListener('click', function() {
-        searchInput.value = this.getAttribute('data-value');
-        dropdownResults.classList.remove('show');
-        searchForm.submit();
-      });
-    });
-    
-    // Manejar navegación con teclado
-    searchInput.addEventListener('keydown', function(e) {
-      if (dropdownResults.classList.contains('show')) {
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          navigateDropdown('down');
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          navigateDropdown('up');
-        } else if (e.key === 'Enter' && activeItemIndex >= 0) {
-          e.preventDefault();
-          const visibleItems = Array.from(dropdownItems).filter(
-            item => item.style.display !== 'none'
-          );
-          if (visibleItems[activeItemIndex]) {
-            searchInput.value = visibleItems[activeItemIndex].getAttribute('data-value');
-            dropdownResults.classList.remove('show');
-            searchForm.submit();
-          }
-        } else if (e.key === 'Escape') {
-          dropdownResults.classList.remove('show');
-        }
-      } else if (e.key === 'Escape') {
-        searchInput.value = '';
-        searchForm.submit();
-      }
-    });
-  });
-</script>
 {% endblock %}

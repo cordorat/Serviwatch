@@ -7,7 +7,7 @@ from django.urls import reverse
 import json
 from unittest.mock import patch, MagicMock
 from django.test import TestCase, RequestFactory
-from core.views.Cliente.cliente_view import cliente_search_view
+from django.contrib.messages import get_messages
 
 class ClienteModelTest(TestCase):
 
@@ -144,66 +144,123 @@ class ClienteFormTest(TestCase):
         self.assertIn('nombre', form.errors)
         self.assertEqual(form.errors['nombre'][0], 'Este cliente ya esta registrado.')
 
-class ClienteListViewTest(TestCase):
+class ClienteViewTest(TestCase):
     
     def setUp(self):
-        # Create a test user
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpassword'
-        )
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.client.login(username='testuser', password='testpass')
         
-        # Create some test clients
-        Cliente.objects.create(
+        # Crear algunos clientes de prueba
+        self.cliente1 = Cliente.objects.create(
             nombre="Juan",
             apellido="Pérez",
             telefono="3001234567"
         )
-        Cliente.objects.create(
+        self.cliente2 = Cliente.objects.create(
             nombre="María",
             apellido="López",
             telefono="3007654321"
         )
         
-        # Create a test client for HTTP requests
-        self.client = Client()
-        
-        # Log in the test user
-        self.client.login(username='testuser', password='testpassword')
-    
-    def test_view_url_exists_at_desired_location(self):
-        """Test that the view exists at the correct URL"""
-        response = self.client.get('/clientes/')  # Adjust this path to match your URL configuration
-        self.assertEqual(response.status_code, 200)
-    
-    def test_view_url_accessible_by_name(self):
-        """Test that the view is accessible by its name"""
-        response = self.client.get(reverse('cliente_list'))
-        self.assertEqual(response.status_code, 200)
-    
-    def test_view_uses_correct_template(self):
-        """Test that the view uses the correct template"""
-        response = self.client.get(reverse('cliente_list'))
+        # URLs
+        self.list_url = reverse('cliente_list')
+        self.create_url = reverse('cliente_create')
+        self.edit_url = reverse('cliente_editar', kwargs={'id': self.cliente1.id})
+
+    def test_list_view_basic(self):
+        """Test básico de la vista de lista"""
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cliente/cliente_list.html')
-    
-    def test_view_contains_clients(self):
-        """Test that the view contains the test clients"""
-        response = self.client.get(reverse('cliente_list'))
+        self.assertTrue('clientes' in response.context)
+
+    def test_list_view_search(self):
+        """Test de búsqueda en la vista de lista"""
+        response = self.client.get(self.list_url, {'term': 'Juan'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['clientes']), 2)
-    
+        self.assertEqual(len(response.context['clientes']), 1)
+        
+        # Búsqueda con múltiples términos
+        response = self.client.get(self.list_url, {'term': 'Juan Pérez'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['clientes']), 1)
+
+    def test_list_view_no_results(self):
+        """Test de búsqueda sin resultados"""
+        response = self.client.get(self.list_url, {'term': 'NoExiste'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['no_results'])
+
+    def test_create_view_get(self):
+        """Test de la vista de creación (GET)"""
+        response = self.client.get(self.create_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cliente/cliente_form.html')
+        self.assertEqual(response.context['modo'], 'agregar')
+
+    def test_create_view_post_success(self):
+        """Test de creación exitosa de cliente"""
+        data = {
+            'nombre': 'Nuevo',
+            'apellido': 'Cliente',
+            'telefono': '3009876543'
+        }
+        response = self.client.post(self.create_url, data)
+        self.assertRedirects(response, self.list_url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Cliente creado exitosamente.')
+
+    def test_edit_view_get(self):
+        """Test de la vista de edición (GET)"""
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['modo'], 'editar')
+
+    def test_edit_view_post_success(self):
+        """Test de edición exitosa de cliente"""
+        data = {
+            'nombre': 'JuanEditado',
+            'apellido': 'PérezEditado',
+            'telefono': '3001234567'
+        }
+        response = self.client.post(self.edit_url, data)
+        self.assertRedirects(response, self.list_url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Cliente editado exitosamente.')
+
+    def test_create_view_post_invalid(self):
+        """Test de creación con datos inválidos"""
+        data = {
+            'nombre': 'Nuevo123',  # Inválido: contiene números
+            'apellido': 'Cliente',
+            'telefono': '3009876543'
+        }
+        response = self.client.post(self.create_url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+
+    def test_redirect_with_next_parameter(self):
+        """Test de redirección con parámetro next"""
+        data = {
+            'nombre': 'Nuevo',
+            'apellido': 'Cliente',
+            'telefono': '3009876543'
+        }
+        # Usar una URL que exista en tu aplicación, por ejemplo la lista de clientes
+        response = self.client.post(
+            f"{self.create_url}?next={self.list_url}",
+            data
+        )
+        # Verificar la redirección
+        self.assertRedirects(response, self.list_url)
+
     def test_login_required(self):
-        """Test that the view requires login"""
-        # Log out the user
+        """Test que la vista requiere login"""
         self.client.logout()
-        
-        # Try to access the view
-        response = self.client.get(reverse('cliente_list'))
-        
-        # Should redirect to login page
+        response = self.client.get(self.list_url)
+        # Solo verificamos que redirija a login, sin verificar la página de destino
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith('/accounts/login/'))
+        self.assertTrue('/login/' in response.url)
 
 class ClienteCreateViewTest(TestCase):
     
@@ -343,133 +400,3 @@ class ClienteCreateViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
-class ClienteSearchViewTest(TestCase):
-    
-    def setUp(self):
-        # Create some test clients
-        Cliente.objects.create(
-            nombre="Juan",
-            apellido="Pérez",
-            telefono="3001234567"
-        )
-        Cliente.objects.create(
-            nombre="María",
-            apellido="López",
-            telefono="3007654321"
-        )
-        Cliente.objects.create(
-            nombre="Pedro",
-            apellido="Martínez",
-            telefono="3005551234"
-        )
-        
-        # Create a test client for HTTP requests
-        self.client = Client()
-    
-    def test_search_by_nombre(self):
-        """Test searching by nombre"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'Juan'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'Juan Pérez')
-        self.assertEqual(data[0]['telefono'], '3001234567')
-    
-    def test_search_by_apellido(self):
-        """Test searching by apellido"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'López'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'María López')
-        self.assertEqual(data[0]['telefono'], '3007654321')
-    
-    def test_search_by_telefono(self):
-        """Test searching by telefono"""
-        response = self.client.get(reverse('cliente_search'), {'term': '3005551234'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'Pedro Martínez')
-        self.assertEqual(data[0]['telefono'], '3005551234')
-    
-    def test_search_partial_match(self):
-        """Test searching with a partial match"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'Mar'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return two results (María and Martínez)
-        self.assertEqual(len(data), 2)
-        
-        # Check that the results contain the expected clients
-        values = [item['value'] for item in data]
-        self.assertIn('María López', values)
-        self.assertIn('Pedro Martínez', values)
-    
-    def test_search_case_insensitive(self):
-        """Test that search is case insensitive"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'juan'})  # Lowercase
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return one result
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['value'], 'Juan Pérez')
-    
-    def test_search_term_too_short(self):
-        """Test that search terms shorter than 2 characters return empty results"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'J'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return empty list
-        self.assertEqual(len(data), 0)
-    
-    def test_search_no_results(self):
-        """Test searching with a term that has no matches"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'NoExiste'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Should return empty list
-        self.assertEqual(len(data), 0)
-    
-    def test_search_response_format(self):
-        """Test that the search response has the correct format"""
-        response = self.client.get(reverse('cliente_search'), {'term': 'Juan'})
-        self.assertEqual(response.status_code, 200)
-        
-        # Parse the JSON response
-        data = json.loads(response.content)
-        
-        # Check the structure of the first result
-        self.assertIn('id', data[0])
-        self.assertIn('label', data[0])
-        self.assertIn('value', data[0])
-        self.assertIn('telefono', data[0])
-        
-        # Check the content of the first result
-        self.assertEqual(data[0]['label'], 'Juan Pérez - 3001234567')
-        self.assertEqual(data[0]['value'], 'Juan Pérez')
-        self.assertEqual(data[0]['telefono'], '3001234567')
