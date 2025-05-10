@@ -271,25 +271,52 @@
     </script>
 
     <script>
-        // Función global para validación de campos individuales
+        // Refactoriza la validación de campos para reducir la complejidad cognitiva
         function validateField(field) {
-            // Obtener el div de error existente o crear uno nuevo
+            // Preparar el div de error
+            let errorDiv = prepareErrorDiv(field);
+            
+            const fieldName = field.id.replace('id_', '');
+            const value = field.value.trim();
+            
+            // Obtener resultado de validación del campo específico
+            const validationResult = getFieldValidation(fieldName, value);
+            
+            // Actualizar UI basado en validación
+            updateFieldValidationUI(field, errorDiv, validationResult.isValid, validationResult.errorMessage);
+            
+            return validationResult.isValid;
+        }
+
+        // Función auxiliar para preparar el div de error
+        function prepareErrorDiv(field) {
             let errorDiv = field.parentElement.nextElementSibling;
             if (!errorDiv || !errorDiv.classList.contains('error-message')) {
                 errorDiv = document.createElement('div');
                 errorDiv.className = 'error-message';
                 field.parentElement.after(errorDiv);
             }
-
+            
             // Limpiar errores anteriores
             errorDiv.innerHTML = '';
+            return errorDiv;
+        }
 
-            const fieldName = field.id.replace('id_', '');
-            const value = field.value.trim();
+        // Función auxiliar para actualizar la UI según resultado de validación
+        function updateFieldValidationUI(field, errorDiv, isValid, errorMessage) {
+            if (!isValid) {
+                field.classList.add('is-invalid');
+                errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        }
+
+        // Función que centraliza las reglas de validación por campo
+        function getFieldValidation(fieldName, value) {
             let isValid = true;
             let errorMessage = '';
 
-            // Validaciones específicas por campo
             switch (fieldName) {
                 case 'marca_reloj':
                     if (!value) {
@@ -309,15 +336,11 @@
                     break;
 
                 case 'codigo_orden':
-                    if (!value) {
-                        errorMessage = 'El código de orden es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-
                 case 'fecha_entrega_estimada':
+                case 'espacio_fisico':
+                case 'tecnico':
                     if (!value) {
-                        errorMessage = 'La fecha de entrega estimada es obligatoria';
+                        errorMessage = `El ${fieldName.replace('_', ' ')} es obligatorio`;
                         isValid = false;
                     }
                     break;
@@ -331,30 +354,9 @@
                         isValid = false;
                     }
                     break;
-
-                case 'espacio_fisico':
-                    if (!value) {
-                        errorMessage = 'El espacio físico es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-                case 'tecnico':
-                    if (!value) {
-                        errorMessage = 'El técnico es obligatorio';
-                        isValid = false;
-                    }
-                    break;
             }
 
-            // Mostrar mensaje de error si existe
-            if (!isValid) {
-                field.classList.add('is-invalid');
-                errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
-            } else {
-                field.classList.remove('is-invalid');
-            }
-
-            return isValid;
+            return { isValid, errorMessage };
         }
 
         // Función global para validación completa del formulario
