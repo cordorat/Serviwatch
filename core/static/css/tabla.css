@@ -176,6 +176,7 @@
     height: 38px;
     background-color: #C9DC4E;
     border: 2px solid #626E15;
+    border-radius: 4px !important;
 }
 .btn-search:hover {
     background-color: #C9DC4E;

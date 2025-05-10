@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from core.forms.pila_form import PilasForm
 from core.services.pilas_service import get_pilas_paginated, create_pila
-
+from core.models.pilas import Pilas
 @login_required
 @require_http_methods(["GET"])
 def pilas_list_view(request):
@@ -18,18 +18,28 @@ def pilas_list_view(request):
     return render(request, 'pilas/pilas_list.html', context)
 
 @login_required
-def pila_create_view(request):
+def pila_create_view(request, id=None):
+    if id:
+        pila = get_object_or_404(Pilas, id=id)
+        modo = 'editar'
+    else:
+        modo = 'agregar'
+        pila = None
     if request.method == 'POST':
-        form = PilasForm(request.POST)
+        form = PilasForm(request.POST, instance=pila)
         if form.is_valid():
             # Use the service to create a pila
+            
+            if modo == 'editar':
+                messages.success(request, 'Referencia de pila editada con exito.')
+            else:
+                messages.success(request, 'Referencia de pila agregada con éxito')
             create_pila(form)
-            messages.success(request, 'Referencia de pila agregada con éxito')
             return redirect('pilas_list')
     else:
-        form = PilasForm()
+        form = PilasForm(instance=pila)
     
     context = {
-        'form': form,
+        'form': form,'modo': modo,
     }
     return render(request, 'pilas/pila_form.html', context)
