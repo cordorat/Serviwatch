@@ -41,10 +41,12 @@ class PilasForm(forms.ModelForm):
 
     def clean_codigo(self):
         codigo = self.cleaned_data.get('codigo')
-        if Pilas.objects.filter(codigo=codigo).exists():
-            raise forms.ValidationError("Este codigo ya esta registrado")
+        if self.instance and self.instance.pk:
+            Pilas.objects.filter(codigo=codigo).exclude(pk=self.instance.pk).exists()
+        else:
+            if Pilas.objects.filter(codigo=codigo).exists():
+                raise forms.ValidationError("Este codigo ya esta registrado")
         return codigo
-
     def clean_precio(self):
         precio = self.cleaned_data.get('precio')
         if not precio.isdigit():
