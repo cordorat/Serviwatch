@@ -113,6 +113,33 @@
       }
     });
 
+    // Función para obtener el mensaje de error basado en el tipo de campo y su valor
+    function getFieldErrorMessage(fieldName, value) {
+      // Si está vacío
+      if (!value) {
+        if (fieldName === 'nombre') return 'El nombre es obligatorio.';
+        if (fieldName === 'apellido') return 'El apellido es obligatorio.';
+        if (fieldName === 'telefono') return 'El número de teléfono es obligatorio.';
+        return '';
+      }
+      
+      // Validaciones específicas para cada tipo de campo
+      if (fieldName === 'nombre' || fieldName === 'apellido') {
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+            return `El ${fieldName} solo debe contener letras.`;
+        }
+      }
+      
+      if (fieldName === 'telefono') {
+        if (!/^\d{10}$/.test(value)) {
+            return 'El número de teléfono debe contener exactamente 10 dígitos.';
+        }
+      }
+      
+      return ''; // No hay error
+    }
+
+    // Función para validar un campo
     function validateField(field) {
       // Remover error anterior
       const formGroup = field.closest('.form-group');
@@ -120,28 +147,12 @@
       if (errorElement) {
         errorElement.remove();
       }
-
+        
+      // Obtener valor y validar
       const value = field.value.trim();
-      let errorMessage = '';
-
-      if (!value) {
-        if (field.name === 'nombre') errorMessage = 'El nombre es obligatorio.';
-        if (field.name === 'apellido') errorMessage = 'El apellido es obligatorio.';
-        if (field.name === 'telefono') errorMessage = 'El número de teléfono es obligatorio.';
-      } else {
-        if (field.name === 'nombre' || field.name === 'apellido') {
-          if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
-            errorMessage = `El ${field.name} solo debe contener letras.`;
-          }
-        }
-
-        if (field.name === 'telefono') {
-          if (!/^\d{10}$/.test(value)) {
-            errorMessage = 'El número de teléfono debe contener exactamente 10 dígitos.';
-          }
-        }
-      }
-
+      const errorMessage = getFieldErrorMessage(field.name, value);
+        
+      // Mostrar error o marcar como válido
       if (errorMessage) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';

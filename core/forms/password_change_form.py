@@ -3,6 +3,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 
+mensaje_campo_requerido = 'Este campo es obligatorio'
+mensaje_tamaño_minimo = 'La contraseña debe tener al menos 8 caracteres'
+mensaje_tamaño_maximo = 'La contraseña no puede tener más de 16 caracteres'
+
 class PasswordChangeForm(forms.Form):
     """
     Formulario para cambiar la contraseña del usuario.
@@ -29,9 +33,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'current-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': mensaje_campo_requerido,
+            'min_length': mensaje_tamaño_minimo,
+            'max_length': mensaje_tamaño_maximo,
         }
     )
     
@@ -46,9 +50,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': mensaje_campo_requerido,
+            'min_length': mensaje_tamaño_minimo,
+            'max_length': mensaje_tamaño_maximo,
         }
     )
     
@@ -63,9 +67,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': mensaje_campo_requerido,
+            'min_length': mensaje_tamaño_minimo,
+            'max_length': mensaje_tamaño_maximo,
         }
     )
 
