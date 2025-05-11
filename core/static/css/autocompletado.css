@@ -1,57 +1,56 @@
-/* Estilos para el campo de búsqueda */
-.search-containerf {
-    position: relative;
-    width: 350px;
-  }
-  
-  /* Estilos para el input de búsqueda */
-  #cliente-searchf {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
-  }
-  
-  /* Estilo para el botón de búsqueda */
-  .btn-searchf {
-    background-color: #6c757d;
-    color: rgb(0, 0, 0) !important;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-  
-  .btn-searchf:hover {
-    background-color: #5a6268;
-  }
-  
-  /* Estilos para el menú desplegable de autocompletado */
-  .ui-autocompletef {
-    max-height: 350px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border: 1px solid #ddd;
-    z-index: 10000;
-  }
-  
-  .ui-menu-itemf {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .ui-menu-itemf:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .ui-menu-itemf:last-child {
-    border-bottom: none;
-  }
-  
-  /* Ajustes para el layout de la cabecera */
-  .header-iconsf {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+.search-container {
+  max-width: 500px;
+  position: relative;
+}
+
+#search-cliente {
+  border-radius: 4px 0 0 4px;
+}
+
+.btn-primary {
+  border-radius: 0 4px 4px 0;
+}
+
+/* Estilos para el dropdown personalizado */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.dropdown-results.show {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+}
+
+/* Estilo mejorado para hover y elemento activo */
+.dropdown-item:hover, .dropdown-item.active {
+  background-color: #f0f4f8;
+  font-weight: bold;
+  border-left: 4px solid #88991d;
+  padding-left: 11px; /* Compensar el borde izquierdo para mantener alineación */
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
