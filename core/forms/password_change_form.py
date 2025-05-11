@@ -27,6 +27,7 @@ class PasswordChangeForm(forms.Form):
         min_length=8,
         max_length=16,
         widget=forms.PasswordInput(attrs={
+            'id': 'id_contraseña_actual',
             'class': 'form-control',
             'placeholder': 'Contraseña ACTUAL',
             'autocomplete': 'current-password'
@@ -43,6 +44,7 @@ class PasswordChangeForm(forms.Form):
         min_length=8,
         max_length=16,
         widget=forms.PasswordInput(attrs={
+            'id': 'id_contraseña_nueva',
             'class': 'form-control',
             'placeholder': 'Contraseña NUEVA',
             'autocomplete': 'new-password'
@@ -59,6 +61,7 @@ class PasswordChangeForm(forms.Form):
         min_length=8,
         max_length=16,
         widget=forms.PasswordInput(attrs={
+            'id': 'id_confirmacion_contraseña',
             'class': 'form-control',
             'placeholder': 'CONFIRMAR contraseña',
             'autocomplete': 'new-password'
@@ -112,6 +115,7 @@ class PasswordChangeForm(forms.Form):
             raise forms.ValidationError('Las contraseñas no coinciden')
         
         return confirmacion_contrasenia
+
 
     def clean(self):
         """
