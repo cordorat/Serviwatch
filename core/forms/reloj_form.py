@@ -5,7 +5,9 @@ class RelojForm(forms.ModelForm):
     marca = forms.CharField(
         required=True,
         max_length=30,
-        widget=forms.TextInput(attrs={'placeholder': 'Marca'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Marca'}),
         error_messages={
             'required': 'La marca es obligatoria',
             'max_length': 'La marca debe tener máximo 30 caracteres'
@@ -14,23 +16,45 @@ class RelojForm(forms.ModelForm):
     referencia = forms.CharField(
         required=True,
         max_length=30,
-        widget=forms.TextInput(attrs={'placeholder': 'Referencia'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Referencia'}),
         error_messages={
             'required': 'La referencia es obligatoria',
             'max_length': 'La referencia debe tener máximo 30 caracteres'
         }
     )
     precio = forms.CharField(
-        max_length=20,
         required=True,
-        widget=forms.NumberInput(attrs={'placeholder': 'Precio','class': 'form-control'}),
-        error_messages={'required': 'El precio es obligatorio',
-                        'max_length': 'El precio no puede exceder los 20 caracteres'}
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Precio',
+            'type': 'text',  # Aseguramos que sea tipo text
+            'inputmode': 'numeric',  # Sugiere teclado numérico en móviles
+            'pattern': '[0-9]*'  # Validación HTML5 para números
+        }),
+        error_messages={
+            'required': 'El precio es obligatorio',
+            'max_length': 'El precio no puede exceder los 20 caracteres'
+        }
     )
-    dueño = forms.CharField(
+    comision = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Comisión (20%)',
+            'readonly': True,
+        })
+    )
+
+    dueno = forms.CharField(
         required=True,
         max_length=50,
-        widget=forms.TextInput(attrs={'placeholder': 'Dueño'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Dueño'}),
         error_messages={
             'required': 'El dueño es obligatorio',
             'max_length': 'El dueño debe tener máximo 50 caracteres'
@@ -39,7 +63,9 @@ class RelojForm(forms.ModelForm):
     descripcion = forms.CharField(
         required=True,
         max_length=150,
-        widget=forms.Textarea(attrs={'placeholder': 'Descripción'}),
+        widget=forms.Textarea(attrs={
+            'class': 'form-control text-secondary', 'rows': 3, 'placeholder': 'Descripción'
+        }),
         error_messages={
             'required': 'La descripción es obligatoria',
             'max_length': 'La descripción debe tener máximo 150 caracteres'
@@ -48,30 +74,50 @@ class RelojForm(forms.ModelForm):
     tipo = forms.ChoiceField(
         required=True,
         choices=[('NUEVO', 'Nuevo'), ('USADO', 'Usado'), ('SEMI', 'Seminuevo')],
-        widget=forms.Select(attrs={'placeholder': 'Tipo'}),
-        error_messages={'required': 'El tipo es obligatorio'}
+        widget=forms.Select(attrs={
+            'class': 'form-span form-control text-secondary',
+            'placeholder': 'Tipo'
+        }),
+        error_messages={
+            'required': 'El tipo es obligatorio',
+            'invalid_choice': 'Tipo no válido'
+        }
     )
     estado = forms.ChoiceField(
         required=True,
         choices=[('VENDIDO', 'Vendido'), ('DISPONIBLE', 'Disponible')],
-        widget=forms.Select(attrs={'placeholder': 'Estado'}),
-        error_messages={'required': 'El estado es obligatorio'}
+        widget=forms.Select(attrs={
+            'class': 'form-span form-control text-secondary',
+            'placeholder': 'Estado'
+        }),
+        error_messages={
+            'required': 'El estado es obligatorio',
+            'invalid_choice': 'Estado no válido'
+        }
     )
     fecha_venta = forms.DateField(
         input_formats=['%d/%m/%Y'],
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Fecha de venta', 'type': 'text'}),
+        widget=forms.DateInput(attrs={
+            'class': 'form-control text-secondary',
+            'type': 'text',
+            'placeholder': 'Fecha de venta dd/mm/aaaa',
+            'autocomplete': 'off',
+            'id':'fecha_venta'
+        }),
         error_messages={'invalid': 'Formato de fecha inválido. Use DD/MM/AA.'}
     )
     pagado = forms.BooleanField(
         required=False,
         initial=False,
-        widget=forms.CheckboxInput()
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        })
     )
 
     class Meta:
         model = Reloj
-        fields = ['marca', 'referencia', 'precio', 'dueño', 'descripcion', 'tipo', 'estado', 'fecha_venta', 'pagado']
+        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta', 'pagado']
         # No incluir 'comision' aquí porque es un campo no editable
 
     def __init__(self, *args, **kwargs):
@@ -96,29 +142,21 @@ class RelojForm(forms.ModelForm):
         return precio
     
     def clean_comision(self):
-        comision = self.cleaned_data.get('comision')
-        precio = self.cleaned_data.get('precio')
+        try:
+            precio = self.cleaned_data.get('precio')
+            if precio is None:
+                return 0
+            
+            comision = int(float(precio) * 0.2)
+            return comision
+        except (TypeError, ValueError):
+            return 0
 
-        if not comision.isdigit():
-            raise forms.ValidationError("La comision solo puede ser numerico")
-        
-        comision = int(comision)
-        comision = precio * 0.2
-
-        if comision <= 0:
-            raise forms.ValidationError('La comision debe ser mayor que cero.')
-
-        if comision > 999999999999:
-            raise forms.ValidationError('La comision es demasiado grande.')
-
-        return comision
-
-    def clean(self):
-        cleaned_data = super().clean()
-        estado = cleaned_data.get('estado')
-        fecha_venta = cleaned_data.get('fecha_venta')
+    def clean_fecha_venta(self):
+        fecha_venta = self.cleaned_data.get('fecha_venta')
+        estado = self.cleaned_data.get('estado')
 
         if estado == 'VENDIDO' and not fecha_venta:
-            self.add_error('fecha_venta', 'La fecha de venta es obligatoria cuando el estado es "Vendido".')
+            raise forms.ValidationError('La fecha de venta es obligatoria cuando el estado es Vendido')
 
-        return cleaned_data
+        return fecha_venta

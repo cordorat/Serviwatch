@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.test import Client
 from django.urls import reverse
 from django.contrib.messages import get_messages
+from datetime import date
 
 class RelojFormTest(TestCase):
 
@@ -15,7 +16,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': 15000,
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -31,7 +32,7 @@ class RelojFormTest(TestCase):
         data = {
             'referencia': '12345',
             'precio': 15000,
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -48,7 +49,7 @@ class RelojFormTest(TestCase):
         data = {
             'marca': 'Rolex',
             'referencia': '12345',
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -66,7 +67,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': 15000,
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -84,7 +85,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': 'invalid_value',  # Esto no es un número válido
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -102,7 +103,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': -15000,  # Precio negativo
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -120,7 +121,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': 1000000000000,  # Precio demasiado grande
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -138,7 +139,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': 15000,
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'VENDIDO',
@@ -155,7 +156,7 @@ class RelojFormTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': 15000,
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'VENDIDO',
@@ -169,23 +170,26 @@ class RelojFormTest(TestCase):
 
     def test_clean_fecha_venta_valid(self):
         """Test valid fecha_venta format"""
+        today = date.today()
         data = {
             'marca': 'Rolex',
             'referencia': '12345',
-            'precio': 15000,
-            'dueño': 'Juan Perez',
+            'precio': '15000',  # Changed to string to match form expectation
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'VENDIDO',
-            'fecha_venta': '10/10/2025',  # Formato válido
+            'fecha_venta': today.strftime('%d/%m/%Y'),  # Format matches input_formats in form
             'pagado': False
         }
 
         form = RelojForm(data=data)
+        if not form.is_valid():
+            print(f"Errores de validación del formulario: {form.errors}")
         self.assertTrue(form.is_valid())
 
-    def test_form_invalid_data_dueño_required(self):
-        """Test the form with missing 'dueño' field"""
+    def test_form_invalid_data_dueno_required(self):
+        """Test the form with missing 'dueno' field"""
         data = {
             'marca': 'Rolex',
             'referencia': '12345',
@@ -199,7 +203,7 @@ class RelojFormTest(TestCase):
 
         form = RelojForm(data=data)
         self.assertFalse(form.is_valid())
-        self.assertIn('dueño', form.errors)
+        self.assertIn('dueno', form.errors)
 
 class RelojViewsTest(TestCase):
     def setUp(self):
@@ -216,7 +220,7 @@ class RelojViewsTest(TestCase):
             'marca': 'Rolex',
             'referencia': '12345',
             'precio': '15000',
-            'dueño': 'Juan Perez',
+            'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
@@ -230,7 +234,7 @@ class RelojViewsTest(TestCase):
                 marca=f'Marca{i}',
                 referencia=f'REF{i}',
                 precio=1000 * i,
-                dueño='Test Owner',
+                dueno='Test Owner',
                 tipo='NUEVO',
                 estado='DISPONIBLE'
             )

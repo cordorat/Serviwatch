@@ -35,14 +35,13 @@ class Reloj(models.Model):
 
     comision = models.CharField(
         max_length=20,
-        editable=False,
         validators=[
             RegexValidator(regex=r'^\d+$', message="La comision debe ser un número válido"),
             MaxLengthValidator(20, "La comision no puede exceder los 20 caracteres"),
         ]
     )
 
-    dueño = models.CharField(
+    dueno = models.CharField(
         max_length=50,
         validators=[MaxLengthValidator(50, "Nombre del dueño demasiado largo")]
     )
