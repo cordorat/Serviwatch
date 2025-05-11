@@ -38,6 +38,18 @@
     input[name="password2"] {
         padding-right: 35px !important;
     }
+
+    .toggle-password:hover {
+    color: #000; 
+    }
+
+    .toggle-password.fa-eye {
+    color: #cce064;
+    }
+
+    .toggle-password.fa-eye-slash {
+    color: #cce064; 
+    }
 </style>
 
 <h2 class="titulo">
@@ -95,7 +107,9 @@
                         <i class="bi bi-lock-fill fs-4 text-secondary"></i>
                     </span>
                     {{ form.password1 }}
-                    <i class="toggle-password bi bi-eye" id="togglePassword"></i>
+                    <span>
+                        <i class="fa-solid fa-eye toggle-password" data-target="id_confirmacion_contraseña"></i>
+                    </span>
                 </div>
 
 
@@ -113,7 +127,9 @@
                         <i class="bi bi-lock-fill fs-4 text-secondary"></i>
                     </span>
                     {{ form.password2 }}
-                    <i class="toggle-password bi bi-eye" id="togglePassword"></i>
+                    <span>
+                        <i class="fa-solid fa-eye toggle-password" data-target="id_confirmacion_contraseña"></i>
+                    </span>
                 </div>
 
 
@@ -393,12 +409,12 @@
             password1Field.setAttribute('type', type);
             
             // Cambia el icono entre ojo y ojo tachado
-            if (this.classList.contains('bi-eye')) {
-                this.classList.remove('bi-eye');
-                this.classList.add('bi-eye-slash');
+            if (this.classList.contains('fa-eye')) {
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
             } else {
-                this.classList.remove('bi-eye-slash');
-                this.classList.add('bi-eye');
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
             }
         });
     }
@@ -413,12 +429,12 @@
                 const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
                 password2Field.setAttribute('type', type);
                 
-                if (this.classList.contains('bi-eye')) {
-                    this.classList.remove('bi-eye');
-                    this.classList.add('bi-eye-slash');
+                if (this.classList.contains('fa-eye')) {
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
                 } else {
-                    this.classList.remove('bi-eye-slash');
-                    this.classList.add('bi-eye');
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
                 }
             });
         }
