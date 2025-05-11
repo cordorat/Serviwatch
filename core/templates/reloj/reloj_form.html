@@ -28,6 +28,8 @@
         <h4>DATOS RELOJ</h4>
     </div>
 
+    <br>
+
     <div class="form-content">
         <form method="post" id="relojForm" class="repair-form custom-form" novalidate>
             {% csrf_token %}
@@ -268,12 +270,6 @@
         }
 
         fixDescriptionContainer();
-
-        function calcularComision(precio) {
-            if (!precio || isNaN(precio)) return '';
-            const comision = precio * 0.20;
-            return formatNumber(comision);
-        }
 
         precioInput.addEventListener('input', function (e) {
             let value = this.value;
