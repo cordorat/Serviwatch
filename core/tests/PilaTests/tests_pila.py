@@ -133,7 +133,77 @@ class PilasViewTest(TestCase):
         self.assertTrue('form' in response.context)
         self.assertFalse(response.context['form'].is_valid())
         self.assertFalse(Pilas.objects.filter(codigo='CR2050').exists())
+    def test_pila_edit_view_get(self):
+        """Prueba que la vista de edición carga el formulario correctamente con datos existentes"""
+        # Crear una pila de prueba
+        pila = Pilas.objects.create(
+            codigo="TEST123",
+            precio="1500",
+            cantidad="10"
+        )
+        response = self.client.get(reverse('pila_editar', kwargs={'id': pila.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'pilas/pila_form.html')
+        self.assertTrue('form' in response.context)
+        self.assertEqual(response.context['modo'], 'editar')
+        self.assertIsInstance(response.context['form'], PilasForm)
+        self.assertEqual(response.context['form'].instance, pila)
 
+    def test_pila_edit_view_post_success(self):
+        """Prueba la edición exitosa de una pila"""
+        pila = Pilas.objects.create(
+            codigo="TEST123",
+            precio="1500",
+            cantidad="10"
+        )
+        data = {
+            'codigo': 'TEST123',
+            'precio': '2000',  # Precio cambiado
+            'cantidad': '15'   # Cantidad cambiada
+        }
+        response = self.client.post(
+            reverse('pila_editar', kwargs={'id': pila.id}), 
+            data
+        )
+        self.assertRedirects(response, self.list_url)
+        
+        # Verificar que la pila fue actualizada
+        pila_actualizada = Pilas.objects.get(id=pila.id)
+        self.assertEqual(pila_actualizada.precio, '2000')
+        self.assertEqual(pila_actualizada.cantidad, '15')
+        
+        # Verificar mensaje de éxito
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Referencia de pila editada con exito.')
+
+    def test_pila_create_view_get_modo(self):
+        """Prueba que la vista de creación establece el modo correcto"""
+        response = self.client.get(self.create_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['modo'], 'agregar')
+
+    def test_pila_edit_view_post_invalid(self):
+        """Prueba la vista de edición con datos de formulario inválidos"""
+        pila = Pilas.objects.create(
+            codigo="TEST123",
+            precio="1500",
+            cantidad="10"
+        )
+        data = {
+            'codigo': 'TEST123',
+            'precio': 'invalido',  # Precio inválido
+            'cantidad': '15'
+        }
+        response = self.client.post(
+            reverse('pila_editar', kwargs={'id': pila.id}), 
+            data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'pilas/pila_form.html')
+        self.assertTrue('form' in response.context)
+        self.assertEqual(response.context['modo'], 'editar')
+        self.assertFalse(response.context['form'].is_valid())
 class PilasFormTest(TestCase):
     def setUp(self):
         # Create a battery for testing unique code validation

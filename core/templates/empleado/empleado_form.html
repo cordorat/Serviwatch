@@ -525,6 +525,7 @@
         }
 
         // ===== EVENTO CLIC EN BOTÓN GUARDAR =====
+        // PUNTO CLAVE: Modificado para validar antes de mostrar el modal
         btnGuardarEmpleado.addEventListener('click', function (event) {
             event.preventDefault(); // Evita el envío inmediato del formulario
 
@@ -591,6 +592,14 @@
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     firstError.focus();
                 }
+            }
+        });
+
+        // ===== VALIDAR AL ENVIAR =====
+        empleadoForm.addEventListener('submit', function (e) {
+            // Esta validación es un respaldo para cuando se envía con Enter
+            if (!document.querySelector('input[name="confirmar"]') && !validateForm()) {
+                e.preventDefault();
             }
         });
 

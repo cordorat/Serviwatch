@@ -103,10 +103,10 @@
 /* Ícono de lápiz */
 .custom-table td a {
     display: initial;
-    font-size: medium;
     align-items: right;
     justify-content: right;
     text-decoration: none;
+    font-size: medium;
 }
 
 /* Botón editar */
@@ -176,6 +176,7 @@
     height: 38px;
     background-color: #C9DC4E;
     border: 2px solid #626E15;
+    border-radius: 4px !important;
 }
 .btn-search:hover {
     background-color: #C9DC4E;

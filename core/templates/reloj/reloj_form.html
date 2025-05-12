@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Color lima para el switch cuando está activo */
+    .custom-switch:checked {
+        background-color: #D4E484;
+        border-color: #626E15;
+    }
+
+    /* Aumentar el tamaño del switch para que combine mejor */
+    .custom-switch {
+        width: 4rem;
+        height: 1.5rem;
+    }
+
+    /* Ajustes al "círculo" interior del switch */
+    .custom-switch:checked::before {
+        background-color: white;
+        transform: translateX(1.5rem);
+    }
+</style>
+
+<div class="container">
+    <div class="form-header">
+        <h2 class="titulo">AGREGAR RELOJ</h2>
+        <h4>DATOS RELOJ</h4>
+    </div>
+
+    <br>
+
+    <div class="form-content">
+        <form method="post" id="relojForm" class="repair-form custom-form" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-4">
+                <div class="repair-form-column">
+                    <!-- Marca -->
+                    <div class="input-group">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-watch fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.marca }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.marca.errors %}
+                        {% for error in form.marca.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Referencia -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-hash fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.referencia }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.referencia.errors %}
+                        {% for error in form.referencia.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.precio }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.precio.errors %}
+                        {% for error in form.precio.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="input-group mt-3" id="basic-addon1">
+                        <span class="input-group-text form-span" id="basic-addon1">
+                            <i class="bi bi-calendar-date fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.fecha_venta }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.fecha_venta.errors %}
+                        {% for error in form.fecha_venta.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-coin fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.comision }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.comision.errors %}
+                        {% for error in form.comision.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="repair-form-column">
+
+                    <!-- Dueño -->
+                    <div class="input-group">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-person fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.dueno }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.dueno.errors %}
+                        {% for error in form.dueno.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Descripción -->
+
+                    <div class="input-group  mt-3">
+                        <span class="input-group-text form-span" id="basic-addon2">
+                            <i class="bi bi-pencil-square fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.descripcion }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.descripcion.errors %}
+                        {% for error in form.descripcion.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+
+                    <!-- Tipo -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-tags fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.tipo }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.tipo.errors %}
+                        {% for error in form.tipo.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span" id="basic-addon1">
+                            <i class="bi bi-smartwatch fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.estado }}
+                    </div>
+                    <div class="error-message">
+                        {% if form.estado.errors %}
+                        {% for error in form.estado.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Checkbox alineado -->
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" 
+                        {% if form.pagado.value %}checked{% endif %}>
+                        <label class="form-check-label ms-2" for="pagado">Pagado</label>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn save" id="btnGuardar">GUARDAR</button>
+                <a href="{% url 'reloj_list' %}">
+                    <button type="button" class="btn cancel">CANCELAR</button>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center" style="background-color: #f1f1f1;">
+            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+                <h4 class="titulo m-0">
+                    {% if editing %}
+                    RELOJ ACTUALIZADO CORRECTAMENTE
+                    {% else %}
+                    RELOJ AGREGADO CORRECTAMENTE
+                    {% endif %}
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('relojForm');
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const precioInput = form.querySelector('[name="precio"]');
+        const comisionInput = form.querySelector('[name="comision"]');
+        const estadoInput = form.querySelector('[name="estado"]');
+        const fechaVentaInput = form.querySelector('[name="fecha_venta"]');
+
+        // Manejar la validación de fecha cuando el estado es VENDIDO
+        estadoInput.addEventListener('change', function () {
+            if (this.value === 'VENDIDO') {
+                fechaVentaInput.required = true;
+            } else {
+                fechaVentaInput.required = false;
+                fechaVentaInput.value = '';
+                validateField(fechaVentaInput);
+            }
+        });
+
+        function fixDescriptionContainer() {
+            const descripcionContainer = document.querySelector('.description-container');
+
+            if (descripcionContainer) {
+                const textarea = descripcionContainer.querySelector('textarea');
+
+                textarea.removeEventListener('invalid', null);
+                textarea.removeEventListener('input', null);
+
+                textarea.addEventListener('invalid', function (e) {
+                    e.preventDefault();
+                    this.classList.add('is-invalid');
+
+                    let errorDiv = descripcionContainer.nextElementSibling;
+                    if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                        errorDiv = document.createElement('div');
+                        errorDiv.className = 'error-message';
+                        descripcionContainer.after(errorDiv);
+                    }
+
+                    errorDiv.innerHTML = '<span class="text-danger">La descripción es obligatoria</span>';
+                });
+
+                textarea.addEventListener('input', function () {
+                    this.classList.remove('is-invalid');
+                    const errorDiv = descripcionContainer.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('error-message')) {
+                        errorDiv.innerHTML = '';
+                    }
+                });
+            }
+        }
+
+        fixDescriptionContainer();
+
+        precioInput.addEventListener('input', function (e) {
+            let value = this.value;
+            value = value.replace(/\D/g, '');
+
+            if (value !== this.value) {
+                this.value = value;
+            }
+
+            if (value) {
+                const precioNumerico = parseInt(value);
+                if (!isNaN(precioNumerico)) {
+                    const comision = Math.floor(precioNumerico * 0.20);
+                    comisionInput.value = comision.toString();
+                }
+            } else {
+                comisionInput.value = '';
+            }
+        });
+
+        function validateField(field) {
+            let errorDiv = field.parentElement.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                field.parentElement.after(errorDiv);
+            }
+
+            errorDiv.innerHTML = '';
+            const value = field.value.trim();
+            let isValid = true;
+            let errorMessage = '';
+
+            switch (field.name) {
+                case 'marca':
+                    if (!value) {
+                        errorMessage = 'La marca es obligatoria';
+                        isValid = false;
+                    } else if (value.length > 30) {
+                        errorMessage = 'La marca debe tener máximo 30 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'referencia':
+                    if (!value) {
+                        errorMessage = 'La referencia es obligatoria';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'precio':
+                    if (!value) {
+                        errorMessage = 'El precio es obligatorio';
+                        isValid = false;
+                    } else if (!/^\d+$/.test(value)) {
+                        errorMessage = 'El precio debe contener solo números';
+                        isValid = false;
+                    } else if (value.length > 20) {
+                        errorMessage = 'El precio no puede exceder los 20 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'dueno':
+                    if (!value) {
+                        errorMessage = 'El dueño es obligatorio';
+                        isValid = false;
+                    } else if (value.length > 30) {
+                        errorMessage = 'El dueño debe tener máximo 30 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'descripcion':
+                    if (!value) {
+                        errorMessage = 'La descripción es obligatoria';
+                        isValid = false;
+                    } else if (value.length > 150) {
+                        errorMessage = 'La descripción debe tener máximo 150 caracteres';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'tipo':
+                    if (!value) {
+                        errorMessage = 'El tipo es obligatorio';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'estado':
+                    if (!value) {
+                        errorMessage = 'El estado es obligatorio';
+                        isValid = false;
+                    }
+                    break;
+
+                case 'fecha_venta':
+                    if (estadoInput.value === 'VENDIDO' && !value) {
+                        errorMessage = 'La fecha de venta es obligatoria cuando el estado es Vendido';
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            if (!isValid) {
+                field.classList.add('is-invalid');
+                errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+
+            return isValid;
+        }
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            let isValid = true;
+
+            comisionInput.disabled = false;
+
+            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (field && !validateField(field)) {
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+
+                    if (response.ok) {
+                        modal.show();
+                        setTimeout(() => {
+                            window.location.href = "{% url 'reloj_list' %}";
+                        }, 1000);
+                    } else {
+                        console.error('Error al enviar el formulario');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            } else {
+                const firstError = form.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+
+        form.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('blur', function () {
+                validateField(this);
+            });
+
+            field.addEventListener('input', function () {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentElement.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('error-message')) {
+                    errorDiv.innerHTML = '';
+                }
+            });
+        });
+
+        estadoInput.addEventListener('change', function () {
+            const fechaVentaField = form.querySelector('[name="fecha_venta"]');
+            if (fechaVentaField) {
+                validateField(fechaVentaField);
+            }
+        });
+
+        // Activar Flatpickr en fecha_venta
+        flatpickr(fechaVentaInput, {
+            dateFormat: "d/m/Y",
+            allowInput: false,
+            locale: "es"
+        });
+    });
+</script>
+
+{% endblock %}
