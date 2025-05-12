@@ -193,8 +193,9 @@
               Gestión de servicios
             </a>
           </li>
-          <li class="{% if '/egreso/' in request.path or request.path == '/egreso' %} active {% endif %}">
-            <a href="{% url 'egreso' %}" class="{% if not '/egreso/' in request.path or request.path == '/egreso' %} menu-link {% endif %}">
+          <li class="{% if '/contable/' in request.path or request.path == '/contable' %} active {% endif %}">
+            <a href="{% url 'contabilidad_usuario' %}" 
+            class="{% if not '/contable/' in request.path or request.path == '/contable' %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Egresos" class="icon">
               </span>

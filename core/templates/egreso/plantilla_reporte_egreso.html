@@ -1,0 +1,122 @@
+esos.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Egresos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .company-info {
+            margin-bottom: 20px;
+        }
+        .report-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .report-subtitle {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #7f8c8d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-weight: bold;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 14px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        .date-range {
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #555;
+        }
+        .logo {
+            max-height: 80px;
+            margin-bottom: 10px;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        @page {
+            margin: 1cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if empresa.logo_url %}
+        <img src="{{ empresa.logo_url }}" alt="Logo de la empresa" class="logo">
+        {% endif %}
+        <div class="company-info">
+            <div class="report-title">{{ empresa.nombre }}</div>
+            <div>{{ empresa.direccion }}</div>
+            <div>Tel: {{ empresa.telefono }}</div>
+        </div>
+        <div class="report-title">REPORTE DE EGRESOS</div>
+        <div class="date-range">
+            Período: {{ fecha_inicio|date:"d/m/Y" }} - {{ fecha_fin|date:"d/m/Y" }}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for egreso in egresos %}
+            <tr>
+                <td>{{ egreso.fecha|date:"d/m/Y" }}</td>
+                <td>{{ egreso.descripcion }}</td>
+                <td>${{ egreso.valor|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center;">No hay egresos registrados en este período</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right;">Total:</td>
+                <td>${{ total|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Generado el {{ now|date:"d/m/Y H:i" }}</p>
+        <p>Este documento es un reporte oficial de {{ empresa.nombre }}</p>
+    </div>
+</body>
+</html>

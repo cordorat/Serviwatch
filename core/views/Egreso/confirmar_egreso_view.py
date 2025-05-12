@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from django.http import JsonResponse
 
 formato_fecha = '%d/%m/%Y'
 
@@ -37,6 +38,14 @@ def confirmar_egreso_view(request):
             # Limpia la sesión
             del request.session['egreso_data']
             
+            # Manejar solicitudes AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': "Egreso ingresado con éxito"
+                })
+            
+            # Para solicitudes normales
             return redirect('egreso')
         
         elif 'editar' in request.POST:
