@@ -71,14 +71,14 @@
                     <span class="input-group-text form-span" id="basic-addon1">
                         <i class="bi bi-person-fill fs-4 text-secondary"></i>
                     </span>
-                    {{ form.username }}
+                    {{ form.username}}
                 </div>
 
                 <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="{{ form.username.help_text }}"><i class="bi bi-question-circle-fill"></i></span>
 
 
-                {% if form.username.errors %}
+                {% if form.username.errors and not success %}
                 <div class="form-error">{{ form.username.errors.0 }}</div>
                 {% endif %}
 
@@ -96,10 +96,11 @@
                 <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}"><i
                         class="bi bi-question-circle-fill"></i></span>
 
-                {% if form.email.errors %}
+                {% if form.username.errors and not success %}
                 <div class="form-error">{{ form.email.errors.0 }}</div>
                 {% endif %}
             </div>
+
             {% if not modo == 'editar' %}
             <div class="form-group">
                 <div class="input-group mb-3">
@@ -116,7 +117,7 @@
                 <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}"><i
                         class="bi bi-question-circle-fill"></i></span>
 
-                {% if form.password1.errors %}
+                {% if form.username.errors and not success %}
                 <div class="form-error">{{ form.password1.errors.0 }}</div>
                 {% endif %}
             </div>
@@ -136,7 +137,7 @@
                 <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}"><i
                         class="bi bi-question-circle-fill"></i></span>
 
-                {% if form.password2.errors %}
+                {% if form.username.errors and not success %}
                 <div class="form-error">{{ form.password2.errors.0 }}</div>
                 {% endif %}
             </div>
@@ -163,18 +164,20 @@
     </div>
 </div>
 
-<!-- Añadir este código al final del formulario, justo antes del cierre del div right-column -->
+
 
 <!-- Modal de confirmación -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" 
+     tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
-            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
                 {% if modo == 'editar' %}
                 <h4 class="titulo m-0">USUARIO ACTUALIZADO CORRECTAMENTE</h4>
                 {% else %}
                 <h4 class="titulo m-0">USUARIO AGREGADO CORRECTAMENTE</h4>
                 {% endif %}
+                <a href="{% url 'usuario_list' %}" class="btn save mt-3">VOLVER</a>
             </div>
         </div>
     </div>
@@ -184,17 +187,23 @@
 
 {% block javascript %}
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Evitar autofoco en todos los campos al cargar la página
+    document.querySelectorAll('input, select, textarea').forEach(field => {
+        field.blur();
+        if (field.hasAttribute('autofocus')) {
+            field.removeAttribute('autofocus');
+        }
+    });
+    
     // Eliminar cualquier estado de mensaje almacenado en el historial de sesión
     if (window.history.replaceState) {
         window.history.replaceState(null, null, window.location.href);
     }
 
-    // Referencias a elementos del DOM
+    // Referencias a elementos DOM importantes
     const form = document.querySelector('form.custom-form');
     const saveButton = form.querySelector('.btn.save');
-    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    
     const usernameField = document.querySelector('input[name="username"]');
     const emailField = document.querySelector('input[name="email"]');
     const password1Field = document.querySelector('input[name="password1"]');
@@ -206,12 +215,59 @@
     if (password1Field && password2Field) {
         allFields.push(password1Field, password2Field);
     }
+
+    // Inicializar el modal
+    let modal;
+    try {
+        modal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
+            backdrop: 'static', // Evita que el modal se cierre al hacer clic fuera
+            keyboard: false     // Evita que el modal se cierre con la tecla ESC
+        });
+        
+        // Verificar si hay un parámetro de éxito en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            // Eliminar completamente los elementos div.form-error
+            document.querySelectorAll('.form-error').forEach(error => {
+                if (error.parentNode) {
+                    error.parentNode.removeChild(error);
+                }
+            });
+            
+            // Eliminar las clases is-invalid de todos los campos
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            
+            // Restablecer el formulario
+            form.reset();
+            
+            // Evitar que los campos reciban foco mientras el modal esté activo
+            const disableFocus = function(e) {
+                if (urlParams.get('success') === 'true') {
+                    e.target.blur();
+                    e.preventDefault();
+                }
+            };
+            
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                field.addEventListener('focus', disableFocus);
+            });
+            
+            // El setTimeout da tiempo al DOM para cargar completamente
+            setTimeout(() => {
+                modal.show();
+            }, 300);
+        }
+    } catch (error) {
+        console.error("Error al inicializar el modal:", error);
+    }
     
     // Aplicar clase de error a los campos con errores del servidor
     document.querySelectorAll('.form-error').forEach(function(errorMessage) {
-        var fieldGroup = errorMessage.closest('.form-group');
+        const fieldGroup = errorMessage.closest('.form-group');
         if (fieldGroup) {
-            var inputField = fieldGroup.querySelector('input');
+            const inputField = fieldGroup.querySelector('input');
             if (inputField) {
                 inputField.classList.add('is-invalid');
             }
@@ -234,50 +290,51 @@
             errorDiv.className = 'form-error';
             
             // Seleccionar mensaje según el campo
-            if (field.name === 'username') {
-                errorDiv.textContent = 'El nombre de usuario es obligatorio.';
-            } else if (field.name === 'email') {
-                errorDiv.textContent = 'El correo electrónico es obligatorio.';
-            } else if (field.name === 'password1') {
-                errorDiv.textContent = 'La contraseña es obligatoria.';
-            } else if (field.name === 'password2') {
-                errorDiv.textContent = 'Debe confirmar la contraseña.';
-            }
+            const errorMessages = {
+                'username': 'El nombre de usuario es obligatorio.',
+                'email': 'El correo electrónico es obligatorio.',
+                'password1': 'La contraseña es obligatoria.',
+                'password2': 'Debe confirmar la contraseña.'
+            };
+            
+            errorDiv.textContent = errorMessages[field.name] || 'Este campo es obligatorio.';
             
             // Añadir el mensaje de error al grupo del campo
             formGroup.appendChild(errorDiv);
             field.classList.add('is-invalid');
             return false;
-        } else {
-            // Si es válido, quitar la clase de error
-            field.classList.remove('is-invalid');
-            return true;
-        }
+        } 
+        
+        // Si es válido, quitar la clase de error
+        field.classList.remove('is-invalid');
+        return true;
     }
     
     // Validar email con expresión regular
     function validateEmail(email) {
         if (email.length > 256) return false;
         
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    // Función auxiliar para preparar el div de error
+    function prepareErrorDiv(field) {
+        const formGroup = field.closest('.form-group');
+        let errorDiv = formGroup.querySelector('.form-error:not(.password-match-error)');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'form-error';
+            formGroup.appendChild(errorDiv);
+        }
+        return errorDiv;
     }
     
     // Validar formato de email
     emailField.addEventListener('blur', function() {
         if (this.value && !validateEmail(this.value)) {
-            // Eliminar errores anteriores
-            const formGroup = this.closest('.form-group');
-            const existingError = formGroup.querySelector('.form-error');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // Mostrar error de formato
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'form-error';
+            const errorDiv = prepareErrorDiv(this);
             errorDiv.textContent = 'Introduzca un correo electrónico válido.';
-            formGroup.appendChild(errorDiv);
             this.classList.add('is-invalid');
         }
     });
@@ -355,60 +412,110 @@
         return isValid;
     }
     
+    // Función para manejar errores del servidor
+    function handleServerErrors(errors) {
+        // Iterar sobre los errores y mostrarlos en los campos correspondientes
+        Object.entries(errors).forEach(([fieldName, errorMessage]) => {
+            // Manejo especial para errores no específicos de un campo
+            if (fieldName === '__all__' || fieldName === 'non_field_errors') {
+                // Crear un div de error general si no existe
+                let generalErrorDiv = document.querySelector('.general-error-message');
+                if (!generalErrorDiv) {
+                    generalErrorDiv = document.createElement('div');
+                    generalErrorDiv.className = 'form-error general-error-message';
+                    form.prepend(generalErrorDiv);
+                }
+                generalErrorDiv.textContent = errorMessage;
+                return;
+            }
+            
+            // Buscar el campo por nombre
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                // Marcar campo como inválido
+                field.classList.add('is-invalid');
+                
+                // Mostrar mensaje de error
+                const errorDiv = prepareErrorDiv(field);
+                errorDiv.textContent = errorMessage;
+            }
+        });
+        
+        // Scroll al primer error
+        const firstErrorField = document.querySelector('.is-invalid');
+        if (firstErrorField) {
+            firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
     // Modificar el comportamiento del botón Guardar
     saveButton.addEventListener('click', function(e) {
         e.preventDefault(); // Evitar el envío inmediato
         
         // Validar el formulario
         if (validateForm()) {
-            console.log("Formulario válido, mostrando modal");
+            // Obtener el token CSRF
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
             
-            // Agregar un campo oculto para confirmar
-            if (!document.querySelector('input[name="confirmar"]')) {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'confirmar';
-                hiddenInput.value = 'true';
-                form.appendChild(hiddenInput);
-            }
+            // Preparar formulario para envío
+            const formData = new FormData(form);
             
-            // Mostrar el modal SOLO si el formulario es válido
-            modal.show();
-            
-            // Enviar el formulario después de 3 segundos
-            setTimeout(function() {
-                form.submit();
-            }, 3000);
+            // Enviar con Fetch API
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => 
+                response.json().then(data => {
+                    return { ...data, status: response.status };
+                })
+            )
+            .then(data => {
+                if (data.success) {
+                    // Redirigir a la misma página con parámetro success para mostrar el modal
+                    window.location.href = `${window.location.pathname}?success=true`;
+                } else {
+                    if (data.errors) {
+                        handleServerErrors(data.errors);
+                    } else if (data.message) {
+                        alert(data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud AJAX:', error);
+                alert("Ocurrió un error al procesar la solicitud. Por favor, intente nuevamente.");
+            });
         } else {
-            console.log("Formulario inválido, no se muestra el modal");
-            
             // Hacer scroll al primer campo con error
             const firstError = document.querySelector('.is-invalid');
             if (firstError) {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstError.focus();
             }
         }
     });
     
-    // Limpiar campos al recargar la página
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
-            document.querySelectorAll('form.custom-form input').forEach(input => {
-                input.value = '';
-            });
-        }
+    // Interceptar envío directo del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveButton.click(); // Delegar al manejador del botón
     });
     
     // Funcionalidad para mostrar/ocultar contraseña
-    const togglePassword = document.getElementById('togglePassword');
-    if (togglePassword && password1Field) {
-        togglePassword.addEventListener('click', function() {
-            // Cambia el tipo de input entre "password" y "text"
-            const type = password1Field.getAttribute('type') === 'password' ? 'text' : 'password';
-            password1Field.setAttribute('type', type);
+    document.querySelectorAll('.toggle-password').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const fieldName = this.closest('.input-group').querySelector('input[type]').name;
+            const field = document.querySelector(`input[name="${fieldName}"]`);
             
-            // Cambia el icono entre ojo y ojo tachado
+            // Cambiar el tipo de input entre "password" y "text"
+            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+            field.setAttribute('type', type);
+            
+            // Cambiar el icono entre ojo y ojo tachado
             if (this.classList.contains('fa-eye')) {
                 this.classList.remove('fa-eye');
                 this.classList.add('fa-eye-slash');
@@ -417,28 +524,7 @@
                 this.classList.add('fa-eye');
             }
         });
-    }
-
-    // Toggle para el segundo campo de contraseña
-    if (password2Field) {
-        const password2Toggle = document.getElementById('togglePassword2') || 
-                                document.querySelector('#id_password2 + .toggle-password');
-        
-        if (password2Toggle) {
-            password2Toggle.addEventListener('click', function() {
-                const type = password2Field.getAttribute('type') === 'password' ? 'text' : 'password';
-                password2Field.setAttribute('type', type);
-                
-                if (this.classList.contains('fa-eye')) {
-                    this.classList.remove('fa-eye');
-                    this.classList.add('fa-eye-slash');
-                } else {
-                    this.classList.remove('fa-eye-slash');
-                    this.classList.add('fa-eye');
-                }
-            });
-        }
-    }
+    });
 });
 </script>
 {% endblock %}

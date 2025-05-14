@@ -5,8 +5,8 @@
 
 {% block content %}
 <div class="productos-container mt-5">
-    <h2 class="titulo text-center mb-4">Contabilidad</h2>
-    <div class="row justify-content-center">
+    <h2 class="titulo text-center mb-4">CONTABILIDAD</h2>
+    <div class="row justify-content-center mt-5">
         <div class="col-12 d-flex flex-wrap gap-3 justify-content-center">
 
         <a href="{% url 'egreso' %}" class="text-decoration-none text-dark">  
@@ -20,7 +20,7 @@
             </div>
         </a>
 
-        <a href="#" class="text-decoration-none text-dark">
+        <a href="{% url 'ingreso' %}" class="text-decoration-none text-dark">
             <div class="service-card text-center">
                 <div class="service-icon mx-auto mb-2">
                     <svg viewBox="0 0 24 24" fill="none">
@@ -41,10 +41,10 @@
 
 <style>
     .service-card {
-        width: 150px;
-        height: 150px;
-        background-color: #dce991;
-        border-radius: 15px;
+        width: 340px;
+        height: 375px;
+        background-color: #D4E484;
+        border-radius: 30px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -75,14 +75,15 @@
     }
 
     .service-icon {
-        width: 50px;
-        height: 50px;
+        width: 200px;
+        height: 200px;
     }
 
     .service-title {
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 50px;
+        font-weight: 600;
         text-transform: uppercase;
+        font-family: 'inter', sans-serif;
     }
 
     @media (max-width: 500px) {

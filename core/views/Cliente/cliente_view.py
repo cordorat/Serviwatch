@@ -70,7 +70,7 @@ def cliente_create_view(request, id=None):
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
-            cliente_obj = form.save()
+            
             crear_cliente(form)
             
             # Manejar solicitudes AJAX
@@ -85,7 +85,8 @@ def cliente_create_view(request, id=None):
                 messages.success(request, 'Cliente editado exitosamente.')
             else:
                 messages.success(request, 'Cliente creado exitosamente.')
-            
+                
+            form.save()
             # Si hay una URL de redirección especificada
             next_url = request.GET.get('next')
             if next_url:

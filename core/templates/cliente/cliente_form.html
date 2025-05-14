@@ -174,9 +174,35 @@ document.addEventListener("DOMContentLoaded", function () {
       if (field.name === 'apellido') errorMessage = 'El apellido es obligatorio.';
       if (field.name === 'telefono') errorMessage = 'El número de teléfono es obligatorio.';
     } else {
-      if (field.name === 'nombre' || field.name === 'apellido') {
+      if (field.name === 'nombre') {
+        // Permitir nombres compuestos con espacios
+        // Validación modificada para aceptar múltiples palabras con espacios
         if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
-          errorMessage = `El ${field.name} solo debe contener letras.`;
+          errorMessage = 'El nombre solo debe contener letras y espacios.';
+        } else {
+          // Verificar que cada palabra del nombre sea válida
+          const palabras = value.split(/\s+/);
+          for (const palabra of palabras) {
+            if (palabra.length < 2) {
+              errorMessage = 'Cada nombre debe tener al menos 2 letras.';
+              break;
+            }
+          }
+        }
+      }
+      
+      if (field.name === 'apellido') {
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+          errorMessage = 'El nombre solo debe contener letras y espacios.';
+        } else {
+          // Verificar que cada palabra del nombre sea válida
+          const palabras = value.split(/\s+/);
+          for (const palabra of palabras) {
+            if (palabra.length < 2) {
+              errorMessage = 'Cada nombre debe tener al menos 2 letras.';
+              break;
+            }
+          }
         }
       }
 
@@ -302,5 +328,4 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-
-{% endblock %} 
+{% endblock %}

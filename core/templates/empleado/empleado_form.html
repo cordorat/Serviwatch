@@ -332,12 +332,14 @@
             nombre: function (value) {
                 if (!value) return { isValid: false, message: 'El nombre es obligatorio' };
                 if (value.length < 2) return { isValid: false, message: 'El nombre debe tener al menos 2 caracteres' };
+                if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$/.test(value)) return { isValid: false, message: 'El nombre solo puede contener letras y espacios' };
                 return { isValid: true, message: '' };
             },
 
             apellidos: function (value) {
                 if (!value) return { isValid: false, message: 'Los apellidos son obligatorios' };
                 if (value.length < 2) return { isValid: false, message: 'Los apellidos deben tener al menos 2 caracteres' };
+                if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$/.test(value)) return { isValid: false, message: 'Los apellidos solo pueden contener letras y espacios' };
                 return { isValid: true, message: '' };
             },
 
