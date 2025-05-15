@@ -9,6 +9,7 @@ from core.models.empleado import Empleado
 from django.core.paginator import Paginator
 from django.db.models import Q
 from core.services import reparacion_service
+from django.http import JsonResponse
 
 
 @login_required
@@ -91,36 +92,75 @@ def reparacion_create_view(request):
 
 
 def _handle_create_post(request):
-    """Maneja las solicitudes POST para crear una reparación."""
     # Limpiar datos del formulario
     post_data = _clean_post_data(request.POST.copy())
-
+    
     form = ReparacionForm(post_data)
     if form.is_valid():
         try:
-            form.save()
+            reparacion = form.save()
+            
+            # Si es una solicitud AJAX, devolver respuesta JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': "Reparación agregada correctamente."
+                })
+                
             messages.success(request, "Reparación agregada correctamente.")
             return redirect('reparacion_list')
         except Exception as e:
+            # Si es una solicitud AJAX, devolver error en JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Intentar determinar si es un error de integridad de BD (duplicado)
+                if 'duplicate' in str(e).lower() or 'unique constraint' in str(e).lower():
+                    return JsonResponse({
+                        'success': False,
+                        'errors': {
+                            'codigo_orden': 'Este código de orden ya existe. Por favor, use otro.'
+                        }
+                    }, status=400)
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'message': str(e)
+                    }, status=400)
+                
             messages.error(request, f"Error al guardar: {str(e)}")
     else:
+        # Si es una solicitud AJAX, devolver errores en JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            errors = {field: error[0] for field, error in form.errors.items()}
+            return JsonResponse({
+                'success': False,
+                'errors': errors
+            }, status=400)
+            
         _add_form_errors_to_messages(form, request)
 
-    return _render_create_form(request, form)
+    # Verificar si debemos mostrar la página con el modal
+    success = request.GET.get('success') == 'true'
+    
+    return _render_create_form(request, form, success)
 
 
 def _handle_create_get(request):
     """Maneja las solicitudes GET para mostrar el formulario de creación."""
     form = ReparacionForm()
-    return _render_create_form(request, form)
+    
+    # Verificar si debemos mostrar el modal de éxito
+    success = request.GET.get('success') == 'true'
+    
+    return _render_create_form(request, form, success)
 
 
-def _render_create_form(request, form):
+def _render_create_form(request, form, success=False):
     """Renderiza el formulario de creación con el contexto apropiado."""
     context = {
         'form': form,
         'clientes': Cliente.objects.all(),
-        'tecnicos': Empleado.objects.filter(cargo='Técnico')
+        'tecnicos': Empleado.objects.filter(cargo='Técnico'),
+        'success': success
     }
     return render(request, 'reparacion/reparacion_form.html', context)
 
@@ -162,21 +202,50 @@ def _handle_edit_post(request, reparacion, pk):
     if form.is_valid():
         try:
             reparacion = reparacion_service.actualizar_reparacion(form, pk)
+            
+            # Si es una solicitud AJAX, devolver respuesta JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': "Reparación actualizada correctamente."
+                })
+            
             messages.success(request, "Reparación actualizada correctamente.")
             return redirect('reparacion_list')
         except Exception as e:
+            # Si es una solicitud AJAX, devolver error en JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': str(e)
+                }, status=400)
+                
             messages.error(request, f"Error al actualizar: {str(e)}")
     else:
+        # Si es una solicitud AJAX, devolver errores en JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            errors = {field: error[0] for field, error in form.errors.items()}
+            return JsonResponse({
+                'success': False,
+                'errors': errors
+            }, status=400)
+            
         _add_form_errors_to_messages(form, request)
 
+    # Verificar si debemos mostrar la página con el modal
+    success = request.GET.get('success') == 'true'
+    
     # Si llegamos aquí, hubo un error, mostrar el formulario nuevamente
-    return _render_edit_form(request, form, reparacion)
-
+    return _render_edit_form(request, form, reparacion, success)
 
 def _handle_edit_get(request, reparacion):
-    """Maneja las solicitudes GET para mostrar el formulario de edición."""
+    """Maneja las solicitudes GET para el formulario de edición."""
     form = ReparacionForm(instance=reparacion)
-    return _render_edit_form(request, form, reparacion)
+    
+    # Verificar si debemos mostrar el modal de éxito
+    success = request.GET.get('success') == 'true'
+    
+    return _render_edit_form(request, form, reparacion, success)
 
 
 def _clean_post_data(post_data):
@@ -195,7 +264,7 @@ def _add_form_errors_to_messages(form, request):
             messages.error(request, f"Error en {field}: {error}")
 
 
-def _render_edit_form(request, form, reparacion):
+def _render_edit_form(request, form, reparacion, success=False):
     """Renderiza el formulario de edición con el contexto apropiado."""
     # Prepara datos adicionales para el frontend
     cliente_actual = reparacion.cliente
@@ -209,6 +278,7 @@ def _render_edit_form(request, form, reparacion):
         'editing': True,
         'reparacion': reparacion,
         'cliente_nombre': cliente_nombre,
-        'cliente_telefono': cliente_telefono
+        'cliente_telefono': cliente_telefono,
+        'success': success  # Asegurarse de que este parámetro se está pasando
     }
     return render(request, 'reparacion/reparacion_form.html', context)
