@@ -63,6 +63,7 @@
                 -Dsonar.python.coverage.reportPaths=coverage.xml
                 -Dsonar.sources=.
                 -Dsonar.exclusions=**/migrations/**,venv/**,**/tests/**,**/js/**,**/static/js/**,**/node_modules/**
+                -Dsonar.cpd.exclusions=*/.html
                 -Dsonar.host.url=https://sonarcloud.io
                 -Dsonar.organization=desprogramadores
                 -Dsonar.branch.name=development
