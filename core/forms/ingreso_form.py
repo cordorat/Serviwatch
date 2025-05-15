@@ -100,19 +100,23 @@ class IngresoForm(forms.ModelForm):
 
 #--------------------REPORTE DE INGRESOS--------------------#   
 
-def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)      
-    # Aplicar clases CSS a campos con errores después de la validación
-        # Aplicar clases CSS a campos con errores después de la validación
-    if hasattr(self, 'errors') and self.errors:
-        for field_name, field in self.fields.items():
-            if field_name in self.errors:
-                # Preservar las clases existentes
-                 current_classes = field.widget.attrs.get('class', '')
-                 if 'is-invalid' not in current_classes:
-                    field.widget.attrs['class'] = f"{current_classes} is-invalid"
+
 
 class ReporteIngresoForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)      
+        # Aplicar clases CSS a campos con errores después de la validación
+            # Aplicar clases CSS a campos con errores después de la validación
+        if hasattr(self, 'errors') and self.errors:
+            for field_name, field in self.fields.items():
+                if field_name in self.errors:
+                    # Preservar las clases existentes
+                    current_classes = field.widget.attrs.get('class', '')
+                    if 'is-invalid' not in current_classes:
+                        field.widget.attrs['class'] = f"{current_classes} is-invalid"
+
+                        
     inicio = forms.DateField(
         required=True,
         error_messages={
