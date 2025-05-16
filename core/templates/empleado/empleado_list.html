@@ -34,9 +34,11 @@
         border-radius: 4px;
         border: 1px solid #ced4da;
         height: 38px;
+        font-family: "Montserrat", sans-serif;
+        font-size: 16px;
     }
 
-    .text-muted {
+    .text-muted-empleado {
         font-weight: bold !important;
     }
 
@@ -92,7 +94,7 @@
             </form>
         </div>
         <div class="report-button-container">
-            <a href="{% url 'empleado_create' %}" class="btn btn-add btn-add-empleado me-3"> Generar reporte</a>
+            <a href="#" class="btn btn-add btn-add-empleado me-3"> Generar reporte</a>
         </div>
     </div>
     
@@ -138,7 +140,7 @@
                 {% else %}
                 <tr>
                     <td colspan="10" class="text-center">
-                        <p class="text-muted">No se encontraron empleados</p>
+                        <p class="text-muted-empleado mt-3">No se encontraron empleados</p>
                     </td>
                 </tr>
                 {% endif %}

@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+<style>
+    /* Estilos más específicos con !important para forzar la aplicación */
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: flex-start;
+        width: 100%;
+        padding: 20px;
+        background-color: #f7f7f7;
+    }
+
+    .ingreso-container {
+        max-width: 900px;
+        margin: 0 auto !important;
+        padding: 20px;
+    }
+
+    .form-ingreso {
+        max-width: 900px;
+    }
+
+    @media (max-width: 768px) {
+        .content {
+            padding-left: 0 !important;
+        }
+    }
+</style>
+
+<div class="ingreso-container p-4">
+    <div class="text-center mb-4">
+        <div style="background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
+            <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">INGRESOS DEL DÍA</h2>
+            <div
+                style="background-color: #e2eec1; padding: 0.5rem 2rem; border-radius: 10px; border: 2px solid #a0b34c; display: inline-block; margin-top: 0.5rem;">
+                <h3 style="margin: 0; font-family: Montserrat, sans-serif;">${{ total_ingresos|floatformat:0|intcomma }}
+                    COP</h3>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="text-center fw-bold mb-3">AGREGAR INGRESO</h4>
+
+    <form method="post" novalidate id="ingresoForm" class="form-ingreso">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <div class="input-group ingreso-form custom-form">
+                <span class="input-group-text form-span" id="basic-addon1">
+                    <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
+                </span>
+                {{ form.valor }}
+            </div>
+            <div class="error-container mt-1">
+                {% if form.valor.errors %}
+                {% for error in form.valor.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="input-group ingreso-form custom-form">
+                <span class="input-group-text form-span" id="basic-addon1">
+                    <i class="bi bi-calendar-date fs-4 text-secondary"></i>
+                </span>
+                {{ form.fecha }}
+            </div>
+            <div class="error-container mt-1">
+                {% if form.fecha.errors %}
+                {% for error in form.fecha.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="input-group ingreso-form custom-form">
+                <span class="input-group-text form-span" id="basic-addon1">
+                    <i class="bi bi-pencil-square fs-4 text-secondary"></i>
+                </span>
+                {{ form.descripcion }}
+            </div>
+            <div class="error-container mt-1">
+                {% if form.descripcion.errors %}
+                {% for error in form.descripcion.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn save">
+                GUARDAR
+            </button>
+            <a href="{% url 'ingreso' %}" class="btn cancel">CANCELAR</a>
+        </div>
+
+        <div class="mt-3" style="width: 100%;">
+            <a href="{% url 'reporte_ingresos_form' %}" class="btn save d-block" style="width: 100%;">GENERAR REPORTE DE INGRESOS</a>
+        </div>
+
+    </form>
+</div>
+
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Corregido: Seleccionar los campos correctamente
+        const fechaField = document.querySelector('input[name="fecha"]');
+        const valorField = document.querySelector('input[name="valor"]');
+        const descripcionField = document.querySelector('textarea[name="descripcion"]');
+
+        const allFields = [fechaField, valorField, descripcionField];
+
+        function validateField(field) {
+            // Remover error anterior
+            const errorContainer = field.closest('.mb-3').querySelector('.error-container');
+            errorContainer.innerHTML = '';
+
+            const value = field.value.trim();
+            let errorMessage = '';
+
+            if (!value) {
+                if (field.name === 'fecha') errorMessage = 'La fecha es obligatoria.';
+                if (field.name === 'valor') errorMessage = 'El valor es obligatorio.';
+                if (field.name === 'descripcion') errorMessage = 'La descripción es obligatoria.';
+            }
+
+            if (field.name === 'valor' && value && parseInt(value) <= 0) {
+                errorMessage = 'El valor debe ser mayor que cero.';
+            }
+
+            if (errorMessage) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'text-danger small';
+                errorDiv.textContent = errorMessage;
+                errorContainer.appendChild(errorDiv);
+                field.classList.add('is-invalid');
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        // Validación al salir del input
+        allFields.forEach(field => {
+            if (!field) return; // Evitar errores si no se encuentra el campo
+
+            field.addEventListener('blur', function () {
+                validateField(this);
+            });
+
+            field.addEventListener('input', function () {
+                this.classList.remove('is-invalid');
+                const errorContainer = this.closest('.mb-3').querySelector('.error-container');
+                errorContainer.innerHTML = '';
+            });
+        });
+
+        const form = document.querySelector('#ingresoForm');
+        form.addEventListener('submit', function (e) {
+            let isValid = true;
+
+            allFields.forEach(field => {
+                if (!field) return;
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) e.preventDefault();
+        });
+    });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ===== VARIABLES INICIALES =====
+        const fechaValue = "{{ form.fecha.value|date:'d/m/Y' }}";
+
+        // ===== CONFIGURACIÓN DE DATEPICKERS =====
+        function setupDatepicker(selector, defaultValue) {
+            return flatpickr(selector, {
+                dateFormat: "d/m/Y",
+                locale: "es",
+                defaultDate: defaultValue || null,
+                onChange: function (selectedDates, dateStr, instance) {
+                    instance.input.value = dateStr;
+                    instance.input.dataset.userModified = 'true';
+                    instance.input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        setupDatepicker("#id_fecha", fechaValue);
+
+        if (fechaValue) {
+            document.querySelector("#id_fecha").value = fechaValue;
+        }
+    });
+
+</script>
+{% endblock %}
