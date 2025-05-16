@@ -9,6 +9,7 @@ from core.models.empleado import Empleado
 from django.core.paginator import Paginator
 from django.db.models import Q
 from core.services import reparacion_service
+from django.db import models
 
 
 @login_required
@@ -64,6 +65,25 @@ def reparacion_list_view(request):
 
         reparaciones_qs = reparaciones_qs.filter(query).distinct()
 
+    # Aplicar ordenamiento según el flujo de trabajo
+    # Primero Cotización, luego Reparación, finalmente Listo
+    order_mapping = {
+        'Cotización': 1,
+        'Reparación': 2,
+        'Listo': 3
+    }
+    reparaciones_qs = reparaciones_qs.order_by(
+        # Ordenar primero por el campo estado según el flujo de trabajo
+        models.Case(
+            *[models.When(estado=estado, then=models.Value(orden)) 
+              for estado, orden in order_mapping.items()],
+            default=models.Value(999),
+            output_field=models.IntegerField()
+        ),
+        # Después por fecha de creación descendente (las más recientes primero)
+        '-fecha_ingreso'
+    )
+    
     paginator = Paginator(reparaciones_qs, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
