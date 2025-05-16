@@ -233,7 +233,7 @@ form.repair-form.custom-form {
 
 /* Añadir al final de formularios.css */
 
-/* Clase específica para formulario de reparación */
+/* Clase específica para formulario de egreso */
 .egreso-form {
   display: flex;
   gap: 0px;
@@ -242,8 +242,23 @@ form.repair-form.custom-form {
   max-width: 800px;
 }
 
-/* Anula los estilos de custom-form cuando se usa con repair-form */
+/* Anula los estilos de custom-form cuando se usa con egreso-form*/
 form.egreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+/* Clase específica para formulario de ingreso */
+.ingreso-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con ingreso-form*/
+form.ingreso-form.custom-form {
   flex-direction: row;
   max-width: 800px;
 }

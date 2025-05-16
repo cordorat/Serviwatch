@@ -4,6 +4,7 @@ from core.services.cliente_service import get_all_clientes, crear_cliente
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
 from django.db.models import Q
 from core.models.cliente import Cliente
 from django.core.paginator import Paginator
@@ -69,19 +70,32 @@ def cliente_create_view(request, id=None):
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
+            
             crear_cliente(form)
+            
+            # Manejar solicitudes AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Cliente editado exitosamente.' if modo == 'editar' else 'Cliente creado exitosamente.'
+                })
+                
+            # Para solicitudes normales
             if modo == 'editar':
                 messages.success(request, 'Cliente editado exitosamente.')
             else:
                 messages.success(request, 'Cliente creado exitosamente.')
+                
             form.save()
+            # Si hay una URL de redirección especificada
             next_url = request.GET.get('next')
             if next_url:
                 return redirect(next_url)
-
-            return redirect('cliente_list')
+            
+            # No redirigimos por defecto, dejamos que el cliente maneje la navegación
     else:
         form = ClienteForm(instance=cliente)
+        
     return render(request, 'cliente/cliente_form.html', {
         'form': form,
         'modo': modo

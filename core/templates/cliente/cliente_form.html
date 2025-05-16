@@ -4,6 +4,47 @@
 {% block title %}Agregar Cliente{% endblock %}
 
 {% block content %}
+
+<style>
+  /* Estilos más específicos con !important para forzar la aplicación */
+  .content {
+    display: flex;
+    justify-content: normal;
+    align-items: flex-start;
+    width: 100%;
+    padding: 20px;
+    background-color: #f7f7f7;
+  }
+
+  .reporte-egreso-container {
+    max-width: 900px;
+    margin: 0 auto !important;
+    padding: 20px;
+  }
+
+  .reporte-form-egreso {
+    max-width: 900px;
+  }
+
+  /* Estilos para mensajes */
+  .message-success {
+    background-color: #C8DA53;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .content {
+      padding-left: 0 !important;
+    }
+  }
+</style>
+
 <h2 class="titulo">
   {% if modo == 'editar' %}
   EDITAR CLIENTE
@@ -11,7 +52,6 @@
   AGREGAR CLIENTE
   {% endif %}
 </h2>
-<h4>DATOS PERSONALES</h4>
 
 <div>
   <div class="left-column">
@@ -75,16 +115,18 @@
 </div>
 
 <!-- Modal de confirmación simplificado -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
-  aria-hidden="true">
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" 
+     tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center" style="background-color: #f1f1f1;">
-      <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+      <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
         {% if modo == 'editar' %}
         <h4 class="titulo m-0" id="modalMessage">CLIENTE ACTUALIZADO CORRECTAMENTE</h4>
         {% else %}
         <h4 class="titulo m-0" id="modalMessage">CLIENTE AGREGADO CORRECTAMENTE</h4>
         {% endif %}
+        <!-- Botón VOLVER -->
+        <a href="{% url 'cliente_list' %}" class="btn save mt-3">VOLVER</a>
       </div>
     </div>
   </div>
@@ -94,154 +136,196 @@
 
 {% block javascript %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const btnGuardarcliente = document.getElementById('btnGuardarcliente');
-    const clienteForm = document.getElementById('clienteForm');
-    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    
-    // Referencias a los campos
-    const nombreField = document.querySelector('input[name="nombre"]');
-    const apellidoField = document.querySelector('input[name="apellido"]');
-    const telefonoField = document.querySelector('input[name="telefono"]');
-    const allFields = [nombreField, apellidoField, telefonoField];
+document.addEventListener("DOMContentLoaded", function () {
+  const btnGuardarcliente = document.getElementById('btnGuardarcliente');
+  const clienteForm = document.getElementById('clienteForm');
+  const modal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
+    backdrop: 'static',  // Esto evita que el modal se cierre al hacer clic fuera
+    keyboard: false      // Esto evita que el modal se cierre con la tecla ESC
+  });
+  
+  // Referencias a los campos
+  const nombreField = document.querySelector('input[name="nombre"]');
+  const apellidoField = document.querySelector('input[name="apellido"]');
+  const telefonoField = document.querySelector('input[name="telefono"]');
+  const allFields = [nombreField, apellidoField, telefonoField];
 
-    // Marcar campos con errores del servidor
-    document.querySelectorAll('.form-error').forEach(function (errorMessage) {
-      var input = errorMessage.closest('.form-group')?.querySelector('input');
-      if (input) {
-        input.classList.add('is-invalid');
-      }
-    });
+  // Marcar campos con errores del servidor
+  document.querySelectorAll('.form-error').forEach(function (errorMessage) {
+    var input = errorMessage.closest('.form-group')?.querySelector('input');
+    if (input) {
+      input.classList.add('is-invalid');
+    }
+  });
 
-    // Función para obtener el mensaje de error basado en el tipo de campo y su valor
-    function getFieldErrorMessage(fieldName, value) {
-      // Si está vacío
-      if (!value) {
-        if (fieldName === 'nombre') return 'El nombre es obligatorio.';
-        if (fieldName === 'apellido') return 'El apellido es obligatorio.';
-        if (fieldName === 'telefono') return 'El número de teléfono es obligatorio.';
-        return '';
-      }
-      
-      // Validaciones específicas para cada tipo de campo
-      if (fieldName === 'nombre' || fieldName === 'apellido') {
+  function validateField(field) {
+    // Remover error anterior
+    const formGroup = field.closest('.form-group');
+    let errorElement = formGroup.querySelector('.form-error');
+    if (errorElement) {
+      errorElement.remove();
+    }
+
+    const value = field.value.trim();
+    let errorMessage = '';
+
+    if (!value) {
+      if (field.name === 'nombre') errorMessage = 'El nombre es obligatorio.';
+      if (field.name === 'apellido') errorMessage = 'El apellido es obligatorio.';
+      if (field.name === 'telefono') errorMessage = 'El número de teléfono es obligatorio.';
+    } else {
+      if (field.name === 'nombre') {
+        // Permitir nombres compuestos con espacios
+        // Validación modificada para aceptar múltiples palabras con espacios
         if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
-            return `El ${fieldName} solo debe contener letras.`;
+          errorMessage = 'El nombre solo debe contener letras y espacios.';
+        } else {
+          // Verificar que cada palabra del nombre sea válida
+          const palabras = value.split(/\s+/);
+          for (const palabra of palabras) {
+            if (palabra.length < 2) {
+              errorMessage = 'Cada nombre debe tener al menos 2 letras.';
+              break;
+            }
+          }
         }
       }
       
-      if (fieldName === 'telefono') {
+      if (field.name === 'apellido') {
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+          errorMessage = 'El nombre solo debe contener letras y espacios.';
+        } else {
+          // Verificar que cada palabra del nombre sea válida
+          const palabras = value.split(/\s+/);
+          for (const palabra of palabras) {
+            if (palabra.length < 2) {
+              errorMessage = 'Cada nombre debe tener al menos 2 letras.';
+              break;
+            }
+          }
+        }
+      }
+
+      if (field.name === 'telefono') {
         if (!/^\d{10}$/.test(value)) {
-            return 'El número de teléfono debe contener exactamente 10 dígitos.';
+          errorMessage = 'El número de teléfono debe contener exactamente 10 dígitos.';
         }
-      }
-      
-      return ''; // No hay error
-    }
-
-    // Función para validar un campo
-    function validateField(field) {
-      // Remover error anterior
-      const formGroup = field.closest('.form-group');
-      let errorElement = formGroup.querySelector('.form-error');
-      if (errorElement) {
-        errorElement.remove();
-      }
-        
-      // Obtener valor y validar
-      const value = field.value.trim();
-      const errorMessage = getFieldErrorMessage(field.name, value);
-        
-      // Mostrar error o marcar como válido
-      if (errorMessage) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'form-error';
-        errorDiv.textContent = errorMessage;
-        formGroup.appendChild(errorDiv);
-        field.classList.add('is-invalid');
-        return false;
-      } else {
-        field.classList.remove('is-invalid');
-        return true;
+        // Validar que comience con 3
+        else if (!value.startsWith('3')) {
+          errorMessage = 'El número de teléfono debe comenzar con 3.';
+        }
       }
     }
 
-    // Validación al salir del input
-    allFields.forEach(field => {
-      field.addEventListener('blur', function () {
-        validateField(this);
-      });
-
-      field.addEventListener('input', function () {
-        this.classList.remove('is-invalid');
-        const formGroup = this.closest('.form-group');
-        const error = formGroup.querySelector('.form-error');
-        if (error) error.remove();
-      });
-    });
-
-    // Función para validar todos los campos
-    function validateAllFields() {
-      let isValid = true;
-      allFields.forEach(field => {
-        if (!validateField(field)) {
-          isValid = false;
-        }
-      });
-      return isValid;
+    if (errorMessage) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'form-error';
+      errorDiv.textContent = errorMessage;
+      formGroup.appendChild(errorDiv);
+      field.classList.add('is-invalid');
+      return false;
+    } else {
+      field.classList.remove('is-invalid');
+      return true;
     }
+  }
 
-    // IMPORTANTE: Manejar el clic del botón con validación
-    btnGuardarcliente.addEventListener('click', function (event) {
-      event.preventDefault(); // Evita el envío inmediato
-      
-      // Validar todos los campos primero
-      const isValid = validateAllFields();
-      
-      if (isValid) {
-        // Agregar un campo oculto solo si no existe
-        if (!document.querySelector('input[name="confirmar"]')) {
-          const hiddenInput = document.createElement('input');
-          hiddenInput.type = 'hidden';
-          hiddenInput.name = 'confirmar';
-          hiddenInput.value = 'true';
-          clienteForm.appendChild(hiddenInput);
-        }
-        
-        console.log("Formulario válido, mostrando modal...");
-        // Mostrar el modal
-        modal.show();
-        
-        // Enviar el formulario después de 3 segundos
-        setTimeout(function () {
-          clienteForm.submit();
-        }, 3000);
-      } else {
-        console.log("Formulario inválido, no se muestra el modal");
-        // Hacer scroll al primer error
-        const firstError = document.querySelector('.is-invalid');
-        if (firstError) {
-          firstError.focus();
-          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
+  // Validación al salir del input
+  allFields.forEach(field => {
+    field.addEventListener('blur', function () {
+      validateField(this);
     });
 
-    // Evitar que el formulario se envíe automáticamente
-    clienteForm.addEventListener('submit', function(e) {
-      // Solo permitir envío automático si viene del botón guardar
-      if (!document.querySelector('input[name="confirmar"]')) {
-        e.preventDefault();
-      }
-    });
-    
-    // Limpiar campos al recargar
-    window.addEventListener('pageshow', function (event) {
-      if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
-        allFields.forEach(input => input.value = '');
-      }
+    field.addEventListener('input', function () {
+      this.classList.remove('is-invalid');
+      const formGroup = this.closest('.form-group');
+      const error = formGroup.querySelector('.form-error');
+      if (error) error.remove();
     });
   });
-</script>
 
+  // Función para validar todos los campos
+  function validateAllFields() {
+    let isValid = true;
+    allFields.forEach(field => {
+      if (!validateField(field)) {
+        isValid = false;
+      }
+    });
+    return isValid;
+  }
+
+  // IMPORTANTE: Manejar el clic del botón con validación
+  btnGuardarcliente.addEventListener('click', function (event) {
+    event.preventDefault(); // Evita el envío inmediato
+    
+    // Validar todos los campos primero
+    const isValid = validateAllFields();
+    
+    if (isValid) {
+      // Agregar el token CSRF
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      // Preparar formulario para envío
+      const formData = new FormData(clienteForm);
+      formData.append('confirmar', 'true');
+      
+      // Enviar con Fetch API
+      fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrftoken
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Mostrar el modal
+          modal.show();
+          
+          // Prevenir que el modal se cierre al hacer clic fuera
+          document.querySelector('.modal-backdrop').addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+        } else {
+          console.error('Error al procesar el formulario:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    } else {
+      console.log("Formulario inválido, no se muestra el modal");
+      // Hacer scroll al primer error
+      const firstError = document.querySelector('.is-invalid');
+      if (firstError) {
+        firstError.focus();
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+  
+  // Si se intenta cerrar el modal con Escape o haciendo clic fuera, prevenir
+  document.querySelector('#confirmationModal').addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+  
+  // Limpiar campos al recargar
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted || performance.getEntriesByType("navigation")[0].type === "reload") {
+      allFields.forEach(input => input.value = '');
+    }
+  });
+});
+</script>
 {% endblock %}

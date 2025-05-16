@@ -1,5 +1,4 @@
-
-from core.models.egreso import Egreso
+from core.models.ingreso import Ingreso
 from django.db.models import Sum
 from datetime import date
 from django.core.exceptions import ValidationError
@@ -15,8 +14,7 @@ from django.utils import timezone
 from reportlab.lib.pagesizes import landscape
 
 
-
-def crear_egreso(datos):
+def crear_ingreso(datos):
     try:
         # Verificar que todos los datos necesarios estén presentes
         required_keys = ['fecha', 'valor', 'descripcion']
@@ -24,63 +22,63 @@ def crear_egreso(datos):
             if key not in datos:
                 raise ValidationError(f"Falta el dato requerido: {key}")
 
-        # Crear una instancia de Egreso
-        egreso = Egreso(
+        # Crear una instancia de Ingreso
+        ingreso = Ingreso(
             fecha=datos['fecha'],
             valor=datos['valor'],
             descripcion=datos['descripcion']
         )
-        # Guardar el egreso en la base de datos
-        egreso.save()
-        return egreso
+        # Guardar el ingreso en la base de datos
+        ingreso.save()
+        return ingreso
 
     except ValidationError as ve:
         # Manejar errores de validación
         raise ve
     except Exception as e:
         # Manejar cualquier otro tipo de error
-        raise DatabaseError(f"Error al crear el egreso: {str(e)}")
+        raise DatabaseError(f"Error al crear el ingreso: {str(e)}")
     
     
-def obtener_total_egresos_dia(fecha=None):
+def obtener_total_ingresos_dia(fecha=None):
     """
-    Obtiene todos los egresos registrados en una fecha específica.
+    Obtiene todos los ingresos registrados en una fecha específica.
     Si no se proporciona fecha, usa la fecha actual.
     """
     if fecha is None:
         fecha = date.today()
 
-    total = Egreso.objects.filter(fecha=fecha).aggregate(total=Sum('valor'))['total']
+    total = Ingreso.objects.filter(fecha=fecha).aggregate(total=Sum('valor'))['total']
     return total or 0
 
-#--------------------REPORTE DE EGRESOS--------------------#
+#--------------------REPORTE DE INGRESOS--------------------#
 
 
-def obtener_egresos_rango(fecha_inicio, fecha_fin):
+def obtener_ingresos_rango(fecha_inicio, fecha_fin):
 
-    return Egreso.objects.filter(
+    return Ingreso.objects.filter(
         fecha__range=(fecha_inicio, fecha_fin)
     ).order_by('fecha')
 
 
-def obtener_total_egresos_rango(fecha_inicio, fecha_fin):
+def obtener_total_ingresos_rango(fecha_inicio, fecha_fin):
 
-    total = Egreso.objects.filter(
+    total = Ingreso.objects.filter(
         fecha__range=(fecha_inicio, fecha_fin)
     ).aggregate(total=Sum('valor'))['total']
     return total or 0
 
-#--------------------GENERAR PDF DE EGRESOS--------------------#
+#--------------------GENERAR PDF DE INGRESOS--------------------#
 
-def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
+def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None):
     """
-    Genera un archivo PDF con el reporte de egresos usando ReportLab.
+    Genera un archivo PDF con el reporte de ingresos usando ReportLab.
     
     Args:
-        egresos: QuerySet con los egresos a incluir en el reporte
+        ingresos: QuerySet con los ingresos a incluir en el reporte
         fecha_inicio: Fecha de inicio del periodo (objeto date)
         fecha_fin: Fecha de fin del periodo (objeto date)
-        total: Valor total de los egresos
+        total: Valor total de los ingresos
         request: Objeto request (opcional, para obtener la URL base)
         
     Returns:
@@ -98,7 +96,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
         rightMargin=72,
         topMargin=72,
         bottomMargin=72,
-        title=f"Reporte de Egresos {fecha_inicio} - {fecha_fin}"
+        title=f"Reporte de Ingresos {fecha_inicio} - {fecha_fin}"
     )
     
     # Lista para almacenar todos los elementos del PDF
@@ -149,7 +147,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     elements.append(Spacer(1, 0.5*inch))
     
     # Título del reporte
-    elements.append(Paragraph("REPORTE DE EGRESOS", subtitle_style))
+    elements.append(Paragraph("REPORTE DE INGRESOS", subtitle_style))
     
     # Período del reporte
     elements.append(Paragraph(
@@ -163,17 +161,17 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
         ["Fecha", "Descripción", "Valor"]  # Encabezados
     ]
     
-    # Agregar cada egreso a la tabla
-    for egreso in egresos:
+    # Agregar cada ingreso a la tabla
+    for ingreso in ingresos:
         table_data.append([
-            egreso.fecha.strftime('%d/%m/%Y'),
-            egreso.descripcion,
-            f"${egreso.valor:,.2f}"
+            ingreso.fecha.strftime('%d/%m/%Y'),
+            ingreso.descripcion,
+            f"${ingreso.valor:,.2f}"
         ])
     
-    # Si no hay egresos, mostrar un mensaje
-    if not egresos:
-        table_data.append(["", "No hay egresos registrados en este período", ""])
+    # Si no hay ingresos, mostrar un mensaje
+    if not ingresos:
+        table_data.append(["", "No hay ingresos registrados en este período", ""])
     
     # Agregar fila de total
     table_data.append([

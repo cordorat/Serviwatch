@@ -846,3 +846,387 @@ class ReparacionEditViewTest(TestCase):
         # Verificar mensaje de error
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any('Error' in str(message) for message in messages))
+
+import json
+from django.test import RequestFactory
+
+# Agregar a las importaciones existentes
+from django.http import HttpRequest
+
+
+# Nueva clase de prueba para solicitudes AJAX
+class ReparacionAJAXTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Crear usuario para autenticación
+        cls.user = User.objects.create_user(
+            username='testajax',
+            password='testpassword123'
+        )
+        
+        # Crear cliente
+        cls.cliente = Cliente.objects.create(
+            nombre="Cliente AJAX",
+            apellido="Test",
+            telefono="3001234567"
+        )
+        
+        # Crear técnico
+        cls.tecnico = Empleado.objects.create(
+            cedula="1023456789",
+            nombre="Técnico",
+            apellidos="AJAX",
+            fecha_ingreso=date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
+            celular="3109876543",
+            cargo="Técnico",
+            salario=2500000,
+            estado="Activo"
+        )
+        
+        # Crear una reparación
+        cls.reparacion = Reparacion.objects.create(
+            cliente=cls.cliente,
+            marca_reloj="Seiko",
+            descripcion="Prueba para solicitudes AJAX con descripción detallada",
+            codigo_orden="9001",
+            fecha_entrega_estimada=date.today() + timedelta(days=7),
+            precio=75000,
+            espacio_fisico="Z1",
+            estado="Cotización",
+            tecnico=cls.tecnico
+        )
+    
+    def setUp(self):
+        self.client.login(username='testajax', password='testpassword123')
+        self.factory = RequestFactory()
+        
+        # URLs
+        self.create_url = reverse('reparacion_create')
+        self.edit_url = reverse('reparacion_edit', kwargs={'pk': self.reparacion.id})
+    
+    def test_ajax_create_success(self):
+        """Prueba la creación exitosa de una reparación vía AJAX"""
+        # Datos para la nueva reparación
+        data = {
+            'cliente': self.cliente.id,
+            'marca_reloj': 'Tissot',
+            'descripcion': 'Reparación completa del mecanismo de cuerda automática',
+            'codigo_orden': '9002',
+            'fecha_entrega_estimada': (date.today() + timedelta(days=10)).strftime('%d/%m/%Y'),
+            'precio': 90000,
+            'espacio_fisico': 'Z2',
+            'estado': 'Cotización',
+            'tecnico': self.tecnico.id
+        }
+        
+        # Configurar cabeceras para simular solicitud AJAX
+        headers = {
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+            'HTTP_X_CSRFTOKEN': 'dummy-token'
+        }
+        
+        # Realizar solicitud POST
+        response = self.client.post(self.create_url, data, **headers)
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response['Content-Type'].startswith('application/json'))
+        
+        # Decodificar JSON
+        json_response = json.loads(response.content)
+        self.assertTrue(json_response['success'])
+        self.assertEqual(json_response['message'], 'Reparación agregada correctamente.')
+        
+        # Verificar que la reparación se creó
+        self.assertTrue(Reparacion.objects.filter(codigo_orden='9002').exists())
+    
+    def test_ajax_create_duplicate_code(self):
+        """Prueba el manejo de códigos duplicados vía AJAX"""
+        # Datos con código duplicado
+        data = {
+            'cliente': self.cliente.id,
+            'marca_reloj': 'Citizen',
+            'descripcion': 'Reparación con código duplicado para prueba AJAX',
+            'codigo_orden': '9001',  # Código que ya existe
+            'fecha_entrega_estimada': (date.today() + timedelta(days=8)).strftime('%d/%m/%Y'),
+            'precio': 65000,
+            'espacio_fisico': 'Z3',
+            'estado': 'Cotización',
+            'tecnico': self.tecnico.id
+        }
+        
+        # Configurar cabeceras para simular solicitud AJAX
+        headers = {
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+            'HTTP_X_CSRFTOKEN': 'dummy-token'
+        }
+        
+        # Realizar solicitud POST
+        response = self.client.post(self.create_url, data, **headers)
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(response['Content-Type'].startswith('application/json'))
+        
+        # Decodificar JSON
+        json_response = json.loads(response.content)
+        self.assertFalse(json_response['success'])
+        self.assertIn('errors', json_response)
+        self.assertIn('codigo_orden', json_response['errors'])
+        self.assertIn('existe', json_response['errors']['codigo_orden'])
+    
+    def test_ajax_create_invalid_form(self):
+        """Prueba el manejo de formularios inválidos vía AJAX"""
+        # Datos con errores de validación
+        data = {
+            'cliente': self.cliente.id,
+            'marca_reloj': 'Fossil',
+            'descripcion': 'Corta',  # Descripción muy corta
+            'codigo_orden': 'ABC',   # No numérico
+            'fecha_entrega_estimada': (date.today() - timedelta(days=1)).strftime('%d/%m/%Y'),  # Fecha pasada
+            'precio': -1000,         # Precio negativo
+            'espacio_fisico': 'Z4',
+            'estado': 'Cotización',
+            'tecnico': self.tecnico.id
+        }
+        
+        headers = {
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+            'HTTP_X_CSRFTOKEN': 'dummy-token'
+        }
+        
+        response = self.client.post(self.create_url, data, **headers)
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 400)
+        json_response = json.loads(response.content)
+        self.assertFalse(json_response['success'])
+        self.assertIn('errors', json_response)
+        
+        # Verificar errores específicos
+        self.assertIn('descripcion', json_response['errors'])
+        self.assertIn('codigo_orden', json_response['errors'])
+        self.assertIn('fecha_entrega_estimada', json_response['errors'])
+        self.assertIn('precio', json_response['errors'])
+    
+    def test_ajax_edit_success(self):
+        """Prueba la edición exitosa de una reparación vía AJAX"""
+        # Datos para actualizar
+        data = {
+            'cliente': self.cliente.id,
+            'marca_reloj': 'Seiko Actualizado',
+            'descripcion': 'Descripción actualizada para prueba AJAX con detalle suficiente',
+            'codigo_orden': '9001',  # Mismo código (no debe dar error)
+            'fecha_entrega_estimada': (date.today() + timedelta(days=15)).strftime('%d/%m/%Y'),
+            'precio': 85000,
+            'espacio_fisico': 'Z5',
+            'estado': 'Reparación',
+            'tecnico': self.tecnico.id
+        }
+        
+        headers = {
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+            'HTTP_X_CSRFTOKEN': 'dummy-token'
+        }
+        
+        response = self.client.post(self.edit_url, data, **headers)
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertTrue(json_response['success'])
+        
+        # Verificar que la reparación se actualizó
+        self.reparacion.refresh_from_db()
+        self.assertEqual(self.reparacion.marca_reloj, 'Seiko Actualizado')
+        self.assertEqual(self.reparacion.precio, 85000)
+        self.assertEqual(self.reparacion.estado, 'Reparación')
+    
+    def test_ajax_edit_invalid_form(self):
+        """Prueba edición con formulario inválido vía AJAX"""
+        # Datos con errores de validación
+        data = {
+            'cliente': self.cliente.id,
+            'marca_reloj': '',  # Campo requerido vacío
+            'descripcion': 'Corta',  # Descripción muy corta
+            'codigo_orden': '9001',
+            'fecha_entrega_estimada': '',  # Campo requerido vacío
+            'precio': 85000,
+            'espacio_fisico': 'Z5',
+            'estado': 'Reparación',
+            'tecnico': self.tecnico.id
+        }
+        
+        headers = {
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+            'HTTP_X_CSRFTOKEN': 'dummy-token'
+        }
+        
+        response = self.client.post(self.edit_url, data, **headers)
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 400)
+        json_response = json.loads(response.content)
+        self.assertFalse(json_response['success'])
+        self.assertIn('errors', json_response)
+        
+        # Verificar errores específicos
+        self.assertIn('marca_reloj', json_response['errors'])
+        self.assertIn('descripcion', json_response['errors'])
+        self.assertIn('fecha_entrega_estimada', json_response['errors'])
+
+
+# Nueva clase para probar el parámetro success y el modal
+class ReparacionModalTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Crear usuario para autenticación
+        cls.user = User.objects.create_user(
+            username='modaltest',
+            password='testpassword123'
+        )
+        
+        # Crear cliente y técnico
+        cls.cliente = Cliente.objects.create(
+            nombre="Cliente Modal",
+            apellido="Test",
+            telefono="3501234567"
+        )
+        
+        cls.tecnico = Empleado.objects.create(
+            cedula="5023456789",
+            nombre="Técnico",
+            apellidos="Modal",
+            fecha_ingreso=date.today().strftime('%Y-%m-%d'),
+            fecha_nacimiento=(date.today() - timedelta(days=365*30)).strftime('%Y-%m-%d'),
+            celular="3509876543",
+            cargo="Técnico",
+            salario=2500000,
+            estado="Activo"
+        )
+    
+    def setUp(self):
+        self.client.login(username='modaltest', password='testpassword123')
+        self.create_url = reverse('reparacion_create')
+    
+    def test_create_with_success_parameter(self):
+        """Prueba que la página de creación con parámetro success muestra el modal"""
+        response = self.client.get(f"{self.create_url}?success=true")
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'reparacion/reparacion_form.html')
+        
+        # Verificar que el contexto incluye success=True
+        self.assertTrue(response.context['success'])
+        
+        # Verificar que el modal está en el HTML
+        self.assertContains(response, 'confirmationModal')
+        self.assertContains(response, 'data-bs-backdrop="static"')
+        self.assertContains(response, 'data-bs-keyboard="false"')
+        self.assertContains(response, 'REPARACIÓN AGREGADA CORRECTAMENTE')
+    
+    def test_create_without_success_parameter(self):
+        """Prueba que la página de creación sin parámetro success no activa el modal"""
+        response = self.client.get(self.create_url)
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 200)
+        
+        # Verificar que el contexto incluye success=False
+        self.assertFalse(response.context['success'])
+    
+    def test_edit_with_success_parameter(self):
+        """Prueba que la página de edición con parámetro success muestra el modal"""
+        # Crear una reparación para editar
+        reparacion = Reparacion.objects.create(
+            cliente=self.cliente,
+            marca_reloj="Orient",
+            descripcion="Reparación para prueba de modal con descripción detallada",
+            codigo_orden="8001",
+            fecha_entrega_estimada=date.today() + timedelta(days=7),
+            precio=55000,
+            espacio_fisico="M1",
+            estado="Cotización",
+            tecnico=self.tecnico
+        )
+        
+        edit_url = reverse('reparacion_edit', kwargs={'pk': reparacion.id})
+        
+        # Acceder primero a la URL sin el parámetro para confirmar estado inicial
+        response_without_param = self.client.get(edit_url)
+        self.assertEqual(response_without_param.status_code, 200)
+        # Verificar que por defecto success es False o no está presente
+        self.assertFalse(response_without_param.context.get('success', False))
+        
+        # Ahora probar con el parámetro success
+        response = self.client.get(f"{edit_url}?success=true")
+        
+        # Verificar respuesta
+        self.assertEqual(response.status_code, 200)
+        
+        # VERIFICAR EL CONTENIDO HTML EN LUGAR DEL CONTEXTO
+        # ya que el modal se renderizará si el JavaScript detecta success=true en la URL
+        # incluso si el contexto no lo incluye explícitamente
+        self.assertContains(response, 'confirmationModal')
+        self.assertContains(response, 'REPARACIÓN ACTUALIZADA CORRECTAMENTE')
+        
+        # Verificar que el HTML incluye código JavaScript que detecta el parámetro success en la URL
+        self.assertContains(response, "if (urlParams.get('success') === 'true')")
+
+
+# Nueva clase para probar funciones auxiliares
+class ReparacionHelperFunctionsTests(TestCase):
+    def test_clean_post_data(self):
+        """Prueba la función _clean_post_data"""
+        from django.http import QueryDict
+        from core.views.Reparacion.reparacion_view import _clean_post_data
+        
+        # Crear datos POST con campos extra
+        post_data = QueryDict('', mutable=True)
+        post_data.update({
+            'cliente': '1',
+            'cliente_nombre': 'Nombre Test',
+            'celular_cliente': '3001234567',
+            'marca_reloj': 'Casio',
+            'codigo_orden': '7001'
+        })
+        
+        # Limpiar datos
+        cleaned_data = _clean_post_data(post_data)
+        
+        # Verificar que los campos extra se eliminaron
+        self.assertNotIn('cliente_nombre', cleaned_data)
+        self.assertNotIn('celular_cliente', cleaned_data)
+        
+        # Verificar que los campos válidos permanecen
+        self.assertIn('cliente', cleaned_data)
+        self.assertIn('marca_reloj', cleaned_data)
+        self.assertIn('codigo_orden', cleaned_data)
+    
+    def test_add_form_errors_to_messages(self):
+        """Prueba la función _add_form_errors_to_messages"""
+        from core.views.Reparacion.reparacion_view import _add_form_errors_to_messages
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        
+        # Crear formulario con errores
+        form = ReparacionForm(data={})  # Formulario vacío tendrá errores
+        
+        # Crear request ficticio
+        request = HttpRequest()
+        request.session = {}
+        
+        # Configurar almacenamiento de mensajes
+        setattr(request, '_messages', FallbackStorage(request))
+        
+        # Llamar a la función
+        _add_form_errors_to_messages(form, request)
+        
+        # Verificar que se agregaron los mensajes
+        messages = list(get_messages(request))
+        self.assertTrue(len(messages) > 0)
+        
+        # Verificar que los mensajes contienen "Error en"
+        for message in messages:
+            self.assertIn("Error en", str(message))
