@@ -93,7 +93,8 @@ class RelojForm(forms.ModelForm):
         error_messages={
             'required': 'El estado es obligatorio',
             'invalid_choice': 'Estado no válido'
-        }
+        },
+        initial='DISPONIBLE'
     )
     fecha_venta = forms.DateField(
         input_formats=['%d/%m/%Y'],
@@ -117,6 +118,7 @@ class RelojForm(forms.ModelForm):
 
     class Meta:
         model = Reloj
+        exclude = ['cliente']
         fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta', 'pagado']
         # No incluir 'comision' aquí porque es un campo no editable
 

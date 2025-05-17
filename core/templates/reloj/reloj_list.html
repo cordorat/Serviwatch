@@ -3,15 +3,26 @@
 
 {% block content %}
 
+<style>
+  .content {
+        overflow:scroll;
+    }
+</style>
+
 <div class="main-content">
   <!-- Botón Agregar reparación -->
   <div class="header-icons">
     <h2 class="titulo">RELOJES</h2>
-    <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s"> Agregar Reloj</a>
+    {% if 'servicios' in request.path %}
+      <a href="#" class="btn btn-add me-3s">Vender Reloj</a>
+    {% else %}
+      <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+    {% endif %}
   </div>
 
   <!-- Campo de búsqueda -->
-  <div class="search-container mb-3 search-form">
+   <div class="header-icons header-icons-reparacion">
+      <div class="search-container mb-3 search-form">
     <form method="get" action="{% url 'reloj_list' %}" class="search-form">
         <div class="input-group" style="gap: 10px;">
             <input type="text" name="search" class="form-control"
@@ -20,7 +31,16 @@
                 <i class="bi bi-search text-secondary"></i>
             </button>
         </div>
+
+        <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+            {% for valor, texto in estados %}
+              <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
+                        {{ texto }}
+              </option>
+            {% endfor %}
+          </select>
     </form>
+  </div>
   </div>
 
   <!-- Lista de reparaciones -->
@@ -32,6 +52,7 @@
           <th>Referencia </th>
           <th>Precio </th>
           <th>Tipo</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -48,6 +69,17 @@
             </td>
             <td>
                 {{ reloj.tipo }}
+            </td>
+            <td>
+              {% if 'servicios' in request.path %}
+                <a href="{% url 'reloj_venta' reloj.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-cart-check fs-4"></i>
+                </a>
+              {% else %}
+                <a href="{% url 'reloj_edit' reloj.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-pencil fs-4"></i>
+                </a>
+              {% endif %}
             </td>
         </tr>
         {% endfor %}

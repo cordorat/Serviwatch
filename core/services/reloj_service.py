@@ -4,9 +4,17 @@ def get_all_relojes():
     return Reloj.objects.all()
 
 def create_reloj(form):
-    reloj = form.save(commit=False)  # Guardamos el objeto pero no lo confirmamos aún
-    precio = form.cleaned_data.get('precio', '0')  # Obtenemos el precio como string
-    comision = int(precio) * 0.2  # Calculamos la comisión
-    reloj.comision = str(int(comision))  # Asignamos la comisión como string
-    reloj.save()  # Ahora sí lo guardamos en la base de datos
+    reloj = form.save(commit=False)
+    precio = form.cleaned_data.get('precio', '0')
+    try:
+        comision = int(precio) * 0.2
+    except Exception as e:
+        print(f"Error calculando comisión: {e}")
+        comision = 0
+    reloj.comision = str(int(comision))
+    if not reloj.estado:
+        reloj.estado = 'DISPONIBLE'
+    print(f"Guardando reloj con: precio={precio}, comision={reloj.comision}, estado={reloj.estado}")
+    reloj.save()
+    print(f"Reloj guardado con ID: {reloj.id}")
     return reloj

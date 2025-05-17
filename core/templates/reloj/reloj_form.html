@@ -20,11 +20,20 @@
         background-color: white;
         transform: translateX(1.5rem);
     }
+
 </style>
 
 <div class="container">
     <div class="form-header">
-        <h2 class="titulo">AGREGAR RELOJ</h2>
+        <h2 class="titulo">
+            {% if modo == 'crear' %}
+            AGREGAR RELOJ
+            {% elif modo == 'editar' %}
+            EDITAR RELOJ
+            {% elif modo == 'vender' %}
+            VENDER RELOJ
+            {% endif %}
+        </h2>
         <h4>DATOS RELOJ</h4>
     </div>
 
@@ -80,6 +89,7 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+                    {% if modo == 'vender' or reloj.estado == 'vendido' %}
                     <div class="input-group mt-3" id="basic-addon1">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
@@ -93,6 +103,8 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+                    {% endif %}
+                    <!-- Comision -->
 
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span">
@@ -158,6 +170,8 @@
                         {% endif %}
                     </div>
 
+
+                    {% if modo == 'vender' or reloj.estado == 'vendido' %}
                     <!-- Estado -->
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
@@ -179,6 +193,8 @@
                         {% if form.pagado.value %}checked{% endif %}>
                         <label class="form-check-label ms-2" for="pagado">Pagado</label>
                     </div>
+
+                    {% endif %}
                 </div>
 
 
@@ -186,9 +202,15 @@
 
             <div class="form-buttons">
                 <button type="submit" class="btn save" id="btnGuardar">GUARDAR</button>
+                {% if 'productos' in request.path %}
                 <a href="{% url 'reloj_list' %}">
                     <button type="button" class="btn cancel">CANCELAR</button>
                 </a>
+                {% else %}
+                <a href="{% url 'reloj_venta_list' %}">
+                    <button type="button" class="btn cancel">CANCELAR</button>
+                </a>
+                {% endif %}
             </div>
         </form>
     </div>
@@ -201,10 +223,12 @@
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
             <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
                 <h4 class="titulo m-0">
-                    {% if editing %}
+                    {% if modo == 'editar' %}
                     RELOJ ACTUALIZADO CORRECTAMENTE
-                    {% else %}
+                    {% elif modo == 'crear' %}
                     RELOJ AGREGADO CORRECTAMENTE
+                    {% elif modo == 'vender' %}
+                    RELOJ VENDIDO CORRECTAMENTE
                     {% endif %}
                 </h4>
             </div>
@@ -226,15 +250,24 @@
         const fechaVentaInput = form.querySelector('[name="fecha_venta"]');
 
         // Manejar la validación de fecha cuando el estado es VENDIDO
-        estadoInput.addEventListener('change', function () {
-            if (this.value === 'VENDIDO') {
-                fechaVentaInput.required = true;
-            } else {
-                fechaVentaInput.required = false;
-                fechaVentaInput.value = '';
-                validateField(fechaVentaInput);
-            }
-        });
+        if (estadoInput) {
+    estadoInput.addEventListener('change', function () {
+        const fechaVentaField = form.querySelector('[name="fecha_venta"]');
+        if (fechaVentaField) {
+            validateField(fechaVentaField);
+        }
+    });
+
+    estadoInput.addEventListener('change', function () {
+        if (this.value === 'VENDIDO') {
+            fechaVentaInput.required = true;
+        } else {
+            fechaVentaInput.required = false;
+            fechaVentaInput.value = '';
+            validateField(fechaVentaInput);
+        }
+    });
+}
 
         function fixDescriptionContainer() {
             const descripcionContainer = document.querySelector('.description-container');
@@ -387,47 +420,45 @@
         }
 
         form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            let isValid = true;
+    e.preventDefault();
+    let isValid = true;
 
-            comisionInput.disabled = false;
+    comisionInput.disabled = false;
 
-            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
-                const field = form.querySelector(`[name="${fieldName}"]`);
-                if (field && !validateField(field)) {
-                    isValid = false;
-                }
+    ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+        if (field && !validateField(field)) {
+            isValid = false;
+        }
+    });
+
+    if (isValid) {
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'  // Esto es importante para el CSRF token
             });
 
-            if (isValid) {
-                try {
-                    const formData = new FormData(form);
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    });
-
-                    if (response.ok) {
-                        modal.show();
-                        setTimeout(() => {
-                            window.location.href = "{% url 'reloj_list' %}";
-                        }, 1000);
-                    } else {
-                        console.error('Error al enviar el formulario');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
+            if (response.ok) {
+                modal.show();
+                setTimeout(() => {
+                    window.location.href = "{% url 'reloj_list' %}";
+                }, 1000);
             } else {
-                const firstError = form.querySelector('.is-invalid');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                console.error('Error al enviar el formulario');
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    } else {
+        const firstError = form.querySelector('.is-invalid');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+});
 
         form.querySelectorAll('input, select, textarea').forEach(field => {
             field.addEventListener('blur', function () {
