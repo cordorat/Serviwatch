@@ -295,3 +295,72 @@ class RelojViewsTest(TestCase):
         response = self.client.get(f"{reverse('reloj_list')}?page=2")
         self.assertEqual(len(response.context['page_obj']), 1)
         self.assertTrue(response.context['is_paginated'])
+
+    def test_reloj_edit_view_get_valid(self):
+        """Test GET request to update a valid reloj"""
+        self.client.login(username='testuser', password='testpass123')
+        reloj = Reloj.objects.first()
+        response = self.client.get(reverse('reloj_edit', kwargs={'pk': reloj.pk}))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'reloj/reloj_form.html')
+        self.assertIn('form', response.context)
+        self.assertEqual(response.context['modo'], 'editar')
+
+    def test_reloj_edit_view_post_valid(self):
+        """Test POST request with valid data updates the reloj"""
+        self.client.login(username='testuser', password='testpass123')
+        reloj = Reloj.objects.first()
+        updated_data = {
+            'marca': 'Omega',
+            'referencia': reloj.referencia,
+            'precio': 20000,
+            'dueno': reloj.dueno,
+            'descripcion': 'Actualizado',
+            'tipo': reloj.tipo,
+            'estado': reloj.estado,
+            'fecha_venta': '',
+            'pagado': False
+        }
+        response = self.client.post(reverse('reloj_edit', kwargs={'pk': reloj.pk}), data=updated_data)
+
+        self.assertRedirects(response, reverse('reloj_list'))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Referencia de reloj actualizada con éxito')
+
+        # Verifica que los datos hayan sido actualizados en la base de datos
+        reloj.refresh_from_db()
+        self.assertEqual(reloj.marca, 'Omega')
+        self.assertEqual(reloj.descripcion, 'Actualizado')
+
+    def test_reloj_edit_view_post_invalid(self):
+        """Test POST request with invalid data does not update the reloj"""
+        self.client.login(username='testuser', password='testpass123')
+        reloj = Reloj.objects.first()
+        invalid_data = {
+            'marca': '',  # Campo requerido vacío
+            'referencia': reloj.referencia,
+            'precio': 20000,
+            'dueno': reloj.dueno,
+            'descripcion': 'Actualizado',
+            'tipo': reloj.tipo,
+            'estado': reloj.estado,
+            'fecha_venta': '',
+            'pagado': False
+        }
+        response = self.client.post(reverse('reloj_edit', kwargs={'pk': reloj.pk}), data=invalid_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'reloj/reloj_form.html')
+        self.assertTrue(response.context['form'].errors)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Por favor corrige los errores en el formulario.')
+
+
+    def test_reloj_edit_view_not_found(self):
+        """Test update view with non-existent reloj redirects with error"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('reloj_edit', kwargs={'pk': 999}))  # ID inexistente
+        self.assertRedirects(response, reverse('reloj_list'))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'El reloj no existe.')
