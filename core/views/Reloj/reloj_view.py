@@ -51,6 +51,7 @@ def reloj_list_view(request):
 def reloj_create_view(request):
     if request.method == 'POST':
         form = RelojForm(request.POST)
+        print(form)
         if form.is_valid():
             create_reloj(form)
             messages.success(request, 'Referencia de reloj agregada con éxito')
@@ -98,6 +99,7 @@ def reloj_sell_view(request, pk):
     if request.method == 'POST':
         form = RelojForm(request.POST, instance=reloj)
         if form.is_valid():
+            reloj = form.save(commit=False)
             reloj.estado = 'vendido'
             reloj.save()
             messages.success(request, 'Referencia de reloj vendida con éxito')

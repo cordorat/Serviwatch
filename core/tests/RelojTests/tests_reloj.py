@@ -180,7 +180,8 @@ class RelojFormTest(TestCase):
             'tipo': 'NUEVO',
             'estado': 'VENDIDO',
             'fecha_venta': today.strftime('%d/%m/%Y'),  # Format matches input_formats in form
-            'pagado': False
+            'pagado': False,
+            'cliente': {'nombre': 'Carlos', 'apellido': 'Gomez', 'telefono': '1234567890'}
         }
 
         form = RelojForm(data=data)
@@ -361,6 +362,81 @@ class RelojViewsTest(TestCase):
         """Test update view with non-existent reloj redirects with error"""
         self.client.login(username='testuser', password='testpass123')
         response = self.client.get(reverse('reloj_edit', kwargs={'pk': 999}))  # ID inexistente
+        self.assertRedirects(response, reverse('reloj_list'))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'El reloj no existe.')
+
+class RelojSellViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.client = Client()
+        self.client.login(username='testuser', password='testpass123')
+
+        self.reloj = Reloj.objects.create(
+            marca='Tag Heuer',
+            referencia='TAG123',
+            precio=20000,
+            dueno='Luis Rodriguez',
+            descripcion='Reloj deportivo',
+            tipo='NUEVO',
+            estado='DISPONIBLE'
+        )
+
+    def test_reloj_venta_view_get(self):
+        url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'reloj/reloj_form.html')
+        self.assertEqual(response.context['modo'], 'vender')
+
+    def test_reloj_venta_view_post_valid(self):
+        url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
+        data = {
+            'marca': self.reloj.marca,
+            'referencia': self.reloj.referencia,
+            'precio': self.reloj.precio,
+            'dueno': self.reloj.dueno,
+            'descripcion': self.reloj.descripcion,
+            'tipo': self.reloj.tipo,
+            'estado': self.reloj.estado,  # original estado, será sobrescrito en la vista
+            'fecha_venta': date.today().strftime('%d/%m/%Y'),
+            'cliente': {'nombre': 'Carlos', 'apellido': 'Gomez', 'telefono': '1234567890'},
+            'pagado': True
+        }
+
+        response = self.client.post(url, data)
+        self.assertRedirects(response, reverse('reloj_list'))
+        self.reloj.refresh_from_db()
+        self.assertEqual(self.reloj.estado.lower(), 'vendido')
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Referencia de reloj vendida con éxito')
+
+    def test_reloj_venta_view_invalid_form(self):
+        url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
+        invalid_data = {
+            'marca': '',
+            'referencia': self.reloj.referencia,
+            'precio': self.reloj.precio,
+            'dueno': self.reloj.dueno,
+            'descripcion': self.reloj.descripcion,
+            'tipo': self.reloj.tipo,
+            'estado': self.reloj.estado,
+            'fecha_venta': '',
+            'cliente': {'nombre': 'Carlos', 'apellido': 'Gomez', 'telefono': '1234567890'},
+            'pagado': False
+        }
+
+        response = self.client.post(url, data=invalid_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'reloj/reloj_form.html')
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), 'Por favor corrige los errores en el formulario.')
+
+    def test_reloj_venta_view_reloj_not_exist(self):
+        url = reverse('reloj_venta', kwargs={'pk': 9999})  # ID inexistente
+        response = self.client.get(url)
         self.assertRedirects(response, reverse('reloj_list'))
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), 'El reloj no existe.')

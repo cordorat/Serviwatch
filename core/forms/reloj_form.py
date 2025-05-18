@@ -84,7 +84,7 @@ class RelojForm(forms.ModelForm):
         }
     )
     estado = forms.ChoiceField(
-        required=True,
+        required=False,
         choices=[('VENDIDO', 'Vendido'), ('DISPONIBLE', 'Disponible')],
         widget=forms.Select(attrs={
             'class': 'form-span form-control text-secondary',
@@ -114,6 +114,13 @@ class RelojForm(forms.ModelForm):
         widget=forms.CheckboxInput(attrs={
             'class': 'form-check-input'
         })
+    )
+
+    cliente = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Cliente'}),
     )
 
     class Meta:
@@ -162,3 +169,11 @@ class RelojForm(forms.ModelForm):
             raise forms.ValidationError('La fecha de venta es obligatoria cuando el estado es Vendido')
 
         return fecha_venta
+    
+    def clean_cliente(self):
+        estado = self.cleaned_data.get('estado')
+        cliente = self.cleaned_data.get('cliente')
+
+        if estado == 'VENDIDO' and not cliente:
+            raise forms.ValidationError('El cliente es obligatorio cuando el estado es Vendido')
+        return cliente

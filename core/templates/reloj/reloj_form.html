@@ -20,7 +20,6 @@
         background-color: white;
         transform: translateX(1.5rem);
     }
-
 </style>
 
 <div class="container">
@@ -42,6 +41,32 @@
     <div class="form-content">
         <form method="post" id="relojForm" class="repair-form custom-form" novalidate>
             {% csrf_token %}
+
+            {%if modo == 'vender' or reloj.estado == 'vendido' %}
+                <div class="form-field">
+                    <div class="input-group repair-form">
+                        <div class="input-group flex-grow-1 repair-form">
+                            <span class="input-group-text form-span">
+                                <i class="bi bi-person fs-4 text-secondary"></i>
+                            </span>
+                            {{ form.cliente }}
+                            <a href="#" class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
+                                title="Agregar cliente"
+                                style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
+                                Agregar Cliente
+                            </a>
+                        </div>
+                    </div>
+                    <div class="error-message">
+                        {% if form.cliente.errors %}
+                        {% for error in form.cliente.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
 
             <div class="row g-4">
                 <div class="repair-form-column">
@@ -103,6 +128,7 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+
                     {% endif %}
                     <!-- Comision -->
 
@@ -189,14 +215,12 @@
 
                     <!-- Checkbox alineado -->
                     <div class="form-check form-switch mt-3">
-                        <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" 
-                        {% if form.pagado.value %}checked{% endif %}>
+                        <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" {% if form.pagado.value %}checked{% endif %}>
                         <label class="form-check-label ms-2" for="pagado">Pagado</label>
                     </div>
 
                     {% endif %}
                 </div>
-
 
             </div>
 
@@ -239,6 +263,56 @@
 {% endblock %}
 
 {% block javascript %}
+<script>
+    $(document).ready(function () {
+        $('#id_cliente').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            containerCssClass: 'select',
+            dropdownCssClass: 'select',
+            allowClear: true,
+            placeholder: 'Seleccione un cliente',
+            minimumInputLength: 1,
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                },
+                searching: function () {
+                    return "Buscando...";
+                },
+                inputTooShort: function () {
+                    return "Por favor ingrese 1 o más caracteres";
+                }
+            },
+            templateResult: formatCliente,
+            templateSelection: formatCliente,
+            matcher: function (params, data) {
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+                if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                    return data;
+                }
+                return null;
+            }
+        });
+        if ($('#id_cliente').hasClass('is-invalid')) {
+            $('#id_cliente').next('.select2-container').find('.select2-selection').addClass('is-invalid');
+        }
+    });
+
+    function formatCliente(cliente) {
+        if (!cliente.id) {
+            return cliente.text;
+        }
+        var parts = cliente.text.split(' - ');
+        return $('<div class="select2-result-cliente">' +
+            '<span class="select2-result-cliente__name">' + parts[0] + '</span>' + " " +
+            '<span class="select2-result-cliente__apellido">' + parts[1] + '</span>' + " - " +
+            '<span class="select2-result-cliente__phone">' + parts[2] + '</span>' +
+            '</div>');
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -248,26 +322,28 @@
         const comisionInput = form.querySelector('[name="comision"]');
         const estadoInput = form.querySelector('[name="estado"]');
         const fechaVentaInput = form.querySelector('[name="fecha_venta"]');
+        const clienteInput = form.querySelector('[name="cliente"]');
 
         // Manejar la validación de fecha cuando el estado es VENDIDO
         if (estadoInput) {
-    estadoInput.addEventListener('change', function () {
-        const fechaVentaField = form.querySelector('[name="fecha_venta"]');
-        if (fechaVentaField) {
-            validateField(fechaVentaField);
-        }
-    });
+            estadoInput.addEventListener('change', function () {
+                const fechaVentaField = form.querySelector('[name="fecha_venta"]');
+                if (fechaVentaField) {
+                    validateField(fechaVentaField);
+                }
+            });
 
-    estadoInput.addEventListener('change', function () {
-        if (this.value === 'VENDIDO') {
-            fechaVentaInput.required = true;
-        } else {
-            fechaVentaInput.required = false;
-            fechaVentaInput.value = '';
-            validateField(fechaVentaInput);
+            estadoInput.addEventListener('change', function () {
+                if (this.value === 'VENDIDO') {
+                    fechaVentaInput.required = true;
+                    clienteInput.required = true;
+                } else {
+                    fechaVentaInput.required = false;
+                    fechaVentaInput.value = '';
+                    validateField(fechaVentaInput);
+                }
+            });
         }
-    });
-}
 
         function fixDescriptionContainer() {
             const descripcionContainer = document.querySelector('.description-container');
@@ -394,6 +470,13 @@
                     }
                     break;
 
+                case 'cliente':
+                    if (estadoInput?.value === 'VENDIDO' && !value) {
+                        errorMessage = 'El cliente es obligatorio';
+                        isValid = false;
+                    }
+                    break;
+
                 case 'estado':
                     if (!value) {
                         errorMessage = 'El estado es obligatorio';
@@ -420,45 +503,45 @@
         }
 
         form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    let isValid = true;
+            e.preventDefault();
+            let isValid = true;
 
-    comisionInput.disabled = false;
+            comisionInput.disabled = false;
 
-    ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
-        const field = form.querySelector(`[name="${fieldName}"]`);
-        if (field && !validateField(field)) {
-            isValid = false;
-        }
-    });
-
-    if (isValid) {
-        try {
-            const formData = new FormData(form);
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                credentials: 'same-origin'  // Esto es importante para el CSRF token
+            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (field && !validateField(field)) {
+                    isValid = false;
+                }
             });
 
-            if (response.ok) {
-                modal.show();
-                setTimeout(() => {
-                    window.location.href = "{% url 'reloj_list' %}";
-                }, 1000);
+            if (isValid) {
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'  // Esto es importante para el CSRF token
+                    });
+
+                    if (response.ok) {
+                        modal.show();
+                        setTimeout(() => {
+                            window.location.href = "{% url 'reloj_list' %}";
+                        }, 1000);
+                    } else {
+                        console.error('Error al enviar el formulario');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             } else {
-                console.error('Error al enviar el formulario');
+                const firstError = form.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    } else {
-        const firstError = form.querySelector('.is-invalid');
-        if (firstError) {
-            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-});
+        });
 
         form.querySelectorAll('input, select, textarea').forEach(field => {
             field.addEventListener('blur', function () {

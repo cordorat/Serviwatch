@@ -12,8 +12,7 @@ def create_reloj(form):
         print(f"Error calculando comisión: {e}")
         comision = 0
     reloj.comision = str(int(comision))
-    if not reloj.estado:
-        reloj.estado = 'DISPONIBLE'
+    
     print(f"Guardando reloj con: precio={precio}, comision={reloj.comision}, estado={reloj.estado}")
     reloj.save()
     print(f"Reloj guardado con ID: {reloj.id}")
