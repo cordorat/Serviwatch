@@ -5,53 +5,79 @@
 
 <style>
   .content {
-        overflow:scroll;
-    }
+    overflow: scroll;
+  }
+
+  .filtro-container-reparacion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-select-sm {
+    min-width: 120px;
+    /* o el ancho que prefieras */
+  }
 
   .header-icons-reparacion {
-        gap: 0px;
-        justify-content: start;
-    }
+    gap: 0px;
+    justify-content: start;
+    align-items: center;
+  }
+  .form-reloj{
+    display:flex;
+    flex-direction: row;
+  }
 </style>
 
 <div class="main-content">
   <!-- Botón Agregar reparación -->
   <div class="header-icons">
     <h2 class="titulo">RELOJES</h2>
-    {% if 'servicios' in request.path %}
-      <a href="#" class="btn btn-add me-3s">Vender Reloj</a>
-    {% else %}
-      <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
-    {% endif %}
+    <!--{% if 'servicios' in request.path %}
+    <a href="#" class="btn btn-add me-3s">Vender Reloj</a>
+    {% else %}-->
+    <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+    <!--{% endif %}-->
   </div>
 
   <!-- Campo de búsqueda -->
-   <div class="header-icons header-icons-reparacion">
-      <form method="get" action="{% url 'reloj_list' %}" class="search-form">
-            <div class="input-group input-group-reparacion" style="gap: 10px;">
-                <input type="text" name="search" class="form-control form-control-reparacion"
-                    placeholder="Buscar reparación" value="{{ request.GET.search }}">
-                <button class="btn btn-search" type="submit">
-                    <i class="bi bi-search text-secondary"></i>
-                </button>
-            </div>
-        </form>
-        <div class="filtro-container-reparacion ms-3">
-            <form method="get" action="{% url 'reloj_list' %}" id="filtroForm">
-                <!-- Mantener la búsqueda actual si existe -->
-                {% if search %}
-                <input type="hidden" name="search" value="{{ search }}">
-                {% endif %}
+  <div class="header-icons header-icons-reparacion">
+    <form method="get" action="{% url 'reloj_list' %}" class="search-form">
+      <div class="input-group input-group-reparacion" style="gap: 10px;">
+        <input type="text" name="search" class="form-control form-control-reparacion" placeholder="Buscar reparación"
+          value="{{ request.GET.search }}">
+        <button class="btn btn-search" type="submit">
+          <i class="bi bi-search text-secondary"></i>
+        </button>
+      </div>
+    </form>
+    <div class="filtro-container-reparacion ms-3 d-flex gap-2">
+      <form method="get" action="{% url 'reloj_list' %}" id="filtroForm" class="d-flex gap-2 form-reloj">
+        <!-- Mantener la búsqueda actual si existe -->
+        {% if search %}
+        <input type="hidden" name="search" value="{{ search }}">
+        {% endif %}
 
-                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
-                    {% for valor, texto in estados %}
-                    <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
-                        {{ texto }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
+        {% if 'productos' in request.path %}
+        <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+          {% for valor, texto in estados %}
+          <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+        
+        <select name="tipo" class="form-select form-select-sm" onchange="this.form.submit()">
+          {% for valor, texto in tipos %}
+          <option value="{{ valor }}" {% if filtro_tipo == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+        {% endif %}
+      </form>
+    </div>
   </div>
 
   <!-- Lista de reparaciones -->
@@ -69,32 +95,32 @@
       <tbody>
         {% for reloj in relojes %}
         <tr>
-            <td>
-                {{ reloj.marca }}
-            </td>
-            <td>
-                {{ reloj.referencia }}
-            </td>
-            <td>
-                {{ reloj.precio }}
-            </td>
-            <td>
-                {{ reloj.tipo }}
-            </td>
-            <td>
-              {% if 'servicios' in request.path %}
-                <a href="{% url 'reloj_venta' reloj.id %}" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-cart-check fs-4"></i>
-                </a>
-              {% else %}
-                <a href="{% url 'reloj_edit' reloj.id %}" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-pencil fs-4"></i>
-                </a>
-              {% endif %}
-            </td>
+          <td>
+            {{ reloj.marca }}
+          </td>
+          <td>
+            {{ reloj.referencia }}
+          </td>
+          <td>
+            {{ reloj.precio }}
+          </td>
+          <td>
+            {{ reloj.tipo }}
+          </td>
+          <td>
+            {% if 'servicios' in request.path %}
+            <a href="{% url 'reloj_venta' reloj.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-cart-check fs-4"></i>
+            </a>
+            {% else %}
+            <a href="{% url 'reloj_edit' reloj.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil fs-4"></i>
+            </a>
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
-    </tbody>
+      </tbody>
 
     </table>
 

@@ -1,5 +1,10 @@
 from django import forms
 from core.models.reloj import Reloj
+from core.models.cliente import Cliente
+
+class ClienteChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.nombre} - {obj.apellido} - {obj.telefono}"
 
 class RelojForm(forms.ModelForm):
     marca = forms.CharField(
@@ -116,21 +121,24 @@ class RelojForm(forms.ModelForm):
         })
     )
 
-    cliente = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control text-secondary',
-            'placeholder': 'Cliente'}),
+    cliente = ClienteChoiceField(
+        queryset=Cliente.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control select',
+        }),
+        empty_label="Seleccione un cliente",
+        required=False
     )
 
     class Meta:
         model = Reloj
-        exclude = ['cliente']
-        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta', 'pagado']
+        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente']
         # No incluir 'comision' aquí porque es un campo no editable
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['cliente'].widget.attrs['class'] = 'form-control'
+        self.fields['cliente'].widget.attrs['placeholder'] = 'Seleccione un cliente'
         self.fields['estado'].initial = 'DISPONIBLE'  # Asegúrate de que el estado tenga un valor por defecto
         self.fields['pagado'].initial = False
 

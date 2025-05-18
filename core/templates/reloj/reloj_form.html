@@ -42,30 +42,30 @@
         <form method="post" id="relojForm" class="repair-form custom-form" novalidate>
             {% csrf_token %}
 
-            {%if modo == 'vender' or reloj.estado == 'vendido' %}
-                <div class="form-field">
-                    <div class="input-group repair-form">
-                        <div class="input-group flex-grow-1 repair-form">
-                            <span class="input-group-text form-span">
-                                <i class="bi bi-person fs-4 text-secondary"></i>
-                            </span>
-                            {{ form.cliente }}
-                            <a href="#" class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
-                                title="Agregar cliente"
-                                style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
-                                Agregar Cliente
-                            </a>
-                        </div>
-                    </div>
-                    <div class="error-message">
-                        {% if form.cliente.errors %}
-                        {% for error in form.cliente.errors %}
-                        <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
-                        {% endif %}
+            {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
+            <div class="form-field">
+                <div class="input-group repair-form">
+                    <div class="input-group flex-grow-1 repair-form">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-person fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.cliente }}
+                        <a href="#" class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
+                            title="Agregar cliente"
+                            style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
+                            Agregar Cliente
+                        </a>
                     </div>
                 </div>
-                {% endif %}
+                <div class="error-message">
+                    {% if form.cliente.errors %}
+                    {% for error in form.cliente.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
 
 
             <div class="row g-4">
@@ -114,7 +114,7 @@
                         {% endfor %}
                         {% endif %}
                     </div>
-                    {% if modo == 'vender' or reloj.estado == 'vendido' %}
+                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <div class="input-group mt-3" id="basic-addon1">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
@@ -197,7 +197,7 @@
                     </div>
 
 
-                    {% if modo == 'vender' or reloj.estado == 'vendido' %}
+                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <!-- Estado -->
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
@@ -527,7 +527,7 @@
                     if (response.ok) {
                         modal.show();
                         setTimeout(() => {
-                            window.location.href = "{% url 'reloj_list' %}";
+                            window.location.href = "{% if modo == 'vender' %}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}";
                         }, 1000);
                     } else {
                         console.error('Error al enviar el formulario');

@@ -7,6 +7,7 @@ from django.test import Client
 from django.urls import reverse
 from django.contrib.messages import get_messages
 from datetime import date
+from core.models.cliente import Cliente
 
 class RelojFormTest(TestCase):
 
@@ -170,18 +171,25 @@ class RelojFormTest(TestCase):
 
     def test_clean_fecha_venta_valid(self):
         """Test valid fecha_venta format"""
+        # Create a test client first
+        test_cliente = Cliente.objects.create(
+            nombre='Carlos',
+            apellido='Gomez',
+            telefono='1234567890'
+        )
+
         today = date.today()
         data = {
             'marca': 'Rolex',
             'referencia': '12345',
-            'precio': '15000',  # Changed to string to match form expectation
+            'precio': '15000',
             'dueno': 'Juan Perez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'VENDIDO',
-            'fecha_venta': today.strftime('%d/%m/%Y'),  # Format matches input_formats in form
+            'fecha_venta': today.strftime('%d/%m/%Y'),
             'pagado': False,
-            'cliente': {'nombre': 'Carlos', 'apellido': 'Gomez', 'telefono': '1234567890'}
+            'cliente': test_cliente.id  # Pass the client ID instead of a dictionary
         }
 
         form = RelojForm(data=data)
@@ -392,6 +400,11 @@ class RelojSellViewTest(TestCase):
 
     def test_reloj_venta_view_post_valid(self):
         url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
+        test_cliente = Cliente.objects.create(
+        nombre='Carlos',
+        apellido='Gomez',
+        telefono='1234567890'
+    )
         data = {
             'marca': self.reloj.marca,
             'referencia': self.reloj.referencia,
@@ -399,14 +412,14 @@ class RelojSellViewTest(TestCase):
             'dueno': self.reloj.dueno,
             'descripcion': self.reloj.descripcion,
             'tipo': self.reloj.tipo,
-            'estado': self.reloj.estado,  # original estado, será sobrescrito en la vista
+            'estado': self.reloj.estado, 
             'fecha_venta': date.today().strftime('%d/%m/%Y'),
-            'cliente': {'nombre': 'Carlos', 'apellido': 'Gomez', 'telefono': '1234567890'},
+            'cliente': test_cliente.id,
             'pagado': True
         }
 
         response = self.client.post(url, data)
-        self.assertRedirects(response, reverse('reloj_list'))
+        self.assertRedirects(response, reverse('reloj_venta_list'))
         self.reloj.refresh_from_db()
         self.assertEqual(self.reloj.estado.lower(), 'vendido')
 
@@ -415,6 +428,11 @@ class RelojSellViewTest(TestCase):
 
     def test_reloj_venta_view_invalid_form(self):
         url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
+        test_cliente = Cliente.objects.create(
+        nombre='Carlos',
+        apellido='Gomez',
+        telefono='1234567890'
+        )
         invalid_data = {
             'marca': '',
             'referencia': self.reloj.referencia,
@@ -424,7 +442,7 @@ class RelojSellViewTest(TestCase):
             'tipo': self.reloj.tipo,
             'estado': self.reloj.estado,
             'fecha_venta': '',
-            'cliente': {'nombre': 'Carlos', 'apellido': 'Gomez', 'telefono': '1234567890'},
+            'cliente': test_cliente.id,
             'pagado': False
         }
 
@@ -437,6 +455,6 @@ class RelojSellViewTest(TestCase):
     def test_reloj_venta_view_reloj_not_exist(self):
         url = reverse('reloj_venta', kwargs={'pk': 9999})  # ID inexistente
         response = self.client.get(url)
-        self.assertRedirects(response, reverse('reloj_list'))
+        self.assertRedirects(response, reverse('reloj_venta_list'))
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), 'El reloj no existe.')
