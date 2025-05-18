@@ -50,7 +50,8 @@
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
                         {{ form.cliente }}
-                        <a href="#" class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
+                        <a href="{% url 'cliente_create' %}?next={{ request.path|urlencode }}?reloj_id={{ reloj.id }}"
+                            class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
                             title="Agregar cliente"
                             style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
                             Agregar Cliente
@@ -327,20 +328,19 @@
         // Manejar la validación de fecha cuando el estado es VENDIDO
         if (estadoInput) {
             estadoInput.addEventListener('change', function () {
-                const fechaVentaField = form.querySelector('[name="fecha_venta"]');
-                if (fechaVentaField) {
-                    validateField(fechaVentaField);
-                }
-            });
-
-            estadoInput.addEventListener('change', function () {
                 if (this.value === 'VENDIDO') {
                     fechaVentaInput.required = true;
                     clienteInput.required = true;
+                    // Validate both fields immediately
+                    validateField(fechaVentaInput);
+                    validateField(clienteInput);
                 } else {
                     fechaVentaInput.required = false;
+                    clienteInput.required = false;
                     fechaVentaInput.value = '';
+                    // Clear validation errors
                     validateField(fechaVentaInput);
+                    validateField(clienteInput);
                 }
             });
         }
@@ -472,7 +472,7 @@
 
                 case 'cliente':
                     if (estadoInput?.value === 'VENDIDO' && !value) {
-                        errorMessage = 'El cliente es obligatorio';
+                        errorMessage = 'El cliente es obligatorio cuando el estado es Vendido';
                         isValid = false;
                     }
                     break;

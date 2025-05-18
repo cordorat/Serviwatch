@@ -127,7 +127,6 @@ class RelojForm(forms.ModelForm):
             'class': 'form-control select',
         }),
         empty_label="Seleccione un cliente",
-        required=False
     )
 
     class Meta:
@@ -137,10 +136,14 @@ class RelojForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['cliente'].required = False
         self.fields['cliente'].widget.attrs['class'] = 'form-control'
         self.fields['cliente'].widget.attrs['placeholder'] = 'Seleccione un cliente'
         self.fields['estado'].initial = 'DISPONIBLE'  # Asegúrate de que el estado tenga un valor por defecto
         self.fields['pagado'].initial = False
+        for field in self.fields:
+            if self[field].errors:
+                self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
 
     def clean_precio(self):
         precio = self.cleaned_data.get('precio')
