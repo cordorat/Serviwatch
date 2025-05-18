@@ -7,6 +7,11 @@
   .content {
         overflow:scroll;
     }
+
+  .header-icons-reparacion {
+        gap: 0px;
+        justify-content: start;
+    }
 </style>
 
 <div class="main-content">
@@ -22,25 +27,31 @@
 
   <!-- Campo de búsqueda -->
    <div class="header-icons header-icons-reparacion">
-      <div class="search-container mb-3 search-form">
-    <form method="get" action="{% url 'reloj_list' %}" class="search-form">
-        <div class="input-group" style="gap: 10px;">
-            <input type="text" name="search" class="form-control"
-                placeholder="Buscar por referencia" value="{{ request.GET.search }}">
-            <button class="btn btn-search" type="submit">
-                <i class="bi bi-search text-secondary"></i>
-            </button>
-        </div>
+      <form method="get" action="{% url 'reloj_list' %}" class="search-form">
+            <div class="input-group input-group-reparacion" style="gap: 10px;">
+                <input type="text" name="search" class="form-control form-control-reparacion"
+                    placeholder="Buscar reparación" value="{{ request.GET.search }}">
+                <button class="btn btn-search" type="submit">
+                    <i class="bi bi-search text-secondary"></i>
+                </button>
+            </div>
+        </form>
+        <div class="filtro-container-reparacion ms-3">
+            <form method="get" action="{% url 'reloj_list' %}" id="filtroForm">
+                <!-- Mantener la búsqueda actual si existe -->
+                {% if search %}
+                <input type="hidden" name="search" value="{{ search }}">
+                {% endif %}
 
-        <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
-            {% for valor, texto in estados %}
-              <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
+                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                    {% for valor, texto in estados %}
+                    <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
                         {{ texto }}
-              </option>
-            {% endfor %}
-          </select>
-    </form>
-  </div>
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
   </div>
 
   <!-- Lista de reparaciones -->
