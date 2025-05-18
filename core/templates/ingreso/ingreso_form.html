@@ -13,13 +13,13 @@
         background-color: #f7f7f7;
     }
 
-    .egreso-container {
+    .ingreso-container {
         max-width: 900px;
         margin: 0 auto !important;
         padding: 20px;
     }
 
-    .form-egreso {
+    .form-ingreso {
         max-width: 900px;
     }
 
@@ -30,25 +30,25 @@
     }
 </style>
 
-<div class="egreso-container p-4">
+<div class="ingreso-container p-4">
     <div class="text-center mb-4">
         <div style="background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
-            <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">EGRESOS DEL DÍA</h2>
+            <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">INGRESOS DEL DÍA</h2>
             <div
                 style="background-color: #e2eec1; padding: 0.5rem 2rem; border-radius: 10px; border: 2px solid #a0b34c; display: inline-block; margin-top: 0.5rem;">
-                <h3 style="margin: 0; font-family: Montserrat, sans-serif;">${{ total_egresos|floatformat:0|intcomma }}
+                <h3 style="margin: 0; font-family: Montserrat, sans-serif;">${{ total_ingresos|floatformat:0|intcomma }}
                     COP</h3>
             </div>
         </div>
     </div>
 
-    <h4 class="text-center fw-bold mb-3">AGREGAR EGRESO</h4>
+    <h4 class="text-center fw-bold mb-3">AGREGAR INGRESO</h4>
 
-    <form method="post" novalidate id="egresoForm" class="form-egreso">
+    <form method="post" novalidate id="ingresoForm" class="form-ingreso">
         {% csrf_token %}
 
         <div class="mb-3">
-            <div class="input-group egreso-form custom-form">
+            <div class="input-group ingreso-form custom-form">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                 </span>
@@ -64,7 +64,7 @@
         </div>
 
         <div class="mb-3">
-            <div class="input-group egreso-form custom-form">
+            <div class="input-group ingreso-form custom-form">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                 </span>
@@ -80,7 +80,7 @@
         </div>
 
         <div class="mb-3">
-            <div class="input-group egreso-form custom-form">
+            <div class="input-group ingreso-form custom-form">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                 </span>
@@ -99,11 +99,11 @@
             <button type="submit" class="btn save">
                 GUARDAR
             </button>
-            <a href="{% url 'egreso' %}" class="btn cancel">CANCELAR</a>
+            <a href="{% url 'ingreso' %}" class="btn cancel">CANCELAR</a>
         </div>
 
         <div class="mt-3" style="width: 100%;">
-            <a href="{% url 'reporte_egresos_form' %}" class="btn save d-block" style="width: 100%;">GENERAR REPORTE DE EGRESOS</a>
+            <a href="{% url 'reporte_ingresos_form' %}" class="btn save d-block" style="width: 100%;">GENERAR REPORTE DE INGRESOS</a>
         </div>
 
     </form>
@@ -168,7 +168,7 @@
             });
         });
 
-        const form = document.querySelector('#egresoForm');
+        const form = document.querySelector('#ingresoForm');
         form.addEventListener('submit', function (e) {
             let isValid = true;
 

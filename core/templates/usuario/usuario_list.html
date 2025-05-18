@@ -43,7 +43,7 @@
         </tr>
         {% endif %}
         {% endfor %}
-    </tbody>
+      </tbody>
 
     </table>
 
@@ -79,12 +79,13 @@
     </div>
 
     <!-- Modal de confirmación de eliminación exitosa -->
-    <div class="modal fade" id="successDeleteModal" tabindex="-1" aria-labelledby="successDeleteModalLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="successDeleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+      aria-labelledby="successDeleteModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
-          <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+          <div class="modal-body d-flex flex-column justify-content-center align-items-center" style="height: 200px;">
             <h4 class="titulo m-0">USUARIO ELIMINADO CORRECTAMENTE</h4>
+            <a href="{%url 'usuario_list' %}" id="btnVolverEliminar" class="btn save mt-3">VOLVER</a>
           </div>
         </div>
       </div>
@@ -92,48 +93,101 @@
 
 
     <script>
-      // Para inicializar el modal cuando se hace clic en el botón
-      const confirmModal = document.getElementById('confirmDeleteModal');
-      confirmModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const userId = button.getAttribute('data-user-id');
-        const username = button.getAttribute('data-username');
-        const email = button.getAttribute('data-email');
-
-        // Rellenar el nombre del usuario
-        const usernamePlaceholder = confirmModal.querySelector('#deleteUserName');
-        usernamePlaceholder.textContent = username;
-        const emailPlaceholder = confirmModal.querySelector('#deleteUserEmail');
-        emailPlaceholder.textContent = email;
-
-        // Asignar la URL al formulario
-        const form = confirmModal.querySelector('#deleteUserForm');
-        form.action = `/usuarios/eliminar/${userId}/`;
-      });
-
-      // Manejar el envío del formulario y mostrar modal de éxito
       document.addEventListener('DOMContentLoaded', function () {
-        const deleteForm = document.getElementById('deleteUserForm');
+        // Inicializar los modales
+        const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'), {
+          backdrop: 'static'
+        });
 
-        // Inicializar modales explícitamente
-        const successModal = new bootstrap.Modal(document.getElementById('successDeleteModal'));
+        const successDeleteModal = new bootstrap.Modal(document.getElementById('successDeleteModal'), {
+          backdrop: 'static',
+          keyboard: false
+        });
 
-        deleteForm.addEventListener('submit', function (e) {
-          e.preventDefault(); // Prevenir el envío inmediato
+        // Configurar el modal de confirmación cuando se muestra
+        document.getElementById('confirmDeleteModal').addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          const userId = button.getAttribute('data-user-id');
+          const username = button.getAttribute('data-username');
+          const email = button.getAttribute('data-email');
 
-          // Crear una instancia nueva del modal de confirmación
-          const deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal'));
+          // Rellenar los datos del usuario en el modal
+          document.getElementById('deleteUserName').textContent = username;
+          document.getElementById('deleteUserEmail').textContent = email;
+
+          // Configurar la acción del formulario
+          document.getElementById('deleteUserForm').action = `/usuarios/eliminar/${userId}/`;
+        });
+
+        // Manejar el envío del formulario de eliminación
+        document.getElementById('deleteUserForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          // Obtener datos del formulario
+          const form = this;
+          const formData = new FormData(form);
+          const url = form.action;
 
           // Ocultar el modal de confirmación
-          deleteModal.hide();
+          confirmDeleteModal.hide();
 
-          // Mostrar el modal de éxito
-          successModal.show();
+          // Mostrar un indicador de carga (opcional)
+          const loadingIndicator = document.createElement('div');
+          loadingIndicator.className = 'loading-overlay';
+          loadingIndicator.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Eliminando...</span></div>';
+          document.body.appendChild(loadingIndicator);
 
-          // Enviar el formulario después de 3 segundos
-          setTimeout(function () {
-            deleteForm.submit();
-          }, 3000);
+          // Enviar solicitud AJAX para eliminar el usuario
+          fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Error en la solicitud: ' + response.status);
+              }
+              return response.json();
+            })
+            .then(data => {
+              // Eliminar el indicador de carga
+              if (loadingIndicator.parentNode) {
+                document.body.removeChild(loadingIndicator);
+              }
+
+              if (data.success) {
+                // Mostrar el modal de éxito
+                successDeleteModal.show();
+
+                // Eliminar la fila de la tabla (opcional, si prefieres no recargar la página)
+                const userId = url.split('/').slice(-2)[0];
+                const userRow = document.querySelector(`[data-user-id="${userId}"]`).closest('tr');
+                if (userRow) {
+                  userRow.remove();
+                }
+              } else {
+                // Mostrar error en caso de problemas
+                alert('Error al eliminar el usuario: ' + (data.message || 'Ocurrió un error desconocido'));
+              }
+            })
+            .catch(error => {
+              // Eliminar el indicador de carga y mostrar error
+              if (loadingIndicator.parentNode) {
+                document.body.removeChild(loadingIndicator);
+              }
+              console.error('Error:', error);
+              alert('Error al eliminar el usuario. Por favor, inténtalo de nuevo.');
+            });
+        });
+
+        // Configurar el botón VOLVER en el modal de éxito
+        document.getElementById('btnVolverEliminar').addEventListener('click', function (e) {
+          // No es necesario preventDefault aquí ya que el enlace ya tiene href
+          // La redirección se manejará automáticamente
+          successDeleteModal.hide();
         });
       });
     </script>

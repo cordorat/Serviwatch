@@ -300,8 +300,7 @@ class EmpleadoFormTest(TestCase):
         }
         form = EmpleadoForm(data=form_data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['nombre'][0],
-                         "El nombre debe tener al menos 2 caracteres.")
+        self.assertEqual(form.errors['nombre'][0], "Cada nombre debe tener al menos 2 letras.")
 
     def test_apellidos_validation(self):
         # Test apellidos muy cortos
@@ -318,8 +317,7 @@ class EmpleadoFormTest(TestCase):
         }
         form = EmpleadoForm(data=form_data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(
-            form.errors['apellidos'][0], "Los apellidos deben tener al menos 2 caracteres.")
+        self.assertEqual(form.errors['apellidos'][0], "Cada nombre debe tener al menos 2 letras.")
 
     def test_fecha_nacimiento_validation(self):
         # Test menor de edad

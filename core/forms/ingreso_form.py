@@ -1,14 +1,14 @@
 from django import forms
-from core.models.egreso import Egreso
+from core.models.ingreso import Ingreso
 from django.utils import timezone
 from datetime import timedelta
 from datetime import date
 
 clase_formulario = 'form-control text-secondary'
 
-class EgresoForm(forms.ModelForm):
+class IngresoForm(forms.ModelForm):
     """
-    Formulario para gestionar el registro de egresos.
+    Formulario para gestionar el registro de ingresos.
     """
 
     def __init__(self, *args, **kwargs):
@@ -34,13 +34,13 @@ class EgresoForm(forms.ModelForm):
     
     class Meta:
 
-        model = Egreso
+        model = Ingreso
         fields = ['fecha', 'valor', 'descripcion']
         widgets = {
             'fecha': forms.DateInput(attrs={
                 'class': clase_formulario,
                 'type': 'date',
-                'placeholder': 'Ingrese la fecha del egreso'
+                'placeholder': 'Ingrese la fecha del ingreso'
             }), 
             'valor': forms.NumberInput(attrs={
                 'class': clase_formulario,
@@ -98,10 +98,11 @@ class EgresoForm(forms.ModelForm):
         return fecha
 
 
-#--------------------REPORTE DE EGRESOS--------------------#   
+#--------------------REPORTE DE INGRESOS--------------------#   
 
 
-class ReporteEgresoForm(forms.Form):
+
+class ReporteIngresoForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)      
@@ -115,6 +116,7 @@ class ReporteEgresoForm(forms.Form):
                     if 'is-invalid' not in current_classes:
                         field.widget.attrs['class'] = f"{current_classes} is-invalid"
 
+                        
     inicio = forms.DateField(
         required=True,
         error_messages={
@@ -158,6 +160,3 @@ class ReporteEgresoForm(forms.Form):
             raise forms.ValidationError("La fecha de inicio no puede ser posterior a la fecha de fin.")
         
         return cleaned_data
-
-    
-
