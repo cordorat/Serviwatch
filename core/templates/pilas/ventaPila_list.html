@@ -67,8 +67,32 @@
     }
 
     .cantidad-input {
-        width: 100px;
+        width: 80px !important; /* Reducir ancho */
         text-align: center;
+        padding-right: 5px; /* Reducir padding derecho */
+        padding-left: 5px; /* Reducir padding izquierdo */
+    }
+    
+    /* Asegurar que los números grandes se muestren correctamente */
+    .cantidad-input::-webkit-inner-spin-button,
+    .cantidad-input::-webkit-outer-spin-button {
+        margin-left: 0;
+    }
+    
+    /* Ajustar el contenedor del grupo de formulario */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; 
+        width: 100%;
+        position: relative;
+    }
+    
+    /* Asegurar que el mensaje de error esté alineado con el input */
+    .error-message {
+        width: 80px; /* Mismo ancho que el input */
+        text-align: left;
+        font-size: 12px; /* Texto más pequeño */
     }
 
     /* Estilos para hacer que la tabla ocupe más espacio */
@@ -120,12 +144,16 @@
 </style>
 <style>
     /* Estilos para los mensajes de error */
-    .error-message {
+    .error-message.pila {
         color: #dc3545;
-        font-size: 14px;
-        margin-top: 5px;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
         display: none;
-        max-width: 100%;
+        width: 80px; /* Mismo ancho que el input */
+        text-align: left;
+        /* Eliminar cualquier margen adicional */
+        margin-left: 0;
+        padding-left: 0;
     }
 
     .input-error {
@@ -195,14 +223,14 @@
                         <td class="{% if pila.cantidad|add:"0" < 10 %}text-danger{% endif %} fw-bold">
                             {{ pila.cantidad }}
                         </td>
-                        <td>
+                        <td class="text-start">
                             <div class="form-group">
                                 <input type="number" name="cantidad_{{ pila.id }}" 
                                     id="cantidad_{{ pila.id }}"
                                     class="form-control cantidad-input" 
                                     placeholder="0" min="0" max="{{ pila.cantidad }}"
-                                    onchange="validateStock(this, {{ pila.cantidad }})">
-                                <div class="error-message" id="error_cantidad_{{ pila.id }}"></div>
+                                    data-max-stock="{{ pila.cantidad }}">
+                                <div class="error-message pila" id="error_cantidad_{{ pila.id }}"></div>
                             </div>
                         </td>
                     </tr>
@@ -259,6 +287,16 @@
 <!-- Script para validar stock, enviar formulario y mostrar modal -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        // Agregar validación de stock a todos los inputs de cantidad
+        const cantidadInputs = document.querySelectorAll('.cantidad-input');
+        cantidadInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                const maxStock = this.getAttribute('data-max-stock');
+                validateStock(this, maxStock);
+            });
+        });
+
         // Configurar botón para enviar formulario
         document.getElementById('btn-procesar').addEventListener('click', function() {
             // Limpiar mensajes de error previos
