@@ -3,27 +3,96 @@
 
 {% block content %}
 
+<style>
+  .content {
+    overflow: scroll;
+  }
+
+  .filtro-container-reparacion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-select-sm {
+    min-width: 120px;
+    /* o el ancho que prefieras */
+  }
+
+  .header-icons-reparacion {
+    gap: 0px;
+    justify-content: start;
+    align-items: center;
+  }
+
+  .form-reloj {
+    display: flex;
+    flex-direction: row;
+  }
+</style>
+
 <div class="main-content">
   <!-- Botón Agregar reparación -->
   <div class="header-icons">
-    <h2 class="titulo">RELOJES</h2>
-    <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s"> Agregar Reloj</a>
+    <h2 class="titulo">
+      {% if 'servicios' in request.path %}
+      RELOJES EN VENTA
+      {% else %}
+      RELOJES
+      {% endif %}
+  </h2>
+    <!--{% if 'servicios' in request.path %}
+    <a href="#" class="btn btn-add me-3s">Vender Reloj</a>
+    {% else %}-->
+    <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+    <!--{% endif %}-->
   </div>
 
   <!-- Campo de búsqueda -->
-  <div class="search-container mb-3 search-form">
-    <form method="get" action="{% url 'reloj_list' %}" class="search-form">
-        <div class="input-group" style="gap: 10px;">
-            <input type="text" name="search" class="form-control"
-                placeholder="Buscar por referencia" value="{{ request.GET.search }}">
-            <button class="btn btn-search" type="submit">
-                <i class="bi bi-search text-secondary"></i>
-            </button>
-        </div>
+  <div class="header-icons header-icons-reparacion">
+    <form method="get"
+      action="{%if 'servicios' in request.path%}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}"
+      class="search-form">
+      <div class="input-group input-group-reparacion" style="gap: 10px;">
+        <input type="text" name="search" class="form-control form-control-reparacion"
+          placeholder="Buscar reloj por referencia" value="{{ request.GET.search }}">
+        <button class="btn btn-search" type="submit">
+          <i class="bi bi-search text-secondary"></i>
+        </button>
+      </div>
     </form>
+    <div class="filtro-container-reparacion ms-3 d-flex gap-2">
+      <form method="get" action="{% url 'reloj_list' %}" id="filtroForm" class="d-flex gap-2 form-reloj">
+        <!-- Mantener la búsqueda actual si existe -->
+        {% if search %}
+        <input type="hidden" name="search" value="{{ search }}">
+        {% endif %}
+
+        {% if 'productos' in request.path %}
+        <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Filtrar relojes por estado">
+          {% for valor, texto in estados %}
+          <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+
+        <select name="tipo" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Filtrar relojes por tipo">
+          {% for valor, texto in tipos %}
+          <option value="{{ valor }}" {% if filtro_tipo == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+        {% endif %}
+      </form>
+    </div>
   </div>
 
-  <!-- Lista de reparaciones -->
+  <br>
+  <!-- Lista de relojes -->
   <div class="table-container">
     <table class="table table-hover align-middle custom-table">
       <thead class="table-header">
@@ -32,26 +101,38 @@
           <th>Referencia </th>
           <th>Precio </th>
           <th>Tipo</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for reloj in relojes %}
         <tr>
-            <td>
-                {{ reloj.marca }}
-            </td>
-            <td>
-                {{ reloj.referencia }}
-            </td>
-            <td>
-                {{ reloj.precio }}
-            </td>
-            <td>
-                {{ reloj.tipo }}
-            </td>
+          <td>
+            {{ reloj.marca }}
+          </td>
+          <td>
+            {{ reloj.referencia }}
+          </td>
+          <td>
+            {{ reloj.precio }}
+          </td>
+          <td>
+            {{ reloj.tipo }}
+          </td>
+          <td>
+            {% if 'servicios' in request.path %}
+            <a href="{% url 'reloj_venta' reloj.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-cart-check fs-4"></i>
+            </a>
+            {% else %}
+            <a href="{% url 'reloj_edit' reloj.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil fs-4"></i>
+            </a>
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
-    </tbody>
+      </tbody>
 
     </table>
 
@@ -86,4 +167,14 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize all tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+  });
+</script>
 {% endblock %}

@@ -11,6 +11,10 @@
     border-top-right-radius: 4px !important;
     border-bottom-right-radius: 4px !important;
   }
+
+  .content {
+    overflow: scroll;
+  }
   
 </style>
 
@@ -25,7 +29,8 @@
     <!-- Campo de búsqueda -->
     <form method="GET" action="{% url 'cliente_list' %}" class="search-form" id="search-form">
       <div class="search-container">
-        <div class="input-group gap-2">
+        <div class="input-group gap-2" data-bs-toggle="tooltip" data-bs-placement="top"
+          title="Buscar cliente por nombre, apellido o teléfono">
           <input type="text" id="search-cliente-cliente" name="term" class="form-control" 
                  placeholder="Buscar cliente" value="{{ search_term }}">
           <button id="btn-search" class="btn btn-search" type="submit">
@@ -52,7 +57,7 @@
           <th>Nombre</th>
           <th>Apellido</th>
           <th>Teléfono</th>
-          <th></th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
