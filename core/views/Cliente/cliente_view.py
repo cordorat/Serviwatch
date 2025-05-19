@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.contrib import messages
 
 @login_required
 @require_http_methods(["GET"])
@@ -65,8 +66,10 @@ def cliente_create_view(request, id=None):
         return _render_cliente_form(request, form, modo)
     
     # Para solicitudes POST, procesamos el formulario
+    form = ClienteForm(request.POST, instance=cliente)  # Definir form aquí para que esté disponible en todo el scope
+    
+    # Verificar si es una solicitud AJAX
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             try:
                 crear_cliente(form)
@@ -90,20 +93,26 @@ def cliente_create_view(request, id=None):
             # Formulario inválido
             return _handle_ajax_response(form=form, success=False)
     
-    # Guardar el cliente y manejar la respuesta
-    crear_cliente(form)
+    # Para solicitudes no-AJAX
+    if form.is_valid():
+        try:
+            # Guardar el cliente
+            crear_cliente(form)
+            
+            # Mensaje de éxito
+            messages.success(request, 'Cliente creado exitosamente.' if modo == 'agregar' else 'Cliente editado exitosamente.')
+            
+            # Redirigir si hay una URL especificada
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
+            
+            # Redirección por defecto
+            return redirect('cliente_list')
+            
+        except Exception as e:
+            # Manejar errores
+            messages.error(request, f'Error: {str(e)}')
     
-    # Manejar solicitud AJAX o normal
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return _handle_ajax_response(modo)
-    
-    # Para solicitudes normales
-    _add_success_message(request, modo)
-    
-    # Redirigir si hay una URL especificada
-    next_url = request.GET.get('next')
-    if next_url:
-        return redirect(next_url)
-    
-    # Mostrar el formulario con el mensaje de éxito
+    # Si llegamos aquí, hay errores en el formulario o hubo una excepción
     return _render_cliente_form(request, form, modo)
