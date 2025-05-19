@@ -166,10 +166,9 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Inicializar todos los tooltips de forma más concisa
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(tooltipTriggerEl) {
-      new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    // Usar el método de inicialización de Bootstrap que no requiere guardar referencias
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerList);
   });
 </script>
 {% endblock %}
