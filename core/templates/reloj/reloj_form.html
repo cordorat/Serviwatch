@@ -24,7 +24,15 @@
 
 <div class="container">
     <div class="form-header">
-        <h2 class="titulo">AGREGAR RELOJ</h2>
+        <h2 class="titulo">
+            {% if modo == 'crear' %}
+            AGREGAR RELOJ
+            {% elif modo == 'editar' %}
+            EDITAR RELOJ
+            {% elif modo == 'vender' %}
+            VENDER RELOJ
+            {% endif %}
+        </h2>
         <h4>DATOS RELOJ</h4>
     </div>
 
@@ -33,6 +41,33 @@
     <div class="form-content">
         <form method="post" id="relojForm" class="repair-form custom-form" novalidate>
             {% csrf_token %}
+
+            {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
+            <div class="form-field">
+                <div class="input-group repair-form">
+                    <div class="input-group flex-grow-1 repair-form">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-person fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.cliente }}
+                        <a href="{% url 'cliente_create' %}?next={{ request.path|urlencode }}?reloj_id={{ reloj.id }}"
+                            class="btn btn-success ms-2 d-flex align-items-center justify-content-center"
+                            title="Agregar cliente"
+                            style="height: 48px; margin-left: 8px; border: 1px solid #626E15; border-radius: 4px;">
+                            Agregar Cliente
+                        </a>
+                    </div>
+                </div>
+                <div class="error-message">
+                    {% if form.cliente.errors %}
+                    {% for error in form.cliente.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
 
             <div class="row g-4">
                 <div class="repair-form-column">
@@ -80,6 +115,7 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <div class="input-group mt-3" id="basic-addon1">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
@@ -93,6 +129,9 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+
+                    {% endif %}
+                    <!-- Comision -->
 
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span">
@@ -158,6 +197,8 @@
                         {% endif %}
                     </div>
 
+
+                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <!-- Estado -->
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
@@ -175,20 +216,26 @@
 
                     <!-- Checkbox alineado -->
                     <div class="form-check form-switch mt-3">
-                        <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" 
-                        {% if form.pagado.value %}checked{% endif %}>
+                        <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" {% if form.pagado.value %}checked{% endif %}>
                         <label class="form-check-label ms-2" for="pagado">Pagado</label>
                     </div>
-                </div>
 
+                    {% endif %}
+                </div>
 
             </div>
 
             <div class="form-buttons">
                 <button type="submit" class="btn save" id="btnGuardar">GUARDAR</button>
+                {% if 'productos' in request.path %}
                 <a href="{% url 'reloj_list' %}">
                     <button type="button" class="btn cancel">CANCELAR</button>
                 </a>
+                {% else %}
+                <a href="{% url 'reloj_venta_list' %}">
+                    <button type="button" class="btn cancel">CANCELAR</button>
+                </a>
+                {% endif %}
             </div>
         </form>
     </div>
@@ -201,10 +248,12 @@
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
             <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
                 <h4 class="titulo m-0">
-                    {% if editing %}
+                    {% if modo == 'editar' %}
                     RELOJ ACTUALIZADO CORRECTAMENTE
-                    {% else %}
+                    {% elif modo == 'crear' %}
                     RELOJ AGREGADO CORRECTAMENTE
+                    {% elif modo == 'vender' %}
+                    RELOJ VENDIDO CORRECTAMENTE
                     {% endif %}
                 </h4>
             </div>
@@ -215,6 +264,56 @@
 {% endblock %}
 
 {% block javascript %}
+<script>
+    $(document).ready(function () {
+        $('#id_cliente').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            containerCssClass: 'select',
+            dropdownCssClass: 'select',
+            allowClear: true,
+            placeholder: 'Seleccione un cliente',
+            minimumInputLength: 1,
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                },
+                searching: function () {
+                    return "Buscando...";
+                },
+                inputTooShort: function () {
+                    return "Por favor ingrese 1 o más caracteres";
+                }
+            },
+            templateResult: formatCliente,
+            templateSelection: formatCliente,
+            matcher: function (params, data) {
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+                if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                    return data;
+                }
+                return null;
+            }
+        });
+        if ($('#id_cliente').hasClass('is-invalid')) {
+            $('#id_cliente').next('.select2-container').find('.select2-selection').addClass('is-invalid');
+        }
+    });
+
+    function formatCliente(cliente) {
+        if (!cliente.id) {
+            return cliente.text;
+        }
+        var parts = cliente.text.split(' - ');
+        return $('<div class="select2-result-cliente">' +
+            '<span class="select2-result-cliente__name">' + parts[0] + '</span>' + " " +
+            '<span class="select2-result-cliente__apellido">' + parts[1] + '</span>' + " - " +
+            '<span class="select2-result-cliente__phone">' + parts[2] + '</span>' +
+            '</div>');
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -224,17 +323,27 @@
         const comisionInput = form.querySelector('[name="comision"]');
         const estadoInput = form.querySelector('[name="estado"]');
         const fechaVentaInput = form.querySelector('[name="fecha_venta"]');
+        const clienteInput = form.querySelector('[name="cliente"]');
 
         // Manejar la validación de fecha cuando el estado es VENDIDO
-        estadoInput.addEventListener('change', function () {
-            if (this.value === 'VENDIDO') {
-                fechaVentaInput.required = true;
-            } else {
-                fechaVentaInput.required = false;
-                fechaVentaInput.value = '';
-                validateField(fechaVentaInput);
-            }
-        });
+        if (estadoInput) {
+            estadoInput.addEventListener('change', function () {
+                if (this.value === 'VENDIDO') {
+                    fechaVentaInput.required = true;
+                    clienteInput.required = true;
+                    // Validate both fields immediately
+                    validateField(fechaVentaInput);
+                    validateField(clienteInput);
+                } else {
+                    fechaVentaInput.required = false;
+                    clienteInput.required = false;
+                    fechaVentaInput.value = '';
+                    // Clear validation errors
+                    validateField(fechaVentaInput);
+                    validateField(clienteInput);
+                }
+            });
+        }
 
         function fixDescriptionContainer() {
             const descripcionContainer = document.querySelector('.description-container');
@@ -361,6 +470,13 @@
                     }
                     break;
 
+                case 'cliente':
+                    if (estadoInput?.value === 'VENDIDO' && !value) {
+                        errorMessage = 'El cliente es obligatorio cuando el estado es Vendido';
+                        isValid = false;
+                    }
+                    break;
+
                 case 'estado':
                     if (!value) {
                         errorMessage = 'El estado es obligatorio';
@@ -405,15 +521,13 @@
                     const response = await fetch(form.action, {
                         method: 'POST',
                         body: formData,
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
+                        credentials: 'same-origin'  // Esto es importante para el CSRF token
                     });
 
                     if (response.ok) {
                         modal.show();
                         setTimeout(() => {
-                            window.location.href = "{% url 'reloj_list' %}";
+                            window.location.href = "{% if modo == 'vender' %}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}";
                         }, 1000);
                     } else {
                         console.error('Error al enviar el formulario');
