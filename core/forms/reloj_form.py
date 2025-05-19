@@ -6,12 +6,14 @@ class ClienteChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.nombre} - {obj.apellido} - {obj.telefono}"
 
+clase_formulario = 'form-control text-secondary'
+
 class RelojForm(forms.ModelForm):
     marca = forms.CharField(
         required=True,
         max_length=30,
         widget=forms.TextInput(attrs={
-            'class': 'form-control text-secondary',
+            'class': clase_formulario,
             'placeholder': 'Marca'}),
         error_messages={
             'required': 'La marca es obligatoria',
@@ -22,7 +24,7 @@ class RelojForm(forms.ModelForm):
         required=True,
         max_length=30,
         widget=forms.TextInput(attrs={
-            'class': 'form-control text-secondary',
+            'class': clase_formulario,
             'placeholder': 'Referencia'}),
         error_messages={
             'required': 'La referencia es obligatoria',
@@ -33,7 +35,7 @@ class RelojForm(forms.ModelForm):
         required=True,
         max_length=20,
         widget=forms.TextInput(attrs={
-            'class': 'form-control text-secondary',
+            'class': clase_formulario,
             'placeholder': 'Precio',
             'type': 'text',  # Aseguramos que sea tipo text
             'inputmode': 'numeric',  # Sugiere teclado numérico en móviles
@@ -48,7 +50,7 @@ class RelojForm(forms.ModelForm):
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control text-secondary',
+            'class': clase_formulario,
             'placeholder': 'Comisión (20%)',
             'readonly': True,
         })
@@ -58,7 +60,7 @@ class RelojForm(forms.ModelForm):
         required=True,
         max_length=50,
         widget=forms.TextInput(attrs={
-            'class': 'form-control text-secondary',
+            'class': clase_formulario,
             'placeholder': 'Dueño'}),
         error_messages={
             'required': 'El dueño es obligatorio',
@@ -69,7 +71,7 @@ class RelojForm(forms.ModelForm):
         required=True,
         max_length=150,
         widget=forms.Textarea(attrs={
-            'class': 'form-control text-secondary', 'rows': 3, 'placeholder': 'Descripción'
+            'class': clase_formulario, 'rows': 3, 'placeholder': 'Descripción'
         }),
         error_messages={
             'required': 'La descripción es obligatoria',
@@ -105,7 +107,7 @@ class RelojForm(forms.ModelForm):
         input_formats=['%d/%m/%Y'],
         required=False,
         widget=forms.DateInput(attrs={
-            'class': 'form-control text-secondary',
+            'class': clase_formulario,
             'type': 'text',
             'placeholder': 'Fecha de venta dd/mm/aaaa',
             'autocomplete': 'off',

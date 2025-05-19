@@ -4,7 +4,9 @@ from django.db.models import Sum
 from datetime import date
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
-
+from django.http import JsonResponse
+from django.contrib import messages
+from django.shortcuts import redirect
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -12,9 +14,9 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from django.utils import timezone
-from reportlab.lib.pagesizes import landscape
+from datetime import datetime
 
-
+formato_fecha = '%d/%m/%Y'
 
 def crear_egreso(datos):
     try:
@@ -138,7 +140,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     
@@ -231,3 +233,37 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     buffer.close()
     
     return pdf
+
+def _parsear_fecha(fecha_str):
+    """Extrae la lógica de parseo de fecha en diferentes formatos."""
+    formatos = ['%Y-%m-%d', formato_fecha, '%d-%m-%Y']
+    
+    for formato in formatos:
+        try:
+            return datetime.strptime(fecha_str, formato).date()
+        except ValueError:
+            continue
+    
+    # Si ningún formato funciona, lanzamos error
+    raise ValueError(f"Formato de fecha no reconocido: {fecha_str}")
+
+
+def _crear_egreso_y_responder(request, datos):
+    """Extrae la lógica de crear un egreso y generar la respuesta apropiada."""
+    # Guarda en la base de datos
+    crear_egreso(datos)
+    
+    # Mensaje de éxito
+    messages.success(request, "Egreso ingresado con éxito")
+    
+    # Limpia la sesión
+    del request.session['egreso_data']
+    
+    # Maneja el tipo de respuesta según la solicitud
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': "Egreso ingresado con éxito"
+        })
+    
+    return redirect('egreso')

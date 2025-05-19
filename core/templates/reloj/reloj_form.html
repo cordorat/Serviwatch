@@ -399,107 +399,109 @@
             }
         });
 
-        function validateField(field) {
+        // Función para obtener o crear el div de mensaje de error
+        function getErrorDiv(field) {
             let errorDiv = field.parentElement.nextElementSibling;
             if (!errorDiv || !errorDiv.classList.contains('error-message')) {
                 errorDiv = document.createElement('div');
                 errorDiv.className = 'error-message';
                 field.parentElement.after(errorDiv);
             }
+            return errorDiv;
+        }
 
+        // Función para mostrar un error
+        function showError(field, message) {
+            const errorDiv = getErrorDiv(field);
+            field.classList.add('is-invalid');
+            errorDiv.innerHTML = `<span class="text-danger">${message}</span>`;
+            return false;
+        }
+
+        // Función para limpiar errores
+        function clearError(field) {
+            const errorDiv = getErrorDiv(field);
+            field.classList.remove('is-invalid');
             errorDiv.innerHTML = '';
+            return true;
+        }
+
+        // Validadores específicos por campo
+        const fieldValidators = {
+            marca: function(value) {
+                if (!value) return { isValid: false, message: 'La marca es obligatoria' };
+                if (value.length > 30) return { isValid: false, message: 'La marca debe tener máximo 30 caracteres' };
+                return { isValid: true };
+            },
+            
+            referencia: function(value) {
+                if (!value) return { isValid: false, message: 'La referencia es obligatoria' };
+                return { isValid: true };
+            },
+            
+            precio: function(value) {
+                if (!value) return { isValid: false, message: 'El precio es obligatorio' };
+                if (!/^\d+$/.test(value)) return { isValid: false, message: 'El precio debe contener solo números' };
+                if (value.length > 20) return { isValid: false, message: 'El precio no puede exceder los 20 caracteres' };
+                return { isValid: true };
+            },
+            
+            dueno: function(value) {
+                if (!value) return { isValid: false, message: 'El dueño es obligatorio' };
+                if (value.length > 30) return { isValid: false, message: 'El dueño debe tener máximo 30 caracteres' };
+                return { isValid: true };
+            },
+            
+            descripcion: function(value) {
+                if (!value) return { isValid: false, message: 'La descripción es obligatoria' };
+                if (value.length > 150) return { isValid: false, message: 'La descripción debe tener máximo 150 caracteres' };
+                return { isValid: true };
+            },
+            
+            tipo: function(value) {
+                if (!value) return { isValid: false, message: 'El tipo es obligatorio' };
+                return { isValid: true };
+            },
+            
+            cliente: function(value, estadoValue) {
+                if (estadoValue === 'VENDIDO' && !value) {
+                    return { isValid: false, message: 'El cliente es obligatorio cuando el estado es Vendido' };
+                }
+                return { isValid: true };
+            },
+            
+            estado: function(value) {
+                if (!value) return { isValid: false, message: 'El estado es obligatorio' };
+                return { isValid: true };
+            },
+            
+            fecha_venta: function(value, estadoValue) {
+                if (estadoValue === 'VENDIDO' && !value) {
+                    return { isValid: false, message: 'La fecha de venta es obligatoria cuando el estado es Vendido' };
+                }
+                return { isValid: true };
+            }
+        };
+
+        // Función principal de validación refactorizada
+        function validateField(field) {
+            // Limpiar mensaje de error anterior
+            clearError(field);
+            
             const value = field.value.trim();
-            let isValid = true;
-            let errorMessage = '';
-
-            switch (field.name) {
-                case 'marca':
-                    if (!value) {
-                        errorMessage = 'La marca es obligatoria';
-                        isValid = false;
-                    } else if (value.length > 30) {
-                        errorMessage = 'La marca debe tener máximo 30 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'referencia':
-                    if (!value) {
-                        errorMessage = 'La referencia es obligatoria';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'precio':
-                    if (!value) {
-                        errorMessage = 'El precio es obligatorio';
-                        isValid = false;
-                    } else if (!/^\d+$/.test(value)) {
-                        errorMessage = 'El precio debe contener solo números';
-                        isValid = false;
-                    } else if (value.length > 20) {
-                        errorMessage = 'El precio no puede exceder los 20 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'dueno':
-                    if (!value) {
-                        errorMessage = 'El dueño es obligatorio';
-                        isValid = false;
-                    } else if (value.length > 30) {
-                        errorMessage = 'El dueño debe tener máximo 30 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'descripcion':
-                    if (!value) {
-                        errorMessage = 'La descripción es obligatoria';
-                        isValid = false;
-                    } else if (value.length > 150) {
-                        errorMessage = 'La descripción debe tener máximo 150 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'tipo':
-                    if (!value) {
-                        errorMessage = 'El tipo es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'cliente':
-                    if (estadoInput?.value === 'VENDIDO' && !value) {
-                        errorMessage = 'El cliente es obligatorio cuando el estado es Vendido';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'estado':
-                    if (!value) {
-                        errorMessage = 'El estado es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'fecha_venta':
-                    if (estadoInput.value === 'VENDIDO' && !value) {
-                        errorMessage = 'La fecha de venta es obligatoria cuando el estado es Vendido';
-                        isValid = false;
-                    }
-                    break;
+            const estadoInput = document.querySelector('[name="estado"]');
+            const estadoValue = estadoInput ? estadoInput.value : '';
+            
+            // Usar el validador específico para este campo
+            if (fieldValidators[field.name]) {
+                const result = fieldValidators[field.name](value, estadoValue);
+                
+                if (!result.isValid) {
+                    return showError(field, result.message);
+                }
             }
-
-            if (!isValid) {
-                field.classList.add('is-invalid');
-                errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
-            } else {
-                field.classList.remove('is-invalid');
-            }
-
-            return isValid;
+            
+            return true;
         }
 
         form.addEventListener('submit', async function (e) {
