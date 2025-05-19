@@ -17,6 +17,7 @@ def usuario_list_view(request):
     usuarios = get_all_usuarios()
     
     usuarios = usuarios.order_by('username')
+    usuarios = usuarios.filter(is_superuser=False)
 
     paginator = Paginator(usuarios, 8)
     page_number = request.GET.get('page')

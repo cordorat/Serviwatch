@@ -69,7 +69,8 @@
     <div class="header-icons header-icons-empleado">
         <a href="{% url 'empleado_create' %}" class="btn btn-add btn-add-empleado me-3"> Agregar Empleado</a>
         <form method="get" action="{% url 'empleado_list' %}" class="search-form">
-            <div class="input-group input-group-empleado" style="gap: 10px;">
+            <div class="input-group input-group-empleado" style="gap: 10px;" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Buscar empleado por cedula, nombre o apellido">
                 <input type="text" name="search" class="form-control form-control-empleado"
                     placeholder="Buscar empleado" value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
@@ -84,7 +85,7 @@
                 <input type="hidden" name="search" value="{{ search }}">
                 {% endif %}
 
-                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar empleados por estado">
                     {% for valor, texto in estados %}
                     <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
                         {{ texto }}
@@ -114,7 +115,7 @@
                     <th>Cargo</th>
                     <th>Salario</th>
                     <th>Estado</th>
-                    <th></th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
