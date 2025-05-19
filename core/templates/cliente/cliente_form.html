@@ -126,7 +126,7 @@
         <h4 class="titulo m-0" id="modalMessage">CLIENTE AGREGADO CORRECTAMENTE</h4>
         {% endif %}
         <!-- Botón VOLVER -->
-        <a href="{% url 'cliente_list' %}" class="btn save mt-3">VOLVER</a>
+        <a href="{{ next_url|default:'/clientes/' }}" class="btn save mt-3">VOLVER</a>
       </div>
     </div>
   </div>

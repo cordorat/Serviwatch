@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from core.models.cliente import Cliente
 from django.core.paginator import Paginator
+from django.urls import reverse
 
 
 
@@ -98,5 +99,6 @@ def cliente_create_view(request, id=None):
         
     return render(request, 'cliente/cliente_form.html', {
         'form': form,
-        'modo': modo
+        'modo': modo,
+        'next_url': request.GET.get('next', reverse('cliente_list')),  # URL de redirección por defecto
         })
