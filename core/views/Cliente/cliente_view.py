@@ -1,16 +1,11 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from core.forms.cliente_form import ClienteForm
-from core.services.cliente_service import get_all_clientes, crear_cliente
-from django.contrib import messages
+from core.services.cliente_service import get_all_clientes, crear_cliente, _initialize_cliente, _handle_ajax_response, _add_success_message, _render_cliente_form
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.db.models import Q
-from core.models.cliente import Cliente
 from django.core.paginator import Paginator
-from django.urls import reverse
-
-
 
 @login_required
 @require_http_methods(["GET"])
@@ -61,44 +56,54 @@ def cliente_list_view(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def cliente_create_view(request, id=None):
-    if id:
-        cliente = get_object_or_404(Cliente, id=id)
-        modo = 'editar'
-    else:
-        modo = 'agregar'
-        cliente = None
-
-    if request.method == 'POST':
+    # Inicializar cliente y modo
+    cliente, modo = _initialize_cliente(id)
+    
+    # Para solicitudes GET, simplemente renderizamos el formulario
+    if request.method == 'GET':
+        form = ClienteForm(instance=cliente)
+        return _render_cliente_form(request, form, modo)
+    
+    # Para solicitudes POST, procesamos el formulario
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
-            
-            crear_cliente(form)
-            
-            # Manejar solicitudes AJAX
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            try:
+                crear_cliente(form)
+                return _handle_ajax_response(modo=modo)
+            except Exception as e:
+                # Si hay error al guardar (por ejemplo, por duplicado)
+                errors = {'__all__': [str(e)]}
+                if 'unique' in str(e).lower() or 'duplicate' in str(e).lower():
+                    # Intentar determinar qué campo está duplicado
+                    if 'telefono' in str(e).lower():
+                        errors = {'telefono': ['Este número de teléfono ya está registrado para otro cliente.']}
+                    else:
+                        errors = {'__all__': ['Ya existe un cliente con estos datos.']}
+                
                 return JsonResponse({
-                    'success': True,
-                    'message': 'Cliente editado exitosamente.' if modo == 'editar' else 'Cliente creado exitosamente.'
-                })
-                
-            # Para solicitudes normales
-            if modo == 'editar':
-                messages.success(request, 'Cliente editado exitosamente.')
-            else:
-                messages.success(request, 'Cliente creado exitosamente.')
-                
-            form.save()
-            # Si hay una URL de redirección especificada
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
-            
-            # No redirigimos por defecto, dejamos que el cliente maneje la navegación
-    else:
-        form = ClienteForm(instance=cliente)
-        
-    return render(request, 'cliente/cliente_form.html', {
-        'form': form,
-        'modo': modo,
-        'next_url': request.GET.get('next', reverse('cliente_list')),  # URL de redirección por defecto
-        })
+                    'success': False,
+                    'errors': errors,
+                    'message': 'No se pudo guardar el cliente.'
+                }, status=400)
+        else:
+            # Formulario inválido
+            return _handle_ajax_response(form=form, success=False)
+    
+    # Guardar el cliente y manejar la respuesta
+    crear_cliente(form)
+    
+    # Manejar solicitud AJAX o normal
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return _handle_ajax_response(modo)
+    
+    # Para solicitudes normales
+    _add_success_message(request, modo)
+    
+    # Redirigir si hay una URL especificada
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
+    
+    # Mostrar el formulario con el mensaje de éxito
+    return _render_cliente_form(request, form, modo)

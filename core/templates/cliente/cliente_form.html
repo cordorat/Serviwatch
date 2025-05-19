@@ -158,76 +158,94 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  function validateField(field) {
-    // Remover error anterior
-    const formGroup = field.closest('.form-group');
-    let errorElement = formGroup.querySelector('.form-error');
-    if (errorElement) {
-      errorElement.remove();
-    }
+  // Split validation rules into separate functions
+  function validateRequired(field) {
+      if (!field.value.trim()) {
+          const fieldLabels = {
+              'nombre': 'El nombre es obligatorio.',
+              'apellido': 'El apellido es obligatorio.',
+              'telefono': 'El número de teléfono es obligatorio.'
+          };
+          return fieldLabels[field.name] || 'Este campo es obligatorio.';
+      }
+      return '';
+  }
 
-    const value = field.value.trim();
-    let errorMessage = '';
-
-    if (!value) {
-      if (field.name === 'nombre') errorMessage = 'El nombre es obligatorio.';
-      if (field.name === 'apellido') errorMessage = 'El apellido es obligatorio.';
-      if (field.name === 'telefono') errorMessage = 'El número de teléfono es obligatorio.';
-    } else {
-      if (field.name === 'nombre') {
-        // Permitir nombres compuestos con espacios
-        // Validación modificada para aceptar múltiples palabras con espacios
-        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
-          errorMessage = 'El nombre solo debe contener letras y espacios.';
-        } else {
-          // Verificar que cada palabra del nombre sea válida
-          const palabras = value.split(/\s+/);
-          for (const palabra of palabras) {
-            if (palabra.length < 2) {
-              errorMessage = 'Cada nombre debe tener al menos 2 letras.';
-              break;
-            }
-          }
-        }
+  function validateName(value) {
+      // Check if name contains only letters and spaces
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+          return 'Solo debe contener letras y espacios.';
       }
       
-      if (field.name === 'apellido') {
-        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
-          errorMessage = 'El nombre solo debe contener letras y espacios.';
-        } else {
-          // Verificar que cada palabra del nombre sea válida
-          const palabras = value.split(/\s+/);
-          for (const palabra of palabras) {
-            if (palabra.length < 2) {
-              errorMessage = 'Cada nombre debe tener al menos 2 letras.';
-              break;
-            }
+      // Check minimum length for each word
+      const palabras = value.split(/\s+/);
+      for (const palabra of palabras) {
+          if (palabra.length < 2) {
+              return 'Cada nombre debe tener al menos 2 letras.';
           }
-        }
       }
+      
+      return '';
+  }
 
-      if (field.name === 'telefono') {
-        if (!/^\d{10}$/.test(value)) {
-          errorMessage = 'El número de teléfono debe contener exactamente 10 dígitos.';
-        }
-        // Validar que comience con 3
-        else if (!value.startsWith('3')) {
-          errorMessage = 'El número de teléfono debe comenzar con 3.';
-        }
+  function validatePhone(value) {
+      if (!/^\d{10}$/.test(value)) {
+          return 'El número de teléfono debe contener exactamente 10 dígitos.';
       }
-    }
+      
+      if (!value.startsWith('3')) {
+          return 'El número de teléfono debe comenzar con 3.';
+      }
+      
+      return '';
+  }
 
-    if (errorMessage) {
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'form-error';
-      errorDiv.textContent = errorMessage;
-      formGroup.appendChild(errorDiv);
-      field.classList.add('is-invalid');
-      return false;
-    } else {
+  // Main validation function with reduced complexity
+  function validateField(field) {
+      // Remove previous error
+      clearFieldError(field);
+      
+      const value = field.value.trim();
+      
+      // First check if field is required
+      let errorMessage = validateRequired(field);
+      
+      // If field has value, apply specific validations
+      if (!errorMessage && value) {
+          if (field.name === 'nombre' || field.name === 'apellido') {
+              errorMessage = validateName(value);
+          } else if (field.name === 'telefono') {
+              errorMessage = validatePhone(value);
+          }
+      }
+      
+      // Display error if any
+      if (errorMessage) {
+          displayFieldError(field, errorMessage);
+          return false;
+      }
+      
       field.classList.remove('is-invalid');
       return true;
-    }
+  }
+
+  // Helper functions for DOM manipulation
+  function clearFieldError(field) {
+      const formGroup = field.closest('.form-group');
+      const errorElement = formGroup.querySelector('.form-error');
+      if (errorElement) {
+          errorElement.remove();
+      }
+      field.classList.remove('is-invalid');
+  }
+
+  function displayFieldError(field, message) {
+      const formGroup = field.closest('.form-group');
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'form-error';
+      errorDiv.textContent = message;
+      formGroup.appendChild(errorDiv);
+      field.classList.add('is-invalid');
   }
 
   // Validación al salir del input
@@ -279,11 +297,12 @@ document.addEventListener("DOMContentLoaded", function () {
           'X-CSRFToken': csrftoken
         }
       })
+      // Modificar la parte del fetch para manejar errores del servidor
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json();
+        return response.json().then(data => {
+          // Agregamos status para poder diferenciar errores
+          return { ...data, status: response.status };
+        });
       })
       .then(data => {
         if (data.success) {
@@ -295,11 +314,39 @@ document.addEventListener("DOMContentLoaded", function () {
             e.stopPropagation();
           });
         } else {
-          console.error('Error al procesar el formulario:', data.message);
+          // NUEVO: Manejar errores específicos del servidor
+          if (data.errors) {
+            // Procesar errores del servidor por campo
+            Object.entries(data.errors).forEach(([field, errorMessages]) => {
+              const fieldElement = document.querySelector(`[name="${field}"]`);
+              if (fieldElement) {
+                // Mostrar error en el campo específico
+                displayFieldError(fieldElement, Array.isArray(errorMessages) ? errorMessages[0] : errorMessages);
+              } else {
+                // Si no encontramos el campo (por ejemplo, para errores generales)
+                console.error(`Error en ${field}: ${errorMessages}`);
+              }
+            });
+            
+            // Hacer scroll al primer error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+              firstError.focus();
+              firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          } else if (data.message) {
+            // Error general con mensaje
+            alert(data.message);
+          } else {
+            // Error genérico sin detalles
+            console.error('Error desconocido al procesar el formulario');
+            alert('Ocurrió un error al procesar el formulario. Por favor, intente nuevamente.');
+          }
         }
       })
       .catch(error => {
-        console.error('Error:', error);
+        console.error('Error en la solicitud:', error);
+        alert('Error de conexión. Por favor, verifique su conexión a internet e intente nuevamente.');
       });
     } else {
       console.log("Formulario inválido, no se muestra el modal");

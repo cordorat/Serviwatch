@@ -132,9 +132,9 @@ class EmpleadoForm(forms.ModelForm):
         if not cedula.isdigit():
             raise forms.ValidationError("La cédula debe contener solo números.")
 
-        if len(cedula) > 15:
+        if len(cedula) > 10:
             raise forms.ValidationError(
-                "La cédula no puede tener más de 15 dígitos.")
+                "La cédula no puede tener más de 10 dígitos.")
 
         # Comprobar unicidad solo para nuevos empleados, no para ediciones
         if not self.instance.pk:  # Si es un nuevo empleado (no tiene ID)
@@ -164,6 +164,9 @@ class EmpleadoForm(forms.ModelForm):
         salario = self.cleaned_data.get('salario')
         if not salario.isdigit():
             raise forms.ValidationError("El salario debe ser numérico.")
+        
+        salario = salario.lstrip('0')  # Eliminar ceros a la izquierda
+
         if len(salario) > 8:
             raise forms.ValidationError(
                 "El salario no puede tener más de 8 dígitos.")

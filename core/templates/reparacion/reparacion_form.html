@@ -328,65 +328,56 @@
             return errorDiv;
         }
 
-        // Función que centraliza las reglas de validación por campo
+        // Función que centraliza las reglas de validación por campo - refactorizada
         function getFieldValidation(fieldName, value) {
-            let isValid = true;
-            let errorMessage = '';
-
-            switch (fieldName) {
-                case 'marca_reloj':
+            // Objeto de validaciones por campo
+            const validations = {
+                marca_reloj: () => {
                     if (!value) {
-                        errorMessage = 'La marca del reloj es obligatoria';
-                        isValid = false;
+                        return { isValid: false, errorMessage: 'La marca del reloj es obligatoria' };
                     }
-                    break;
-
-                case 'descripcion':
+                    return { isValid: true, errorMessage: '' };
+                },
+                
+                descripcion: () => {
                     if (!value) {
-                        errorMessage = 'La descripción es obligatoria';
-                        isValid = false;
-                    } else if (value.length < 10) {
-                        errorMessage = 'La descripción debe tener al menos 10 caracteres';
-                        isValid = false;
+                        return { isValid: false, errorMessage: 'La descripción es obligatoria' };
                     }
-                    break;
-
-                case 'codigo_orden':
-                case 'fecha_entrega_estimada':
-                case 'espacio_fisico':
-                case 'tecnico':
+                    if (value.length < 10) {
+                        return { isValid: false, errorMessage: 'La descripción debe tener al menos 10 caracteres' };
+                    }
+                    return { isValid: true, errorMessage: '' };
+                },
+                
+                precio: () => {
                     if (!value) {
-                        errorMessage = `El ${fieldName.replace('_', ' ')} es obligatorio`;
-                        isValid = false;
+                        return { isValid: false, errorMessage: 'El precio es obligatorio' };
                     }
-                    break;
-
-                case 'precio':
-                    if (!value) {
-                        errorMessage = 'El precio es obligatorio';
-                        isValid = false;
-                    } else if (isNaN(value) || parseFloat(value) <= 0) {
-                        errorMessage = 'El precio debe ser un número mayor que cero';
-                        isValid = false;
+                    if (isNaN(value) || parseFloat(value) <= 0) {
+                        return { isValid: false, errorMessage: 'El precio debe ser un número mayor que cero' };
                     }
-                    break;
-
-                case 'espacio_fisico':
-                    if (!value) {
-                        errorMessage = 'El espacio físico es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'tecnico':
-                    if (!value) {
-                        errorMessage = 'El técnico es obligatorio';
-                        isValid = false;
-                    }
-                    break;
+                    return { isValid: true, errorMessage: '' };
+                },
+                
+                // Campos con validación simple (solo requeridos)
+                codigo_orden: () => validateRequiredField('código de orden'),
+                fecha_entrega_estimada: () => validateRequiredField('fecha de entrega estimada'),
+                espacio_fisico: () => validateRequiredField('espacio físico'),
+                tecnico: () => validateRequiredField('técnico')
+            };
+            
+            // Función auxiliar para validar campos requeridos
+            function validateRequiredField(label) {
+                if (!value) {
+                    return { isValid: false, errorMessage: `El ${label} es obligatorio` };
+                }
+                return { isValid: true, errorMessage: '' };
             }
-
-            return { isValid, errorMessage };
+            
+            // Ejecutar la validación correspondiente o usar validación por defecto
+            return validations[fieldName] ? 
+                validations[fieldName]() : 
+                { isValid: true, errorMessage: '' };
         }
 
         // Función de validación de campo individual

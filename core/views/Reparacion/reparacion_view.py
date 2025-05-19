@@ -98,46 +98,64 @@ def _handle_create_post(request):
     form = ReparacionForm(post_data)
     if form.is_valid():
         try:
-            reparacion = form.save()
-            
-            # Si es una solicitud AJAX, devolver respuesta JSON
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'message': "Reparación agregada correctamente."
-                })
-                
-            messages.success(request, "Reparación agregada correctamente.")
-            return redirect('reparacion_list')
+            form.save()
+            return _handle_success_response(request, "Reparación agregada correctamente.")
         except Exception as e:
-            # Si es una solicitud AJAX, devolver error en JSON
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                # Intentar determinar si es un error de integridad de BD (duplicado)
-                if 'duplicate' in str(e).lower() or 'unique constraint' in str(e).lower():
-                    return JsonResponse({
-                        'success': False,
-                        'errors': {
-                            'codigo_orden': 'Este código de orden ya existe. Por favor, use otro.'
-                        }
-                    }, status=400)
-                else:
-                    return JsonResponse({
-                        'success': False,
-                        'message': str(e)
-                    }, status=400)
-                
-            messages.error(request, f"Error al guardar: {str(e)}")
+            return _handle_exception_response(request, e)
     else:
-        # Si es una solicitud AJAX, devolver errores en JSON
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {field: error[0] for field, error in form.errors.items()}
+        return _handle_form_invalid_response(request, form)
+
+
+def _handle_success_response(request, message):
+    """Maneja las respuestas exitosas."""
+    # Si es una solicitud AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': message
+        })
+    
+    # Para solicitudes normales
+    messages.success(request, message)
+    return redirect('reparacion_list')
+
+
+def _handle_exception_response(request, exception):
+    """Maneja las excepciones al guardar el formulario."""
+    # Si es una solicitud AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Verificar si es un error de duplicado
+        if 'duplicate' in str(exception).lower() or 'unique constraint' in str(exception).lower():
             return JsonResponse({
                 'success': False,
-                'errors': errors
+                'errors': {
+                    'codigo_orden': 'Este código de orden ya existe. Por favor, use otro.'
+                }
             }, status=400)
-            
-        _add_form_errors_to_messages(form, request)
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': str(exception)
+            }, status=400)
+    
+    # Para solicitudes normales
+    messages.error(request, f"Error al guardar: {str(exception)}")
+    return _render_create_form(request, ReparacionForm(request.POST))
 
+
+def _handle_form_invalid_response(request, form):
+    """Maneja las respuestas cuando el formulario no es válido."""
+    # Si es una solicitud AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        errors = {field: error[0] for field, error in form.errors.items()}
+        return JsonResponse({
+            'success': False,
+            'errors': errors
+        }, status=400)
+    
+    # Para solicitudes normales    
+    _add_form_errors_to_messages(form, request)
+    
     # Verificar si debemos mostrar la página con el modal
     success = request.GET.get('success') == 'true'
     

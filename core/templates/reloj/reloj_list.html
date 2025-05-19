@@ -41,11 +41,7 @@
       RELOJES
       {% endif %}
   </h2>
-    <!--{% if 'servicios' in request.path %}
-    <a href="#" class="btn btn-add me-3s">Vender Reloj</a>
-    {% else %}-->
     <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
-    <!--{% endif %}-->
   </div>
 
   <!-- Campo de búsqueda -->
@@ -170,10 +166,9 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Initialize all tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
+    // Inicializar todos los tooltips de forma más concisa
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
     });
   });
 </script>
