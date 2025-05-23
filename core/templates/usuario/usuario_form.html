@@ -478,12 +478,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     // Redirigir a la misma página con parámetro success para mostrar el modal
                     window.location.href = `${window.location.pathname}?success=true`;
+                    return; // Retorno temprano para evitar seguir ejecutando
+                }
+                
+                // Manejar caso de error, sin usar un bloque else
+                if (data.errors) {
+                    handleServerErrors(data.errors);
+                } else if (data.message) {
+                    alert(data.message);
                 } else {
-                    if (data.errors) {
-                        handleServerErrors(data.errors);
-                    } else if (data.message) {
-                        alert(data.message);
-                    }
+                    // Manejar caso donde no hay errors ni message
+                    console.error('Respuesta no exitosa sin información de error');
+                    alert("La operación no pudo completarse. Por favor intente nuevamente.");
                 }
             })
             .catch(error => {

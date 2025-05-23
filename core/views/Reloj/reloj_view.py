@@ -9,6 +9,9 @@ from django.db.models import Q
 from core.models.reloj import Reloj
 from core.models.cliente import Cliente
 
+mensaje_de_error = 'Por favor corrige los errores en el formulario.'
+templade_a_dirigir = 'reloj/reloj_form.html'
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def reloj_list_view(request):
@@ -28,7 +31,7 @@ def reloj_list_view(request):
         relojes = relojes.filter(tipo=filtro_tipo)
 
     if search_query:
-        search_terms = search_query.split()
+        search_query.split()
         query = Q()
         base_query = (
             Q(referencia__icontains=search_query) 
@@ -69,12 +72,12 @@ def reloj_create_view(request):
             messages.success(request, 'Referencia de reloj agregada con éxito')
             return redirect('reloj_list')
         else:
-            messages.error(request, 'Por favor corrige los errores en el formulario.')
+            messages.error(request, mensaje_de_error)
     else:
         form = RelojForm()
     
     context = {'form': form, 'modo': 'crear'}
-    return render(request, 'reloj/reloj_form.html', context)
+    return render(request, templade_a_dirigir, context)
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -92,12 +95,12 @@ def reloj_update_view(request, pk):
             messages.success(request, 'Referencia de reloj actualizada con éxito')
             return redirect('reloj_list')
         else:
-            messages.error(request, 'Por favor corrige los errores en el formulario.')
+            messages.error(request, mensaje_de_error)
     else:
         form = RelojForm(instance=reloj)
     
     context = {'form': form, 'modo': 'editar', 'reloj': reloj}
-    return render(request, 'reloj/reloj_form.html', context)
+    return render(request, templade_a_dirigir, context)
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -117,7 +120,7 @@ def reloj_sell_view(request, pk):
             messages.success(request, 'Referencia de reloj vendida con éxito')
             return redirect('reloj_venta_list')
         else:
-            messages.error(request, 'Por favor corrige los errores en el formulario.')
+            messages.error(request, mensaje_de_error)
     else:
         form = RelojForm(instance=reloj)
     
@@ -127,4 +130,4 @@ def reloj_sell_view(request, pk):
         'reloj': reloj,
         'clientes': Cliente.objects.all().order_by('nombre')  
     }
-    return render(request, 'reloj/reloj_form.html', context)
+    return render(request, templade_a_dirigir, context)
