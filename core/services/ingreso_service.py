@@ -3,7 +3,6 @@ from django.db.models import Sum
 from datetime import date
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
-
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter

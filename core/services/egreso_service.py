@@ -4,6 +4,19 @@ from django.db.models import Sum
 from datetime import date
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
+from django.http import JsonResponse
+from django.contrib import messages
+from django.shortcuts import redirect
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from django.utils import timezone
+from datetime import datetime
+
+formato_fecha = '%d/%m/%Y'
 
 from io import BytesIO
 from reportlab.lib import colors

@@ -1,15 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from core.forms.cliente_form import ClienteForm
-from core.services.cliente_service import get_all_clientes, crear_cliente
-from django.contrib import messages
+from core.services.cliente_service import get_all_clientes, crear_cliente, _initialize_cliente, _handle_ajax_response, _add_success_message, _render_cliente_form
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.db.models import Q
-from core.models.cliente import Cliente
 from django.core.paginator import Paginator
-
-
+from django.contrib import messages
 
 @login_required
 @require_http_methods(["GET"])
@@ -60,15 +57,19 @@ def cliente_list_view(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def cliente_create_view(request, id=None):
-    if id:
-        cliente = get_object_or_404(Cliente, id=id)
-        modo = 'editar'
-    else:
-        modo = 'agregar'
-        cliente = None
-
-    if request.method == 'POST':
-        form = ClienteForm(request.POST, instance=cliente)
+    # Inicializar cliente y modo
+    cliente, modo = _initialize_cliente(id)
+    
+    # Para solicitudes GET, simplemente renderizamos el formulario
+    if request.method == 'GET':
+        form = ClienteForm(instance=cliente)
+        return _render_cliente_form(request, form, modo)
+    
+    # Para solicitudes POST, procesamos el formulario
+    form = ClienteForm(request.POST, instance=cliente)  # Definir form aquí para que esté disponible en todo el scope
+    
+    # Verificar si es una solicitud AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         if form.is_valid():
             
             crear_cliente(form)

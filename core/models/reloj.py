@@ -1,6 +1,6 @@
 from django.db import models
-from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxLengthValidator, RegexValidator
+from django.core.validators import MaxLengthValidator, RegexValidator
+from core.models.cliente import Cliente
 
 
 class Reloj(models.Model):
@@ -68,6 +68,13 @@ class Reloj(models.Model):
     )
 
     pagado = models.BooleanField(default=False)
+
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         return f"{self.marca} - {self.referencia} - ${self.precio} - {self.get_tipo_display()}"

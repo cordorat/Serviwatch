@@ -1,13 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.core.paginator import Paginator
 from core.forms.empleado_form import EmpleadoForm
-from core.services.empleado_service import crear_empleado, get_all_empleados
+from core.services.empleado_service import _initialize_empleado, _handle_form_success, _handle_form_error
 from django.views.decorators.http import require_http_methods
-from django.contrib import messages
 from django.db.models import Q
 from core.models.empleado import Empleado
 from django.http import JsonResponse
-
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
 
 @require_http_methods(["GET"])
 def empleado_list_view(request,):

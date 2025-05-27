@@ -17,6 +17,7 @@ def usuario_list_view(request):
     usuarios = get_all_usuarios()
     
     usuarios = usuarios.order_by('username')
+    usuarios = usuarios.filter(is_superuser=False)
 
     paginator = Paginator(usuarios, 8)
     page_number = request.GET.get('page')
@@ -29,6 +30,29 @@ def usuario_list_view(request):
     }
 
     return render(request, "usuario/usuario_list.html",context)
+
+def _handle_ajax_response(success, data=None, errors=None, status=200):
+    """Función auxiliar para manejar respuestas AJAX."""
+    if success:
+        return JsonResponse({
+            'success': True,
+            'message': data or 'Usuario agregado correctamente'
+        }, status=status)
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': errors or {}
+        }, status=status or 400)
+
+
+def _render_usuario_form(request, form, modo='crear', success=False):
+    """Función auxiliar para renderizar el formulario de usuario."""
+    return render(request, 'usuario/usuario_form.html', {
+        'form': form,
+        'modo': modo,
+        'success': success
+    })
+
 
 @login_required
 @require_http_methods(["GET", "POST"])
