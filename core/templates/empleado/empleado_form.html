@@ -325,7 +325,6 @@
             cedula: function (value) {
                 if (!value) return { isValid: false, message: 'La cédula es obligatoria' };
                 if (!/^\d+$/.test(value)) return { isValid: false, message: 'La cédula debe contener solo números' };
-                if (value.length > 15) return { isValid: false, message: 'La cédula no puede tener más de 15 dígitos' };
                 return { isValid: true, message: '' };
             },
 
@@ -560,25 +559,31 @@
                         if (data.success) {
                             // Redirigir a la misma página con parámetro success=true
                             window.location.href = `${window.location.pathname}?success=true`;
-                        } else {
-                            // Mostrar errores del servidor
-                            if (data.errors) {
-                                for (const [field, error] of Object.entries(data.errors)) {
-                                    const fieldElement = document.getElementById(`id_${field}`);
-                                    if (fieldElement) {
-                                        fieldElement.classList.add('is-invalid');
-                                        const errorDiv = getErrorDiv(fieldElement);
-                                        errorDiv.innerHTML = `<span class="text-danger">${error}</span>`;
-                                    }
-                                }
-
-                                // Hacer scroll al primer error
-                                const firstError = document.querySelector('.is-invalid');
-                                if (firstError) {
-                                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    firstError.focus();
-                                }
+                            return;
+                        }
+                        
+                        // Si llegamos aquí, no hubo éxito
+                        if (!data.errors) {
+                            console.error('Respuesta no exitosa sin errores específicos');
+                            alert('Ha ocurrido un error al procesar el formulario.');
+                            return;
+                        }
+                        
+                        // Mostrar errores del servidor
+                        for (const [field, error] of Object.entries(data.errors)) {
+                            const fieldElement = document.getElementById(`id_${field}`);
+                            if (fieldElement) {
+                                fieldElement.classList.add('is-invalid');
+                                const errorDiv = getErrorDiv(fieldElement);
+                                errorDiv.innerHTML = `<span class="text-danger">${error}</span>`;
                             }
+                        }
+
+                        // Hacer scroll al primer error
+                        const firstError = document.querySelector('.is-invalid');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            firstError.focus();
                         }
                     })
                     .catch(error => {

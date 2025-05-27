@@ -1,13 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.core.paginator import Paginator
 from core.forms.empleado_form import EmpleadoForm
-from core.services.empleado_service import crear_empleado, get_all_empleados
+from core.services.empleado_service import _initialize_empleado, _handle_form_success, _handle_form_error
 from django.views.decorators.http import require_http_methods
-from django.contrib import messages
 from django.db.models import Q
 from core.models.empleado import Empleado
-from django.http import JsonResponse
-
 
 @require_http_methods(["GET"])
 def empleado_list_view(request,):
@@ -45,70 +42,37 @@ def empleado_list_view(request,):
 
 @require_http_methods(["POST", "GET"])
 def empleado_create_view(request, id=None):
-    if id:
-        empleado = get_object_or_404(Empleado, id=id)
-        modo = 'editar'
-    else:
-        empleado = None
-        modo = 'agregar'
-
-    if request.method == 'POST':
-        form = EmpleadoForm(request.POST, instance=empleado)
-        print("Datos del formulario:", request.POST)  # Depuración
-
-        if form.is_valid():
-            print("Formulario válido!")
-            try:
-                empleado = form.save()
-                messages.success(
-                    request, f'Empleado {"editado" if modo == "editar" else "creado"} exitosamente.')
-                
-                # Manejar solicitudes AJAX
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'success': True,
-                        'message': f'Empleado {"editado" if modo == "editar" else "creado"} exitosamente.'
-                    })
-                
-                # Si hay una solicitud específica para mostrar el modal
-                if request.headers.get('X-Show-Modal') == 'true':
-                    return JsonResponse({
-                        'success': True,
-                        'redirect': f"{request.path}?success=true"
-                    })
-                
-                # Para solicitudes normales
-                return redirect('empleado_list')
-
-            except Exception as e:
-                print(f"Error al guardar: {str(e)}")  # Depuración
-                messages.error(request, f'Error: {str(e)}')
-                # Para solicitudes AJAX, devolver error en formato JSON
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'success': False,
-                        'message': str(e)
-                    }, status=400)
-                
-        else:
-            print("Errores del formulario:", form.errors)
-            # Si es una solicitud AJAX, devolver errores en formato JSON
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                errors = {field: error[0] for field, error in form.errors.items()}
-                return JsonResponse({
-                    'success': False,
-                    'errors': errors
-                }, status=400)
-                
-    else:
+    # Inicializar empleado y modo
+    empleado, modo = _initialize_empleado(id)
+    
+    # Para solicitudes GET
+    if request.method == 'GET':
         form = EmpleadoForm(instance=empleado)
-
-    # Verificar si estamos mostrando el modal de éxito
-    success = request.GET.get('success') == 'true'
-
-    return render(request, 'empleado/empleado_form.html', {
-        'form': form,
-        'modo': modo,
-        'empleado': empleado,
-        'success': success
-    })
+        success = request.GET.get('success') == 'true'
+        return render(request, 'empleado/empleado_form.html', {
+            'form': form, 'modo': modo, 'empleado': empleado, 'success': success
+        })
+    
+    # Para solicitudes POST
+    form = EmpleadoForm(request.POST, instance=empleado)
+    
+    # Si el formulario no es válido
+    if not form.is_valid():
+        error_response = _handle_form_error(request, "Formulario inválido", form)
+        if error_response:
+            return error_response
+        return render(request, 'empleado/empleado_form.html', {
+            'form': form, 'modo': modo, 'empleado': empleado
+        })
+    
+    # Si el formulario es válido
+    try:
+        empleado = form.save()
+        return _handle_form_success(request, empleado, modo)
+    except Exception as e:
+        error_response = _handle_form_error(request, str(e))
+        if error_response:
+            return error_response
+        return render(request, 'empleado/empleado_form.html', {
+            'form': form, 'modo': modo, 'empleado': empleado
+        })

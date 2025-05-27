@@ -49,12 +49,20 @@ class PilasForm(forms.ModelForm):
         return codigo
     def clean_precio(self):
         precio = self.cleaned_data.get('precio')
+
         if not precio.isdigit():
             raise forms.ValidationError("El precio solo debe contener números.")
+        
+        precio = precio.lstrip('0')  # Eliminar ceros a la izquierda
+
         return precio
         
     def clean_cantidad(self):
         cantidad = self.cleaned_data.get('cantidad')
+
         if not cantidad.isdigit():
             raise forms.ValidationError("La cantidad solo debe contener números.")
+        
+        cantidad = cantidad.lstrip('0')
+
         return cantidad

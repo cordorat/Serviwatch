@@ -3,7 +3,6 @@ from django.db.models import Sum
 from datetime import date
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
-
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -11,8 +10,12 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from django.utils import timezone
-from reportlab.lib.pagesizes import landscape
+from datetime import datetime
+from django.http import JsonResponse
+from django.contrib import messages
+from django.shortcuts import redirect
 
+formato_fecha = '%d/%m/%Y'
 
 def crear_ingreso(datos):
     try:
@@ -136,7 +139,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     
@@ -229,3 +232,56 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
     buffer.close()
     
     return pdf
+
+def _parsear_fecha(fecha_str):
+    """Función auxiliar para parsear la fecha en diferentes formatos."""
+    formatos = ['%Y-%m-%d', '%d-%m-%Y', formato_fecha]
+    
+    for formato in formatos:
+        try:
+            return datetime.strptime(fecha_str, formato).date()
+        except ValueError:
+            continue
+    
+    # Si ningún formato funciona, lanzamos un error
+    raise ValueError(f"No se pudo parsear la fecha: {fecha_str}")
+
+def _formatear_datos_ingreso(ingreso_data):
+    """Función auxiliar para formatear los datos del ingreso para la plantilla."""
+    fecha_obj = _parsear_fecha(ingreso_data['fecha'])
+    fecha_formateada = fecha_obj.strftime(formato_fecha)
+    
+    return {
+        'fecha': fecha_formateada,
+        'valor': ingreso_data['valor'],
+        'descripcion': ingreso_data['descripcion']
+    }
+
+def _procesar_confirmacion(request, ingreso_data):
+    """Función auxiliar para procesar la confirmación del ingreso."""
+    # Preparar datos para el servicio
+    fecha = _parsear_fecha(ingreso_data['fecha'])
+    datos = {
+        'fecha': fecha,
+        'valor': ingreso_data['valor'],
+        'descripcion': ingreso_data['descripcion']
+    }
+    
+    # Guarda en la base de datos
+    crear_ingreso(datos)
+    
+    # Mensaje de éxito
+    messages.success(request, "Ingreso registrado con éxito")
+    
+    # Limpia la sesión
+    del request.session['ingreso_data']
+    
+    # Manejar solicitudes AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': "Ingreso registrado con éxito"
+        })
+    
+    # Para solicitudes normales
+    return redirect('ingreso')
