@@ -1,0 +1,2 @@
+Este es un proyecto de la materia de Desarrollo de Software II, para la empresa Serviwatch. El proyecto tiene como propósito simplificar el manejo interno que tiene la empresa, con tal de dar mas eficiencia y menos complejidad en el día a día.
+Este proyecto ha sido realizado con Django para el backend, y HTML, CSS y JS para el frontend. Poniendo en práctica buenas prácticas de programación, DevOps (CI/CD, Static Code Analysis), y despliegue en la nube haciendo uso de AWS en un EC2.
