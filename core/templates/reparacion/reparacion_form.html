@@ -181,17 +181,23 @@
 
                 <div class="form-buttons">
                     <button class="btn save" id="btnGuardar">GUARDAR</button>
+                    {% if request.GET.return_to == 'alertas' %}
+                    <a href="{% url 'alertas' %}?tipo={{ request.GET.tipo }}&page={{ request.GET.page }}">
+                        <button type="button" class="btn cancel">CANCELAR</button>
+                    </a>
+                    {% else %}
                     <a href="{% url 'reparacion_list' %}">
                         <button type="button" class="btn cancel">CANCELAR</button>
                     </a>
+                    {% endif %}
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal de confirmación simplificado -->
-    <div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" 
-        tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center" style="background-color: #f1f1f1;">
                 <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
@@ -200,7 +206,12 @@
                     {% else %}
                     <h4 class="titulo m-0" id="modalMessage">REPARACIÓN AGREGADA CORRECTAMENTE</h4>
                     {% endif %}
+                    {% if request.GET.return_to == 'alertas' %}
+                    <a href="{% url 'alertas' %}?tipo={{ request.GET.tipo }}&page={{ request.GET.page }}"
+                        class="btn save mt-3">VOLVER</a>
+                    {% else %}
                     <a href="{% url 'reparacion_list' %}" class="btn save mt-3">VOLVER</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -272,439 +283,449 @@
     </script>
 
     <script>
-    /**
-     * Script de validación y envío de formulario para reparaciones
-     * Implementa validación de cliente-lado y modal de confirmación
-     */
-    document.addEventListener("DOMContentLoaded", function () {
-        console.log("DOM cargado, iniciando script de validación...");
+        /**
+         * Script de validación y envío de formulario para reparaciones
+         * Implementa validación de cliente-lado y modal de confirmación
+         */
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("DOM cargado, iniciando script de validación...");
 
-        // Referencias a elementos DOM importantes
-        const btnGuardar = document.getElementById('btnGuardar');
-        const reparacionForm = document.getElementById('reparacionForm');
-        const clienteSelect = document.querySelector('#id_cliente');
+            // Referencias a elementos DOM importantes
+            const btnGuardar = document.getElementById('btnGuardar');
+            const reparacionForm = document.getElementById('reparacionForm');
+            const clienteSelect = document.querySelector('#id_cliente');
 
-        // Definición de campos del formulario para validación
-        const formFields = {
-            marca_reloj: document.querySelector('#id_marca_reloj'),
-            descripcion: document.querySelector('#id_descripcion'),
-            codigo_orden: document.querySelector('#id_codigo_orden'),
-            fecha_entrega_estimada: document.querySelector('#id_fecha_entrega_estimada'),
-            precio: document.querySelector('#id_precio'),
-            espacio_fisico: document.querySelector('#id_espacio_fisico'),
-            tecnico: document.querySelector('#id_tecnico'),
-        };
+            // Definición de campos del formulario para validación
+            const formFields = {
+                marca_reloj: document.querySelector('#id_marca_reloj'),
+                descripcion: document.querySelector('#id_descripcion'),
+                codigo_orden: document.querySelector('#id_codigo_orden'),
+                fecha_entrega_estimada: document.querySelector('#id_fecha_entrega_estimada'),
+                precio: document.querySelector('#id_precio'),
+                espacio_fisico: document.querySelector('#id_espacio_fisico'),
+                tecnico: document.querySelector('#id_tecnico'),
+            };
 
-        // Inicializar el modal
-        let modal;
-        try {
-            modal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
-                backdrop: 'static',  // Evita que el modal se cierre al hacer clic fuera
-                keyboard: false      // Evita que el modal se cierre con la tecla ESC
-            });
-            console.log("Modal inicializado correctamente");
-            
-            // Verificar si hay un parámetro de éxito en la URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success') === 'true') {
-                console.log("Parámetro success detectado, mostrando modal...");
-                // El setTimeout da tiempo al DOM para cargar completamente
-                setTimeout(() => {
-                    modal.show();
-                }, 300);
-            }
-        } catch (e) {
-            console.error("Error al inicializar el modal:", e);
-        }
+            // Inicializar el modal
+            let modal;
+            try {
+                modal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
+                    backdrop: 'static',  // Evita que el modal se cierre al hacer clic fuera
+                    keyboard: false      // Evita que el modal se cierre con la tecla ESC
+                });
+                console.log("Modal inicializado correctamente");
 
-        // Función auxiliar para preparar el div de error
-        function prepareErrorDiv(field) {
-            let errorDiv = field.parentElement.nextElementSibling;
-            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-                errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                field.parentElement.after(errorDiv);
-            }
-            return errorDiv;
-        }
-
-        // Función que centraliza las reglas de validación por campo
-        function getFieldValidation(fieldName, value) {
-            let isValid = true;
-            let errorMessage = '';
-
-            switch (fieldName) {
-                case 'marca_reloj':
-                    if (!value) {
-                        errorMessage = 'La marca del reloj es obligatoria';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'descripcion':
-                    if (!value) {
-                        errorMessage = 'La descripción es obligatoria';
-                        isValid = false;
-                    } else if (value.length < 10) {
-                        errorMessage = 'La descripción debe tener al menos 10 caracteres';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'codigo_orden':
-                    if (!value) {
-                        errorMessage = 'El código de orden es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'fecha_entrega_estimada':
-                    if (!value) {
-                        errorMessage = 'La fecha de entrega estimada es obligatoria';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'precio':
-                    if (!value) {
-                        errorMessage = 'El precio es obligatorio';
-                        isValid = false;
-                    } else if (isNaN(value) || parseFloat(value) <= 0) {
-                        errorMessage = 'El precio debe ser un número mayor que cero';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'espacio_fisico':
-                    if (!value) {
-                        errorMessage = 'El espacio físico es obligatorio';
-                        isValid = false;
-                    }
-                    break;
-
-                case 'tecnico':
-                    if (!value) {
-                        errorMessage = 'El técnico es obligatorio';
-                        isValid = false;
-                    }
-                    break;
+                // Verificar si hay un parámetro de éxito en la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('success') === 'true') {
+                    console.log("Parámetro success detectado, mostrando modal...");
+                    // El setTimeout da tiempo al DOM para cargar completamente
+                    setTimeout(() => {
+                        modal.show();
+                    }, 300);
+                }
+            } catch (e) {
+                console.error("Error al inicializar el modal:", e);
             }
 
-            return { isValid, errorMessage };
-        }
-
-        // Función de validación de campo individual
-        function validateField(field) {
-            if (!field) return false;
-            
-            const fieldName = field.id.replace('id_', '');
-            const errorDiv = prepareErrorDiv(field);
-            const value = field.value.trim();
-            
-            // Obtener el resultado de validación desde la función centralizada
-            const result = getFieldValidation(fieldName, value);
-            
-            // Actualizar UI según validación
-            if (!result.isValid) {
-                field.classList.add('is-invalid');
-                errorDiv.innerHTML = `<span class="text-danger">${result.errorMessage}</span>`;
-                return false;
-            } else {
-                field.classList.remove('is-invalid');
-                errorDiv.innerHTML = '';
-                return true;
+            // Función auxiliar para preparar el div de error
+            function prepareErrorDiv(field) {
+                let errorDiv = field.parentElement.nextElementSibling;
+                if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    field.parentElement.after(errorDiv);
+                }
+                return errorDiv;
             }
-        }
 
-        // Función global para validación completa del formulario
-        function validateForm() {
-            let isValid = true;
+            // Función que centraliza las reglas de validación por campo
+            function getFieldValidation(fieldName, value) {
+                let isValid = true;
+                let errorMessage = '';
 
-            // Validar cliente (Select2)
-            const clienteErrorDiv = document.querySelector('.form-field .error-message');
+                switch (fieldName) {
+                    case 'marca_reloj':
+                        if (!value) {
+                            errorMessage = 'La marca del reloj es obligatoria';
+                            isValid = false;
+                        }
+                        break;
 
-            if (!clienteSelect.value) {
-                isValid = false;
-                clienteSelect.classList.add('is-invalid');
+                    case 'descripcion':
+                        if (!value) {
+                            errorMessage = 'La descripción es obligatoria';
+                            isValid = false;
+                        } else if (value.length < 10) {
+                            errorMessage = 'La descripción debe tener al menos 10 caracteres';
+                            isValid = false;
+                        }
+                        break;
 
-                // También aplicar el estilo al contenedor Select2
-                const select2Container = clienteSelect.nextElementSibling;
-                if (select2Container) {
-                    select2Container.querySelector('.select2-selection').classList.add('is-invalid');
+                    case 'codigo_orden':
+                        if (!value) {
+                            errorMessage = 'El código de orden es obligatorio';
+                            isValid = false;
+                        }
+                        break;
+
+                    case 'fecha_entrega_estimada':
+                        if (!value) {
+                            errorMessage = 'La fecha de entrega estimada es obligatoria';
+                            isValid = false;
+                        }
+                        break;
+
+                    case 'precio':
+                        if (!value) {
+                            errorMessage = 'El precio es obligatorio';
+                            isValid = false;
+                        } else if (isNaN(value) || parseFloat(value) <= 0) {
+                            errorMessage = 'El precio debe ser un número mayor que cero';
+                            isValid = false;
+                        }
+                        break;
+
+                    case 'espacio_fisico':
+                        if (!value) {
+                            errorMessage = 'El espacio físico es obligatorio';
+                            isValid = false;
+                        }
+                        break;
+
+                    case 'tecnico':
+                        if (!value) {
+                            errorMessage = 'El técnico es obligatorio';
+                            isValid = false;
+                        }
+                        break;
                 }
 
-                if (clienteErrorDiv) {
-                    clienteErrorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
+                return { isValid, errorMessage };
+            }
+
+            // Función de validación de campo individual
+            function validateField(field) {
+                if (!field) return false;
+
+                const fieldName = field.id.replace('id_', '');
+                const errorDiv = prepareErrorDiv(field);
+                const value = field.value.trim();
+
+                // Obtener el resultado de validación desde la función centralizada
+                const result = getFieldValidation(fieldName, value);
+
+                // Actualizar UI según validación
+                if (!result.isValid) {
+                    field.classList.add('is-invalid');
+                    errorDiv.innerHTML = `<span class="text-danger">${result.errorMessage}</span>`;
+                    return false;
                 } else {
-                    // Si no existe div de error, crearlo
-                    const newErrorDiv = document.createElement('div');
-                    newErrorDiv.className = 'error-message';
-                    newErrorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
-                    clienteSelect.closest('.form-field').appendChild(newErrorDiv);
-                }
-            } else {
-                clienteSelect.classList.remove('is-invalid');
-
-                // Quitar estilo del contenedor Select2
-                const select2Container = clienteSelect.nextElementSibling;
-                if (select2Container) {
-                    select2Container.querySelector('.select2-selection').classList.remove('is-invalid');
-                }
-
-                if (clienteErrorDiv) {
-                    clienteErrorDiv.innerHTML = '';
+                    field.classList.remove('is-invalid');
+                    errorDiv.innerHTML = '';
+                    return true;
                 }
             }
 
-            // Validar resto de campos
-            for (const fieldName in formFields) {
-                const field = formFields[fieldName];
-                if (field && !validateField(field)) {
-                    isValid = false;
-                }
-            }
+            // Función global para validación completa del formulario
+            function validateForm() {
+                let isValid = true;
 
-            return isValid;
-        }
-
-        // Limpiar errores al iniciar
-        function clearAllErrors() {
-            if (clienteSelect) {
-                clienteSelect.classList.remove('is-invalid');
+                // Validar cliente (Select2)
                 const clienteErrorDiv = document.querySelector('.form-field .error-message');
-                if (clienteErrorDiv) {
-                    clienteErrorDiv.innerHTML = '';
-                }
-            }
 
-            // Limpiar todos los campos de formulario
-            document.querySelectorAll('.form-control, select').forEach(field => {
-                field.classList.remove('is-invalid');
-            });
+                if (!clienteSelect.value) {
+                    isValid = false;
+                    clienteSelect.classList.add('is-invalid');
 
-            // Limpiar todos los mensajes de error
-            document.querySelectorAll('.error-message').forEach(div => {
-                div.innerHTML = '';
-            });
-        }
-
-        // Configurar validación en tiempo real
-        function setupRealTimeValidation() {
-            // Validar Select2 al cambiar
-            $('#id_cliente').on('change', function () {
-                const errorDiv = document.querySelector('.form-field .error-message');
-
-                if (this.value) {
-                    clienteSelect.classList.remove('is-invalid');
-                    if (errorDiv) {
-                        errorDiv.innerHTML = '';
+                    // También aplicar el estilo al contenedor Select2
+                    const select2Container = clienteSelect.nextElementSibling;
+                    if (select2Container) {
+                        select2Container.querySelector('.select2-selection').classList.add('is-invalid');
                     }
+
+                    if (clienteErrorDiv) {
+                        clienteErrorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
+                    } else {
+                        // Si no existe div de error, crearlo
+                        const newErrorDiv = document.createElement('div');
+                        newErrorDiv.className = 'error-message';
+                        newErrorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
+                        clienteSelect.closest('.form-field').appendChild(newErrorDiv);
+                    }
+                } else {
+                    clienteSelect.classList.remove('is-invalid');
+
                     // Quitar estilo del contenedor Select2
                     const select2Container = clienteSelect.nextElementSibling;
                     if (select2Container) {
                         select2Container.querySelector('.select2-selection').classList.remove('is-invalid');
                     }
-                } else {
-                    clienteSelect.classList.add('is-invalid');
-                    if (errorDiv) {
-                        errorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
-                    }
-                    // Aplicar estilo al contenedor Select2
-                    const select2Container = clienteSelect.nextElementSibling;
-                    if (select2Container) {
-                        select2Container.querySelector('.select2-selection').classList.add('is-invalid');
+
+                    if (clienteErrorDiv) {
+                        clienteErrorDiv.innerHTML = '';
                     }
                 }
-            });
 
-            // Asignar eventos de validación en tiempo real a campos normales
-            for (const fieldName in formFields) {
-                const field = formFields[fieldName];
-                if (field) {
-                    field.addEventListener('blur', function () {
-                        validateField(this);
-                    });
+                // Validar resto de campos
+                for (const fieldName in formFields) {
+                    const field = formFields[fieldName];
+                    if (field && !validateField(field)) {
+                        isValid = false;
+                    }
+                }
 
-                    field.addEventListener('input', function () {
-                        this.classList.remove('is-invalid');
-                        const errorDiv = this.parentElement.nextElementSibling;
-                        if (errorDiv && errorDiv.classList.contains('error-message')) {
+                return isValid;
+            }
+
+            // Limpiar errores al iniciar
+            function clearAllErrors() {
+                if (clienteSelect) {
+                    clienteSelect.classList.remove('is-invalid');
+                    const clienteErrorDiv = document.querySelector('.form-field .error-message');
+                    if (clienteErrorDiv) {
+                        clienteErrorDiv.innerHTML = '';
+                    }
+                }
+
+                // Limpiar todos los campos de formulario
+                document.querySelectorAll('.form-control, select').forEach(field => {
+                    field.classList.remove('is-invalid');
+                });
+
+                // Limpiar todos los mensajes de error
+                document.querySelectorAll('.error-message').forEach(div => {
+                    div.innerHTML = '';
+                });
+            }
+
+            // Configurar validación en tiempo real
+            function setupRealTimeValidation() {
+                // Validar Select2 al cambiar
+                $('#id_cliente').on('change', function () {
+                    const errorDiv = document.querySelector('.form-field .error-message');
+
+                    if (this.value) {
+                        clienteSelect.classList.remove('is-invalid');
+                        if (errorDiv) {
                             errorDiv.innerHTML = '';
                         }
-                    });
-                }
-            }
-        }
-
-        // Configurar handler para el botón guardar
-        function setupSubmitHandler() {
-            if (!btnGuardar) {
-                console.error("BOTÓN GUARDAR NO ENCONTRADO. Verificar ID del botón.");
-                return;
-            }
-            
-            console.log("Botón guardar encontrado, añadiendo evento click");
-            btnGuardar.addEventListener('click', function (event) {
-                console.log("Botón guardar clickeado");
-                event.preventDefault(); // Prevenir envío automático
-
-                // Validar formulario
-                const isFormValid = validateForm();
-                console.log("¿Formulario válido?", isFormValid);
-
-                if (isFormValid) {
-                    handleValidFormSubmission();
-                } else {
-                    handleInvalidFormSubmission();
-                }
-            });
-        }
-
-        // Manejar envío de formulario válido
-        function handleValidFormSubmission() {
-            console.log("Formulario validado, preparando para envío AJAX");
-
-            // Obtener el token CSRF
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
-            // Preparar formulario para envío
-            const formData = new FormData(reparacionForm);
-            formData.append('confirmar', 'true');
-            
-            
-            // Enviar con Fetch API
-            fetch(reparacionForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrftoken
-                }
-            })
-            .then(response => {
-                console.log("Respuesta recibida:", response);
-                return response.json().then(data => {
-                    // Incluir status en el objeto de datos para verificar después
-                    return { ...data, status: response.status };
-                });
-            })
-            .then(data => {
-                console.log("Datos de respuesta:", data);
-                
-                if (data.success) {
-                    handleSuccessResponse(data);
-                } else {
-                    handleErrorResponse(data);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud AJAX:', error);
-                
-                // Mostrar mensaje de error más descriptivo
-                alert("Ocurrió un error al procesar la solicitud. Por favor, intente nuevamente.");
-            });
-        }
-
-        // Manejar respuesta exitosa
-        function handleSuccessResponse(data) {
-            console.log("Operación exitosa, redirigiendo...");
-            // Redirigir a la misma página con parámetro success=true
-            window.location.href = `${window.location.pathname}?success=true`;
-        }
-
-        // Manejar respuesta con errores
-        function handleErrorResponse(data) {
-            console.error("El servidor reportó un error:", data);
-            
-            // Procesamiento de errores
-            if (data.errors) {
-                // Iterar sobre los errores y mostrarlos en los campos correspondientes
-                Object.entries(data.errors).forEach(([fieldName, errorMessage]) => {
-                    console.log(`Error en campo ${fieldName}:`, errorMessage);
-                    
-                    const fieldElement = document.getElementById(`id_${fieldName}`);
-                    if (fieldElement) {
-                        // Marcar campo como inválido
-                        fieldElement.classList.add('is-invalid');
-                        
-                        // Encontrar o crear div de error
-                        let errorDiv = fieldElement.parentElement.nextElementSibling;
-                        if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-                            errorDiv = document.createElement('div');
-                            errorDiv.className = 'error-message';
-                            fieldElement.parentElement.after(errorDiv);
+                        // Quitar estilo del contenedor Select2
+                        const select2Container = clienteSelect.nextElementSibling;
+                        if (select2Container) {
+                            select2Container.querySelector('.select2-selection').classList.remove('is-invalid');
                         }
-                        
-                        // Mostrar mensaje de error
-                        errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
                     } else {
-                        console.warn(`No se encontró el campo para el error: ${fieldName}`);
+                        clienteSelect.classList.add('is-invalid');
+                        if (errorDiv) {
+                            errorDiv.innerHTML = '<span class="text-danger">Debe seleccionar un cliente</span>';
+                        }
+                        // Aplicar estilo al contenedor Select2
+                        const select2Container = clienteSelect.nextElementSibling;
+                        if (select2Container) {
+                            select2Container.querySelector('.select2-selection').classList.add('is-invalid');
+                        }
                     }
                 });
-                
-                // Scroll al primer error
-                const firstErrorField = document.querySelector('.is-invalid');
-                if (firstErrorField) {
-                    firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    if (firstErrorField.tagName !== 'SELECT') {
-                        firstErrorField.focus();
+
+                // Asignar eventos de validación en tiempo real a campos normales
+                for (const fieldName in formFields) {
+                    const field = formFields[fieldName];
+                    if (field) {
+                        field.addEventListener('blur', function () {
+                            validateField(this);
+                        });
+
+                        field.addEventListener('input', function () {
+                            this.classList.remove('is-invalid');
+                            const errorDiv = this.parentElement.nextElementSibling;
+                            if (errorDiv && errorDiv.classList.contains('error-message')) {
+                                errorDiv.innerHTML = '';
+                            }
+                        });
                     }
                 }
-            } else if (data.message) {
-                console.error("Mensaje de error:", data.message);
-                // Mostrar mensaje general de error
-                alert(data.message);
             }
-        }
 
-        // Manejar envío de formulario inválido
-        function handleInvalidFormSubmission() {
-            console.log("Formulario inválido, no se muestra el modal");
+            // Configurar handler para el botón guardar
+            function setupSubmitHandler() {
+                if (!btnGuardar) {
+                    console.error("BOTÓN GUARDAR NO ENCONTRADO. Verificar ID del botón.");
+                    return;
+                }
 
-            // Hacer scroll al primer campo con error
-            const firstError = document.querySelector('.is-invalid');
-            if (firstError) {
-                console.log("Haciendo scroll al primer error");
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Intentar dar foco al campo con error
-                if (firstError.tagName === 'INPUT' || firstError.tagName === 'SELECT') {
-                    firstError.focus();
+                console.log("Botón guardar encontrado, añadiendo evento click");
+                btnGuardar.addEventListener('click', function (event) {
+                    console.log("Botón guardar clickeado");
+                    event.preventDefault(); // Prevenir envío automático
+
+                    // Validar formulario
+                    const isFormValid = validateForm();
+                    console.log("¿Formulario válido?", isFormValid);
+
+                    if (isFormValid) {
+                        handleValidFormSubmission();
+                    } else {
+                        handleInvalidFormSubmission();
+                    }
+                });
+            }
+
+            // Manejar envío de formulario válido
+            function handleValidFormSubmission() {
+                console.log("Formulario validado, preparando para envío AJAX");
+
+                // Obtener el token CSRF
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                // Preparar formulario para envío
+                const formData = new FormData(reparacionForm);
+                formData.append('confirmar', 'true');
+
+
+                // Enviar con Fetch API
+                fetch(reparacionForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    }
+                })
+                    .then(response => {
+                        console.log("Respuesta recibida:", response);
+                        return response.json().then(data => {
+                            // Incluir status en el objeto de datos para verificar después
+                            return { ...data, status: response.status };
+                        });
+                    })
+                    .then(data => {
+                        console.log("Datos de respuesta:", data);
+
+                        if (data.success) {
+                            handleSuccessResponse(data);
+                        } else {
+                            handleErrorResponse(data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en la solicitud AJAX:', error);
+
+                        // Mostrar mensaje de error más descriptivo
+                        alert("Ocurrió un error al procesar la solicitud. Por favor, intente nuevamente.");
+                    });
+            }
+
+            // Manejar respuesta exitosa
+            function handleSuccessResponse(data) {
+                console.log("Operación exitosa");
+
+                const returnToAlertas = "{{ request.GET.return_to }}" === "alertas";
+                const alertasUrl = "{% url 'alertas' %}?tipo={{ request.GET.tipo }}&page={{ request.GET.page }}";
+
+                if (returnToAlertas) {
+                    // Redirigir de vuelta a alertas
+                    window.location.href = alertasUrl;
+                } else {
+                    // Comportamiento original (redirigir a la misma página con success=true)
+                    window.location.href = `${window.location.pathname}?success=true`;
                 }
             }
-        }
 
-        // Configurar validación para envío tradicional (respaldo)
-        function setupFormSubmitValidation() {
-            if (!reparacionForm) {
-                console.error("FORMULARIO NO ENCONTRADO. Verificar ID del formulario.");
-                return;
-            }
-            
-            reparacionForm.addEventListener('submit', function (e) {
-                console.log("Formulario enviado, validando...");
-                const isFormValid = validateForm();
-                console.log("¿Formulario válido?", isFormValid);
 
-                if (!isFormValid) {
-                    console.log("Validación fallida, deteniendo envío");
-                    e.preventDefault();
+            // Manejar respuesta con errores
+            function handleErrorResponse(data) {
+                console.error("El servidor reportó un error:", data);
+
+                // Procesamiento de errores
+                if (data.errors) {
+                    // Iterar sobre los errores y mostrarlos en los campos correspondientes
+                    Object.entries(data.errors).forEach(([fieldName, errorMessage]) => {
+                        console.log(`Error en campo ${fieldName}:`, errorMessage);
+
+                        const fieldElement = document.getElementById(`id_${fieldName}`);
+                        if (fieldElement) {
+                            // Marcar campo como inválido
+                            fieldElement.classList.add('is-invalid');
+
+                            // Encontrar o crear div de error
+                            let errorDiv = fieldElement.parentElement.nextElementSibling;
+                            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                                errorDiv = document.createElement('div');
+                                errorDiv.className = 'error-message';
+                                fieldElement.parentElement.after(errorDiv);
+                            }
+
+                            // Mostrar mensaje de error
+                            errorDiv.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+                        } else {
+                            console.warn(`No se encontró el campo para el error: ${fieldName}`);
+                        }
+                    });
 
                     // Scroll al primer error
-                    const firstError = document.querySelector('.is-invalid');
-                    if (firstError) {
-                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const firstErrorField = document.querySelector('.is-invalid');
+                    if (firstErrorField) {
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        if (firstErrorField.tagName !== 'SELECT') {
+                            firstErrorField.focus();
+                        }
                     }
-                } else {
-                    console.log("Formulario válido, procediendo con el envío");
+                } else if (data.message) {
+                    console.error("Mensaje de error:", data.message);
+                    // Mostrar mensaje general de error
+                    alert(data.message);
                 }
-            });
-        }
+            }
 
-        // Inicializar todas las configuraciones
-        clearAllErrors();
-        setupRealTimeValidation();
-        setupSubmitHandler();
-        setupFormSubmitValidation();
-    });
+            // Manejar envío de formulario inválido
+            function handleInvalidFormSubmission() {
+                console.log("Formulario inválido, no se muestra el modal");
+
+                // Hacer scroll al primer campo con error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    console.log("Haciendo scroll al primer error");
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Intentar dar foco al campo con error
+                    if (firstError.tagName === 'INPUT' || firstError.tagName === 'SELECT') {
+                        firstError.focus();
+                    }
+                }
+            }
+
+            // Configurar validación para envío tradicional (respaldo)
+            function setupFormSubmitValidation() {
+                if (!reparacionForm) {
+                    console.error("FORMULARIO NO ENCONTRADO. Verificar ID del formulario.");
+                    return;
+                }
+
+                reparacionForm.addEventListener('submit', function (e) {
+                    console.log("Formulario enviado, validando...");
+                    const isFormValid = validateForm();
+                    console.log("¿Formulario válido?", isFormValid);
+
+                    if (!isFormValid) {
+                        console.log("Validación fallida, deteniendo envío");
+                        e.preventDefault();
+
+                        // Scroll al primer error
+                        const firstError = document.querySelector('.is-invalid');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } else {
+                        console.log("Formulario válido, procediendo con el envío");
+                    }
+                });
+            }
+
+            // Inicializar todas las configuraciones
+            clearAllErrors();
+            setupRealTimeValidation();
+            setupSubmitHandler();
+            setupFormSubmitValidation();
+        });
     </script>
     {% endblock %}

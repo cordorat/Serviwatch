@@ -38,7 +38,7 @@ def reparacion_list_view(request):
             Q(cliente__apellido__icontains=search_query) |
             Q(cliente__telefono__icontains=search_query) |
             Q(tecnico__nombre__icontains=search_query) |
-            Q(tecnico__apellidos__icontains=search_query) 
+            Q(tecnico__apellidos__icontains=search_query)
         )
         query |= base_query
 
@@ -51,18 +51,18 @@ def reparacion_list_view(request):
 
                 # Buscar "nombre apellido"
                 query |= (Q(cliente__nombre__icontains=first_term) &
-                        Q(cliente__apellido__icontains=second_term))
+                          Q(cliente__apellido__icontains=second_term))
 
                 # También buscar posibles segundos nombres
                 query |= (Q(cliente__nombre__icontains=first_term) &
-                        Q(cliente__nombre__icontains=second_term))
-                
+                          Q(cliente__nombre__icontains=second_term))
+
                 query |= (Q(tecnico__nombre__icontains=first_term) &
-                        Q(tecnico__apellidos__icontains=second_term))
+                          Q(tecnico__apellidos__icontains=second_term))
 
                 # También buscar posibles segundos nombres
                 query |= (Q(tecnico__nombre__icontains=first_term) &
-                        Q(tecnico__nombre__icontains=second_term))
+                          Q(tecnico__nombre__icontains=second_term))
 
         reparaciones_qs = reparaciones_qs.filter(query).distinct()
 
@@ -76,7 +76,7 @@ def reparacion_list_view(request):
     reparaciones_qs = reparaciones_qs.order_by(
         # Ordenar primero por el campo estado según el flujo de trabajo
         models.Case(
-            *[models.When(estado=estado, then=models.Value(orden)) 
+            *[models.When(estado=estado, then=models.Value(orden))
               for estado, orden in order_mapping.items()],
             default=models.Value(999),
             output_field=models.IntegerField()
@@ -84,7 +84,7 @@ def reparacion_list_view(request):
         # Después por fecha de creación descendente (las más recientes primero)
         '-fecha_ingreso'
     )
-    
+
     paginator = Paginator(reparaciones_qs, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -114,19 +114,19 @@ def reparacion_create_view(request):
 def _handle_create_post(request):
     # Limpiar datos del formulario
     post_data = _clean_post_data(request.POST.copy())
-    
+
     form = ReparacionForm(post_data)
     if form.is_valid():
         try:
             reparacion = form.save()
-            
+
             # Si es una solicitud AJAX, devolver respuesta JSON
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
                     'message': "Reparación agregada correctamente."
                 })
-                
+
             messages.success(request, "Reparación agregada correctamente.")
             return redirect('reparacion_list')
         except Exception as e:
@@ -145,7 +145,7 @@ def _handle_create_post(request):
                         'success': False,
                         'message': str(e)
                     }, status=400)
-                
+
             messages.error(request, f"Error al guardar: {str(e)}")
     else:
         # Si es una solicitud AJAX, devolver errores en JSON
@@ -155,22 +155,22 @@ def _handle_create_post(request):
                 'success': False,
                 'errors': errors
             }, status=400)
-            
+
         _add_form_errors_to_messages(form, request)
 
     # Verificar si debemos mostrar la página con el modal
     success = request.GET.get('success') == 'true'
-    
+
     return _render_create_form(request, form, success)
 
 
 def _handle_create_get(request):
     """Maneja las solicitudes GET para mostrar el formulario de creación."""
     form = ReparacionForm()
-    
+
     # Verificar si debemos mostrar el modal de éxito
     success = request.GET.get('success') == 'true'
-    
+
     return _render_create_form(request, form, success)
 
 
@@ -222,14 +222,20 @@ def _handle_edit_post(request, reparacion, pk):
     if form.is_valid():
         try:
             reparacion = reparacion_service.actualizar_reparacion(form, pk)
-            
+
             # Si es una solicitud AJAX, devolver respuesta JSON
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
                     'message': "Reparación actualizada correctamente."
                 })
-            
+
+            # Verificar si hay parámetro de retorno a alertas
+            if request.GET.get('return_to') == 'alertas':
+                tipo = request.GET.get('tipo', 'proxima_entrega')
+                page = request.GET.get('page', '1')
+                return redirect(f'/alertas/?tipo={tipo}&page={page}')
+
             messages.success(request, "Reparación actualizada correctamente.")
             return redirect('reparacion_list')
         except Exception as e:
@@ -239,7 +245,7 @@ def _handle_edit_post(request, reparacion, pk):
                     'success': False,
                     'message': str(e)
                 }, status=400)
-                
+
             messages.error(request, f"Error al actualizar: {str(e)}")
     else:
         # Si es una solicitud AJAX, devolver errores en JSON
@@ -249,22 +255,23 @@ def _handle_edit_post(request, reparacion, pk):
                 'success': False,
                 'errors': errors
             }, status=400)
-            
+
         _add_form_errors_to_messages(form, request)
 
     # Verificar si debemos mostrar la página con el modal
     success = request.GET.get('success') == 'true'
-    
+
     # Si llegamos aquí, hubo un error, mostrar el formulario nuevamente
     return _render_edit_form(request, form, reparacion, success)
+
 
 def _handle_edit_get(request, reparacion):
     """Maneja las solicitudes GET para el formulario de edición."""
     form = ReparacionForm(instance=reparacion)
-    
+
     # Verificar si debemos mostrar el modal de éxito
     success = request.GET.get('success') == 'true'
-    
+
     return _render_edit_form(request, form, reparacion, success)
 
 
@@ -299,6 +306,10 @@ def _render_edit_form(request, form, reparacion, success=False):
         'reparacion': reparacion,
         'cliente_nombre': cliente_nombre,
         'cliente_telefono': cliente_telefono,
-        'success': success  # Asegurarse de que este parámetro se está pasando
+        'success': success,
+        # Agregar parámetros de retorno al contexto
+        'return_to': request.GET.get('return_to'),
+        'return_tipo': request.GET.get('tipo'),
+        'return_page': request.GET.get('page'),
     }
     return render(request, 'reparacion/reparacion_form.html', context)
