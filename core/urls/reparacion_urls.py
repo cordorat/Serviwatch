@@ -5,5 +5,5 @@ urlpatterns = [
     path('servicios/reparaciones/', reparacion_list_view, name='reparacion_list'),
     path('servicios/reparaciones/agregar', reparacion_create_view, name='reparacion_create'),
     path('reparacion/edit/<int:pk>/', reparacion_edit_view, name='reparacion_edit'),
-    
+    path('productos-admin/reparaciones/', reparacion_list_view, name='reparacion_list_admin'),
 ]

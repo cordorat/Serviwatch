@@ -41,7 +41,9 @@
       RELOJES
       {% endif %}
   </h2>
+  {% if 'productos' in request.path %}
     <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+  {% endif %}
   </div>
 
   <!-- Campo de búsqueda -->
