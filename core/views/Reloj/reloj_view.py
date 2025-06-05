@@ -120,8 +120,11 @@ def reloj_sell_view(request, pk):
     if request.method == 'POST':
         form = RelojForm(request.POST, instance=reloj)
         if form.is_valid():
-            reloj = form.save(commit=False)
+            # Guardar solo los campos relacionados con la venta
             reloj.estado = 'VENDIDO'
+            reloj.cliente = form.cleaned_data['cliente']
+            reloj.fecha_venta = form.cleaned_data['fecha_venta']
+            reloj.metodo_pago = form.cleaned_data['metodo_pago']
             
             # Establecer valores según método de pago
             if reloj.metodo_pago == 'CONTADO':
@@ -129,7 +132,7 @@ def reloj_sell_view(request, pk):
                 reloj.saldo_pendiente = '0'
             else:  # ABONO
                 reloj.pagado = False
-                reloj.saldo_pendiente = str(reloj.precio)
+                reloj.saldo_pendiente = reloj.precio
             
             reloj.save()
             messages.success(request, 'Reloj vendido exitosamente.')

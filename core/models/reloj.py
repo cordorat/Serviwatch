@@ -89,12 +89,11 @@ class Reloj(models.Model):
     metodo_pago = models.CharField(
         max_length=20,
         choices=METODO_PAGO_CHOICES,
-        default='CONTADO'
+        default='ABONO'
     )
 
     saldo_pendiente = models.CharField(
         max_length=20,
-        default='0',
         validators=[
             RegexValidator(regex=r'^\d+$', message="El saldo pendiente debe ser un número válido"),
             MaxLengthValidator(20, "El saldo pendiente no puede exceder los 20 caracteres")

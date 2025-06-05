@@ -4,29 +4,40 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from core.models.reloj import Reloj
 from core.forms.abono_form import AbonoForm
-from core.services.abono_service import registrar_abono, get_all_abonos
+from core.services.abono_service import registrar_abono
 
 @login_required
 @require_http_methods(["POST"])
-def abono_create_view(request, reloj_id):
+def abono_create_view(request, reloj_id): 
     reloj = get_object_or_404(Reloj, id=reloj_id)
     
-    if request.method == 'POST':
-        form = AbonoForm(request.POST)
-        if form.is_valid():
-            try:
-                monto = form.cleaned_data['monto']
-                descripcion = form.cleaned_data.get('descripcion', '')
-                
-                abono, reloj_actualizado = registrar_abono(reloj_id, monto, descripcion)
-                messages.success(request, f'Abono por ${monto} registrado exitosamente. Saldo pendiente: ${reloj_actualizado.saldo_pendiente}')
-                
-            except ValueError as e:
-                messages.error(request, str(e))
-            except Exception as e:
-                messages.error(request, "Error al procesar el abono")
-                print(f"Error inesperado: {str(e)}")
-        else:
-            messages.error(request, "Por favor verifique los datos del abono")
+    try:
+        monto = request.POST.get('monto')
+        descripcion = request.POST.get('descripcion', '')
+        next_url = request.POST.get('next')
+        
+        if not monto:
+            raise ValueError("El monto es requerido")
+        
+        abono, reloj_actualizado = registrar_abono(
+            reloj_id=reloj_id,
+            monto=monto,
+            descripcion=descripcion
+        )
+        
+        messages.success(
+            request, 
+            f'Abono por ${monto} registrado exitosamente. Saldo pendiente: ${reloj_actualizado.saldo_pendiente}'
+        )
+        
+        if next_url:
+            return redirect(next_url)
+            
+    except ValueError as e:
+        messages.error(request, str(e))
+        print(f"Error de validación: {str(e)}")
+    except Exception as e:
+        messages.error(request, "Error al procesar el abono")
+        print(f"Error inesperado: {str(e)}")
     
-    return redirect('reloj_form', pk=reloj_id)
+    return redirect('reloj_edit', pk=reloj_id)

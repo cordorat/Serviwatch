@@ -154,7 +154,7 @@
                     {% endif %}
 
                     <!--Saber si se va a tener una comisión o no-->
-                    {% if not modo == 'vender' or reloj.estado == 'VENDIDO' %}
+                    {% if modo == 'crear' %}
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input custom-switch" type="checkbox" id="tiene_comision"
                             name="tiene_comision" {% if form.tiene_comision.value %}checked{% endif %}>
@@ -311,41 +311,51 @@
                 <h5 class="modal-title" id="abonoModalLabel">Registrar Abono</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'reloj_abono_create' reloj.id %}" id="abonoForm">
-                {% csrf_token %}
-                <!-- Reemplazar el contenido del modal de abono -->
-                <div class="modal-body">
-
-                    <!-- Mostrar información del reloj -->
-                    <div class="mb-3">
-                        <p><strong>Precio total:</strong> ${{ reloj.precio }}</p>
-                        <p><strong>Saldo pendiente:</strong> ${{ reloj.saldo_pendiente }}</p>
+            <div class="modal-body">
+                <!-- Información del saldo -->
+                <div class="info-saldo mb-4">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <div>
+                            <h6 class="mb-1">Precio Total:</h6>
+                            <span class="fs-5">${{ reloj.precio }}</span>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="mb-1">Saldo Pendiente:</h6>
+                            <span class="fs-5 text-danger">${{ reloj.saldo_pendiente }}</span>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Campos específicos para el abono -->
+                <!-- Formulario de abono -->
+                <form method="post" {% if reloj.id %}action="{% url 'reloj_abono_create' reloj.id %}" {% endif %}
+                    id="abonoForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+
                     <div class="mb-3">
-                        <label for="monto" class="form-label">Monto del abono</label>
+                        <label for="monto" class="form-label">Monto del Abono</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
                             <input class="form-control" id="monto" name="monto" required min="1"
-                                max="{{ reloj.saldo_pendiente }}" step="1">
+                                max="{{ reloj.saldo_pendiente|default:'0' }}" placeholder="Ingrese el monto">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="descripcion" class="form-label">Descripción (opcional)</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"
+                            placeholder="Agregue una descripción del abono"></textarea>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn cancel" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn save">Guardar Abono</button>
-                </div>
-            </form>
+
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn cancel" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn save">Guardar Abono</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block javascript %}
@@ -413,108 +423,114 @@
         const abonoForm = document.getElementById('abonoForm');
 
         if (abonoForm) {
-            abonoForm.addEventListener('submit', async function (e) {
+            abonoForm.addEventListener('submit', function (e) {
                 e.preventDefault();
 
-                try {
-                    const formData = new FormData(this);
-                    const response = await fetch(this.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    });
+                const montoInput = document.querySelector('#monto');
+                const monto = parseInt(montoInput.value) || 0;
+                const saldoPendienteElement = document.querySelector('#abonoModal .text-danger');
+                const saldoPendienteActual = parseInt(saldoPendienteElement.textContent.replace(/[^0-9]/g, ''));
 
-                    if (response.ok) {
-                        // Actualizar método de pago solo en el form
-                        const metodoPago = document.querySelector('[name="metodo_pago"]');
-                        if (metodoPago) {
-                            metodoPago.value = 'ABONO';
-                        }
+                if (!monto) {
+                    alert('El monto es requerido');
+                    return false;
+                }
 
-                        // Cerrar el modal de abono
+                if (monto > saldoPendienteActual) {
+                    alert('El monto del abono no puede ser mayor al saldo pendiente');
+                    return false;
+                }
+
+                // Enviar el formulario usando fetch para manejar la respuesta
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                    .then(response => response.ok ? response.text() : Promise.reject(response))
+                    .then(() => {
+                        // Actualizar el saldo pendiente en el modal
+                        const nuevoSaldo = saldoPendienteActual - monto;
+                        saldoPendienteElement.textContent = `$${nuevoSaldo}`;
+
+                        // Limpiar el formulario
+                        montoInput.value = '';
+                        document.querySelector('#descripcion').value = '';
+
+                        // Cerrar el modal
                         const abonoModal = bootstrap.Modal.getInstance(document.getElementById('abonoModal'));
                         abonoModal.hide();
 
-                        // Limpiar el formulario
-                        this.reset();
-
-                        // Mostrar mensaje de éxito
-                        const mensajeExito = document.createElement('div');
-                        mensajeExito.className = 'alert alert-success alert-dismissible fade show';
-                        mensajeExito.innerHTML = `
-                    Abono registrado correctamente. Por favor, guarde los cambios del reloj.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                        document.querySelector('.form-content').insertBefore(mensajeExito, document.querySelector('.form-content').firstChild);
-                    } else {
-                        throw new Error('Error al registrar el abono');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'alert alert-danger';
-                    errorDiv.textContent = 'Error al procesar el abono';
-                    this.insertBefore(errorDiv, this.firstChild);
-                }
+                        // Recargar la página para actualizar todos los datos
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al procesar el abono');
+                    });
             });
         }
 
         if (metodoPagoInput) {
-    const btnAgregarAbono = document.getElementById('btnAgregarAbono');
-    
-    function actualizarBotonAbono() {
-        if (metodoPagoInput.value === 'ABONO' && estadoInput.value === 'VENDIDO') {
-            btnAgregarAbono.style.display = 'block';
-        } else {
-            btnAgregarAbono.style.display = 'none';
+            const btnAgregarAbono = document.getElementById('btnAgregarAbono');
+
+            function actualizarBotonAbono() {
+                const modoEditar = '{{ modo }}' === 'editar';
+                const esVendido = estadoInput.value === 'VENDIDO';
+                const esAbono = metodoPagoInput.value === 'ABONO';
+
+                if (modoEditar && esVendido && esAbono) {
+                    btnAgregarAbono.style.display = 'block';
+                } else {
+                    btnAgregarAbono.style.display = 'none';
+                }
+            }
+
+            // Verificar estado inicial
+            actualizarBotonAbono();
+
+            // Escuchar cambios en método de pago
+            metodoPagoInput.addEventListener('change', actualizarBotonAbono);
+
+            // Escuchar cambios en estado
+            estadoInput.addEventListener('change', actualizarBotonAbono);
         }
-    }
-
-    // Verificar estado inicial
-    actualizarBotonAbono();
-
-    // Escuchar cambios en método de pago
-    metodoPagoInput.addEventListener('change', actualizarBotonAbono);
-    
-    // Escuchar cambios en estado
-    estadoInput.addEventListener('change', actualizarBotonAbono);
-}
 
         // Manejar la validación de fecha cuando el estado es VENDIDO
         if (estadoInput) {
-    estadoInput.addEventListener('change', function () {
-        const metodoPagoInput = document.querySelector('[name="metodo_pago"]');
-        
-        if (this.value === 'VENDIDO') {
-            fechaVentaInput.required = true;
-            clienteInput.required = true;
-            metodoPagoInput.required = true;
-            
-            // Asegurar que tenga un valor válido
-            if (!metodoPagoInput.value || metodoPagoInput.value === '') {
-                metodoPagoInput.value = 'CONTADO';
-            }
-            
-            // Validar campos
-            validateField(fechaVentaInput);
-            validateField(clienteInput);
-            validateField(metodoPagoInput);
-        } else {
-            fechaVentaInput.required = false;
-            clienteInput.required = false;
-            metodoPagoInput.required = false;
-            fechaVentaInput.value = '';
-            metodoPagoInput.value = 'CONTADO';
-            
-            // Limpiar validaciones
-            clearError(fechaVentaInput);
-            clearError(clienteInput);
-            clearError(metodoPagoInput);
+            estadoInput.addEventListener('change', function () {
+                const metodoPagoInput = document.querySelector('[name="metodo_pago"]');
+
+                if (this.value === 'VENDIDO') {
+                    fechaVentaInput.required = true;
+                    clienteInput.required = true;
+                    metodoPagoInput.required = true;
+
+                    // Asegurar que tenga un valor válido
+                    if (!metodoPagoInput.value || metodoPagoInput.value === '') {
+                        metodoPagoInput.value = 'CONTADO';
+                    }
+
+                    // Validar campos
+                    validateField(fechaVentaInput);
+                    validateField(clienteInput);
+                    validateField(metodoPagoInput);
+                } else {
+                    fechaVentaInput.required = false;
+                    clienteInput.required = false;
+                    metodoPagoInput.required = false;
+                    fechaVentaInput.value = '';
+                    metodoPagoInput.value = 'CONTADO';
+
+                    // Limpiar validaciones
+                    clearError(fechaVentaInput);
+                    clearError(clienteInput);
+                    clearError(metodoPagoInput);
+                }
+            });
         }
-    });
-}
 
         $('#id_cliente').on('select2:select', function (e) {
             // Limpiar error cuando se selecciona un cliente
@@ -569,16 +585,36 @@
                 this.value = value;
             }
 
-            if (value) {
-                const precioNumerico = parseInt(value);
-                if (!isNaN(precioNumerico)) {
-                    const comision = Math.floor(precioNumerico * 0.20);
-                    comisionInput.value = comision.toString();
+            // Solo calcular comisión si tiene_comision está marcado
+            const tieneComisionCheckbox = document.getElementById('tiene_comision');
+            if (tieneComisionCheckbox && tieneComisionCheckbox.checked) {
+                if (value) {
+                    const precioNumerico = parseInt(value);
+                    if (!isNaN(precioNumerico)) {
+                        const comision = Math.floor(precioNumerico * 0.20);
+                        comisionInput.value = comision.toString();
+                    }
                 }
             } else {
-                comisionInput.value = '';
+                comisionInput.value = '0';
             }
         });
+
+        // Agregar el evento change para el checkbox tiene_comision
+        const tieneComisionCheckbox = document.getElementById('tiene_comision');
+        if (tieneComisionCheckbox) {
+            tieneComisionCheckbox.addEventListener('change', function () {
+                if (!this.checked) {
+                    comisionInput.value = '0';
+                } else if (precioInput.value) {
+                    const precioNumerico = parseInt(precioInput.value);
+                    if (!isNaN(precioNumerico)) {
+                        const comision = Math.floor(precioNumerico * 0.20);
+                        comisionInput.value = comision.toString();
+                    }
+                }
+            });
+        }
 
         // Función para obtener o crear el div de mensaje de error
         function getErrorDiv(field) {
@@ -672,23 +708,23 @@
                 return { isValid: true };
             },
 
-            metodo_pago: function(value, estadoValue) {
-    if (estadoValue === 'VENDIDO') {
-        if (!value || value === '') {
-            return { 
-                isValid: false, 
-                message: 'El método de pago es obligatorio cuando el estado es Vendido' 
-            };
-        }
-        if (!['CONTADO', 'ABONO'].includes(value)) {
-            return { 
-                isValid: false, 
-                message: 'Seleccione un método de pago válido' 
-            };
-        }
-    }
-    return { isValid: true };
-}
+            metodo_pago: function (value, estadoValue) {
+                if (estadoValue === 'VENDIDO') {
+                    if (!value || value === '') {
+                        return {
+                            isValid: false,
+                            message: 'El método de pago es obligatorio cuando el estado es Vendido'
+                        };
+                    }
+                    if (!['CONTADO', 'ABONO'].includes(value)) {
+                        return {
+                            isValid: false,
+                            message: 'Seleccione un método de pago válido'
+                        };
+                    }
+                }
+                return { isValid: true };
+            }
         };
 
         // Función principal de validación refactorizada
@@ -716,12 +752,12 @@
             e.preventDefault();
             let isValid = true;
 
-             // Debug logs mejorados
-    const formData = new FormData(form);
-    console.log('Datos del formulario:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-    }
+            // Debug logs mejorados
+            const formData = new FormData(form);
+            console.log('Datos del formulario:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
 
 
             comisionInput.disabled = false;

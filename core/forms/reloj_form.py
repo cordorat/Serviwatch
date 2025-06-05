@@ -1,6 +1,8 @@
 from django import forms
 from core.models.reloj import Reloj
+from core.models.abono import Abono
 from core.models.cliente import Cliente
+from core.services.abono_service import calcular_saldo_pendiente
 
 class ClienteChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
@@ -150,9 +152,14 @@ class RelojForm(forms.ModelForm):
         })
     )
 
+    saldo_pendiente = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
     class Meta:
         model = Reloj
-        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente', 'tiene_comision', 'metodo_pago']
+        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente', 'tiene_comision', 'metodo_pago', 'saldo_pendiente']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -215,6 +222,8 @@ class RelojForm(forms.ModelForm):
         cleaned_data = super().clean()
         estado = cleaned_data.get('estado')
         metodo_pago = cleaned_data.get('metodo_pago')
+        precio = cleaned_data.get('precio', '0')
+        tiene_comision = cleaned_data.get('tiene_comision')
         
         if estado == 'VENDIDO':
             if not metodo_pago:
@@ -224,13 +233,33 @@ class RelojForm(forms.ModelForm):
                     'metodo_pago': 'Seleccione un método de pago válido'
                 })
             
-            # Configurar pagado y saldo_pendiente según el método de pago
             if metodo_pago == 'CONTADO':
                 cleaned_data['pagado'] = True
                 cleaned_data['saldo_pendiente'] = '0'
             elif metodo_pago == 'ABONO':
-                cleaned_data['pagado'] = False
-                precio = cleaned_data.get('precio', '0')
-                cleaned_data['saldo_pendiente'] = str(precio)
-        
+                # Asegurarse de que el precio sea un string
+                if self.instance and self.instance.pk:
+                    abonos_existentes = Abono.objects.filter(reloj=self.instance).exists()
+
+                    print(f"Abonos existentes: {abonos_existentes}")
+                    if not abonos_existentes:
+                        cleaned_data['saldo_pendiente'] = str(precio)
+
+                    else:
+                        saldo_actual = calcular_saldo_pendiente(self.instance)
+                        cleaned_data['saldo_pendiente'] = saldo_actual
+                        print(f"Saldo pendiente: {saldo_actual}")
+
+        if self.instance and self.instance.pk:
+            if (precio == self.instance.precio and 
+                tiene_comision == self.instance.tiene_comision):
+                return cleaned_data
+
+        try:
+            comision = int(precio) * 0.2 if tiene_comision else 0
+            cleaned_data['comision'] = str(int(comision))
+
+        except (ValueError, TypeError):
+            cleaned_data['comision'] = '0'
+                
         return cleaned_data
