@@ -424,7 +424,7 @@ class RelojSellViewTest(TestCase):
         self.assertEqual(self.reloj.estado.lower(), 'vendido')
 
         messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Referencia de reloj vendida con éxito')
+        self.assertEqual(str(messages[0]), 'Reloj vendido exitosamente.')
 
     def test_reloj_venta_view_invalid_form(self):
         url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
@@ -450,7 +450,7 @@ class RelojSellViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'reloj/reloj_form.html')
         messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Por favor corrige los errores en el formulario.')
+        self.assertEqual(str(messages[0]), 'Por favor corrija los errores en el formulario.')
 
     def test_reloj_venta_view_reloj_not_exist(self):
         url = reverse('reloj_venta', kwargs={'pk': 9999})  # ID inexistente
