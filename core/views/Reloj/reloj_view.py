@@ -23,16 +23,20 @@ def reloj_list_view(request):
     relojes = get_all_relojes()
 
     # Verificar si estamos en la URL de servicios
+    filter_params = {}
     if 'servicios' in request.path:
         relojes = relojes.filter(estado='DISPONIBLE')
     elif filtro_estado and filtro_estado != 'todos':
         relojes = relojes.filter(estado=filtro_estado)
-    
+        filter_params['estado'] = filtro_estado
+
     if filtro_tipo and filtro_tipo != 'todos':
         relojes = relojes.filter(tipo=filtro_tipo)
+        filter_params['tipo'] = filtro_tipo
 
     if filtro_pagado and filtro_pagado != 'todos':
         relojes = relojes.filter(pagado=filtro_pagado)
+        filter_params['pagado'] = filtro_pagado
 
     if search_query:
         search_query.split()
@@ -58,10 +62,11 @@ def reloj_list_view(request):
         'filtro_estado': filtro_estado,
         'filtro_tipo': filtro_tipo,
         'filtro_pagado': filtro_pagado,
+        'filter_params': filter_params, 
         'pagado_options': [('todos', 'Todos'), ('True', 'Pagado'), ('False', 'No Pagado')],
         'estados': [('todos', 'Todos')] + list(Reloj.ESTADO_CHOICES),
         'tipos': [('todos', 'Todos')] + list(Reloj.TIPO_CHOICES),
-        'is_servicios': 'servicios' in request.path  # Agregar flag para el template
+        'is_servicios': 'servicios' in request.path 
     }
 
     return render(request, 'reloj/reloj_list.html', context)

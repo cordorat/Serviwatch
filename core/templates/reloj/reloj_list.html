@@ -149,7 +149,7 @@
 
         <li class="page-item">
           <a class="page-link"
-            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }} {% endif %}">
+            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}{% endif %}">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
@@ -157,13 +157,12 @@
 
         {% for num in page_obj.paginator.page_range %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}">{{ num }}</a>
         </li>
         {% endfor %}
 
         <li class="page-item">
-          <a class="page-link" href="{% if page_obj.has_next %} ?page={{ page_obj.next_page_number }} {% endif %}"
-            aria-label="Next">
+          <a class="page-link" href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}{% endif %}" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
           </a>
         </li>
