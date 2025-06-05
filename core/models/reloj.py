@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MaxLengthValidator, RegexValidator
 from core.models.cliente import Cliente
-
+from core.models.abono import Abono
 
 class Reloj(models.Model):
 
@@ -14,6 +14,11 @@ class Reloj(models.Model):
     ESTADO_CHOICES = [
         ('VENDIDO', 'Vendido'),
         ('DISPONIBLE', 'Disponible'),
+    ]
+
+    METODO_PAGO_CHOICES = [
+        ('CONTADO', 'Contado'),
+        ('ABONO', 'Abono'),
     ]
 
     marca = models.CharField(
@@ -32,6 +37,11 @@ class Reloj(models.Model):
             RegexValidator(regex=r'^\d+$', message="El precio debe ser un número válido"),
             MaxLengthValidator(20, "El precio no puede exceder los 20 caracteres")],
     )
+
+    tiene_comision = models.BooleanField(
+        default=False,
+        verbose_name="¿Tiene comisión?"
+        )
 
     comision = models.CharField(
         max_length=20,
@@ -76,5 +86,21 @@ class Reloj(models.Model):
         null=True
     )
 
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODO_PAGO_CHOICES,
+        default='CONTADO'
+    )
+
+    saldo_pendiente = models.CharField(
+        max_length=20,
+        default='0',
+        validators=[
+            RegexValidator(regex=r'^\d+$', message="El saldo pendiente debe ser un número válido"),
+            MaxLengthValidator(20, "El saldo pendiente no puede exceder los 20 caracteres")
+        ]
+    )
+
     def __str__(self):
         return f"{self.marca} - {self.referencia} - ${self.precio} - {self.get_tipo_display()}"
+    

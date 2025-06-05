@@ -6,14 +6,13 @@ def get_all_relojes():
 def create_reloj(form):
     reloj = form.save(commit=False)
     precio = form.cleaned_data.get('precio', '0')
+    tiene_comision = form.cleaned_data.get('tiene_comision', False)
+
     try:
-        comision = int(precio) * 0.2
+        comision = int(precio) * 0.2 if tiene_comision else 0
     except Exception as e:
-        print(f"Error calculando comisión: {e}")
         comision = 0
     reloj.comision = str(int(comision))
     
-    print(f"Guardando reloj con: precio={precio}, comision={reloj.comision}, estado={reloj.estado}")
     reloj.save()
-    print(f"Reloj guardado con ID: {reloj.id}")
     return reloj

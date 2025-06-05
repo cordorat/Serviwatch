@@ -16,7 +16,6 @@
 
   .form-select-sm {
     min-width: 120px;
-    /* o el ancho que prefieras */
   }
 
   .header-icons-reparacion {
@@ -80,6 +79,15 @@
           data-bs-placement="top" title="Filtrar relojes por tipo">
           {% for valor, texto in tipos %}
           <option value="{{ valor }}" {% if filtro_tipo == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+
+        <select name="pagado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Filtrar relojes por estado de pago">
+          {% for valor, texto in pagado_options %}
+          <option value="{{ valor }}" {% if filtro_pagado == valor %}selected{% endif %}>
             {{ texto }}
           </option>
           {% endfor %}

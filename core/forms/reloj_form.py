@@ -46,6 +46,16 @@ class RelojForm(forms.ModelForm):
             'max_length': 'El precio no puede exceder los 20 caracteres'
         }
     )
+
+    tiene_comision = forms.BooleanField(
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input custom-switch',
+            'id': 'tiene_comision'
+        }),
+    )
+
     comision = forms.CharField(
         max_length=20,
         required=False,
@@ -131,10 +141,18 @@ class RelojForm(forms.ModelForm):
         empty_label="Seleccione un cliente",
     )
 
+    metodo_pago = forms.ChoiceField(
+        choices=Reloj.METODO_PAGO_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-span form-control text-secondary',
+            'placeholder': 'Método de pago'
+        })
+    )
+
     class Meta:
         model = Reloj
-        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente']
-        # No incluir 'comision' aquí porque es un campo no editable
+        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente', 'tiene_comision', 'metodo_pago']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -166,7 +184,9 @@ class RelojForm(forms.ModelForm):
     def clean_comision(self):
         try:
             precio = self.cleaned_data.get('precio')
-            if precio is None:
+            tiene_comision = self.cleaned_data.get('tiene_comision')
+
+            if not tiene_comision and precio is None:
                 return 0
             
             comision = int(float(precio) * 0.2)
@@ -190,3 +210,27 @@ class RelojForm(forms.ModelForm):
         if estado == 'VENDIDO' and not cliente:
             raise forms.ValidationError('El cliente es obligatorio cuando el estado es Vendido')
         return cliente
+
+    def clean(self):
+        cleaned_data = super().clean()
+        estado = cleaned_data.get('estado')
+        metodo_pago = cleaned_data.get('metodo_pago')
+        
+        if estado == 'VENDIDO':
+            if not metodo_pago:
+                cleaned_data['metodo_pago'] = 'CONTADO'
+            elif metodo_pago not in dict(Reloj.METODO_PAGO_CHOICES):
+                raise forms.ValidationError({
+                    'metodo_pago': 'Seleccione un método de pago válido'
+                })
+            
+            # Configurar pagado y saldo_pendiente según el método de pago
+            if metodo_pago == 'CONTADO':
+                cleaned_data['pagado'] = True
+                cleaned_data['saldo_pendiente'] = '0'
+            elif metodo_pago == 'ABONO':
+                cleaned_data['pagado'] = False
+                precio = cleaned_data.get('precio', '0')
+                cleaned_data['saldo_pendiente'] = str(precio)
+        
+        return cleaned_data

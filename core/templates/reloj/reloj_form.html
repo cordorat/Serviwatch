@@ -20,6 +20,27 @@
         background-color: white;
         transform: translateX(1.5rem);
     }
+
+    .btn-circle {
+        width: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        border: 1px solid #626E15;
+        color: #626E15;
+        transition: all 0.3s ease;
+    }
+
+    .btn-circle:hover {
+        background-color: #626E15;
+        color: white;
+    }
+
+    .btn-circle i {
+        font-size: 1.2rem;
+    }
 </style>
 
 <div class="container">
@@ -131,6 +152,18 @@
                     </div>
 
                     {% endif %}
+
+                    <!--Saber si se va a tener una comisión o no-->
+                    {% if not modo == 'vender' or reloj.estado == 'VENDIDO' %}
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input custom-switch" type="checkbox" id="tiene_comision"
+                            name="tiene_comision" {% if form.tiene_comision.value %}checked{% endif %}>
+                        <label class="form-check-label ms-2" for="tiene_comision">
+                            ¿Tiene comisión?
+                        </label>
+                    </div>
+                    {% endif %}
+
                     <!-- Comision -->
 
                     <div class="input-group mt-3">
@@ -166,8 +199,7 @@
                     </div>
 
                     <!-- Descripción -->
-
-                    <div class="input-group  mt-3">
+                    <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                         </span>
@@ -214,6 +246,17 @@
                         {% endif %}
                     </div>
 
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-credit-card fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.metodo_pago }}
+                        <button type="button" id="btnAgregarAbono" class="btn btn-circle" data-bs-toggle="modal"
+                            data-bs-target="#abonoModal" style="display: none;">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+
                     <!-- Checkbox alineado -->
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" {% if form.pagado.value %}checked{% endif %}>
@@ -257,6 +300,48 @@
                     {% endif %}
                 </h4>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="abonoModal" tabindex="-1" aria-labelledby="abonoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="abonoModalLabel">Registrar Abono</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'reloj_abono_create' reloj.id %}" id="abonoForm">
+                {% csrf_token %}
+                <!-- Reemplazar el contenido del modal de abono -->
+                <div class="modal-body">
+
+                    <!-- Mostrar información del reloj -->
+                    <div class="mb-3">
+                        <p><strong>Precio total:</strong> ${{ reloj.precio }}</p>
+                        <p><strong>Saldo pendiente:</strong> ${{ reloj.saldo_pendiente }}</p>
+                    </div>
+
+                    <!-- Campos específicos para el abono -->
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto del abono</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input class="form-control" id="monto" name="monto" required min="1"
+                                max="{{ reloj.saldo_pendiente }}" step="1">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción (opcional)</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn cancel" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn save">Guardar Abono</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -324,26 +409,122 @@
         const estadoInput = form.querySelector('[name="estado"]');
         const fechaVentaInput = form.querySelector('[name="fecha_venta"]');
         const clienteInput = form.querySelector('[name="cliente"]');
+        const metodoPagoInput = form.querySelector('[name="metodo_pago"]');
+        const abonoForm = document.getElementById('abonoForm');
 
-        // Manejar la validación de fecha cuando el estado es VENDIDO
-        if (estadoInput) {
-            estadoInput.addEventListener('change', function () {
-                if (this.value === 'VENDIDO') {
-                    fechaVentaInput.required = true;
-                    clienteInput.required = true;
-                    // Validate both fields immediately
-                    validateField(fechaVentaInput);
-                    validateField(clienteInput);
-                } else {
-                    fechaVentaInput.required = false;
-                    clienteInput.required = false;
-                    fechaVentaInput.value = '';
-                    // Clear validation errors
-                    validateField(fechaVentaInput);
-                    validateField(clienteInput);
+        if (abonoForm) {
+            abonoForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                try {
+                    const formData = new FormData(this);
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Actualizar método de pago solo en el form
+                        const metodoPago = document.querySelector('[name="metodo_pago"]');
+                        if (metodoPago) {
+                            metodoPago.value = 'ABONO';
+                        }
+
+                        // Cerrar el modal de abono
+                        const abonoModal = bootstrap.Modal.getInstance(document.getElementById('abonoModal'));
+                        abonoModal.hide();
+
+                        // Limpiar el formulario
+                        this.reset();
+
+                        // Mostrar mensaje de éxito
+                        const mensajeExito = document.createElement('div');
+                        mensajeExito.className = 'alert alert-success alert-dismissible fade show';
+                        mensajeExito.innerHTML = `
+                    Abono registrado correctamente. Por favor, guarde los cambios del reloj.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                        document.querySelector('.form-content').insertBefore(mensajeExito, document.querySelector('.form-content').firstChild);
+                    } else {
+                        throw new Error('Error al registrar el abono');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger';
+                    errorDiv.textContent = 'Error al procesar el abono';
+                    this.insertBefore(errorDiv, this.firstChild);
                 }
             });
         }
+
+        if (metodoPagoInput) {
+    const btnAgregarAbono = document.getElementById('btnAgregarAbono');
+    
+    function actualizarBotonAbono() {
+        if (metodoPagoInput.value === 'ABONO' && estadoInput.value === 'VENDIDO') {
+            btnAgregarAbono.style.display = 'block';
+        } else {
+            btnAgregarAbono.style.display = 'none';
+        }
+    }
+
+    // Verificar estado inicial
+    actualizarBotonAbono();
+
+    // Escuchar cambios en método de pago
+    metodoPagoInput.addEventListener('change', actualizarBotonAbono);
+    
+    // Escuchar cambios en estado
+    estadoInput.addEventListener('change', actualizarBotonAbono);
+}
+
+        // Manejar la validación de fecha cuando el estado es VENDIDO
+        if (estadoInput) {
+    estadoInput.addEventListener('change', function () {
+        const metodoPagoInput = document.querySelector('[name="metodo_pago"]');
+        
+        if (this.value === 'VENDIDO') {
+            fechaVentaInput.required = true;
+            clienteInput.required = true;
+            metodoPagoInput.required = true;
+            
+            // Asegurar que tenga un valor válido
+            if (!metodoPagoInput.value || metodoPagoInput.value === '') {
+                metodoPagoInput.value = 'CONTADO';
+            }
+            
+            // Validar campos
+            validateField(fechaVentaInput);
+            validateField(clienteInput);
+            validateField(metodoPagoInput);
+        } else {
+            fechaVentaInput.required = false;
+            clienteInput.required = false;
+            metodoPagoInput.required = false;
+            fechaVentaInput.value = '';
+            metodoPagoInput.value = 'CONTADO';
+            
+            // Limpiar validaciones
+            clearError(fechaVentaInput);
+            clearError(clienteInput);
+            clearError(metodoPagoInput);
+        }
+    });
+}
+
+        $('#id_cliente').on('select2:select', function (e) {
+            // Limpiar error cuando se selecciona un cliente
+            $(this).removeClass('is-invalid');
+            $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
+            const errorDiv = $(this).parent().next('.error-message');
+            if (errorDiv) {
+                errorDiv.html('');
+            }
+        });
 
         function fixDescriptionContainer() {
             const descripcionContainer = document.querySelector('.description-container');
@@ -428,79 +609,106 @@
 
         // Validadores específicos por campo
         const fieldValidators = {
-            marca: function(value) {
+            marca: function (value) {
                 if (!value) return { isValid: false, message: 'La marca es obligatoria' };
                 if (value.length > 30) return { isValid: false, message: 'La marca debe tener máximo 30 caracteres' };
                 return { isValid: true };
             },
-            
-            referencia: function(value) {
+
+            referencia: function (value) {
                 if (!value) return { isValid: false, message: 'La referencia es obligatoria' };
                 return { isValid: true };
             },
-            
-            precio: function(value) {
+
+            precio: function (value) {
                 if (!value) return { isValid: false, message: 'El precio es obligatorio' };
                 if (!/^\d+$/.test(value)) return { isValid: false, message: 'El precio debe contener solo números' };
                 if (value.length > 20) return { isValid: false, message: 'El precio no puede exceder los 20 caracteres' };
                 return { isValid: true };
             },
-            
-            dueno: function(value) {
+
+            dueno: function (value) {
                 if (!value) return { isValid: false, message: 'El dueño es obligatorio' };
                 if (value.length > 30) return { isValid: false, message: 'El dueño debe tener máximo 30 caracteres' };
                 return { isValid: true };
             },
-            
-            descripcion: function(value) {
+
+            descripcion: function (value) {
                 if (!value) return { isValid: false, message: 'La descripción es obligatoria' };
                 if (value.length > 150) return { isValid: false, message: 'La descripción debe tener máximo 150 caracteres' };
                 return { isValid: true };
             },
-            
-            tipo: function(value) {
+
+            tipo: function (value) {
                 if (!value) return { isValid: false, message: 'El tipo es obligatorio' };
                 return { isValid: true };
             },
-            
-            cliente: function(value, estadoValue) {
+
+            cliente: function (value, estadoValue) {
                 if (estadoValue === 'VENDIDO' && !value) {
                     return { isValid: false, message: 'El cliente es obligatorio cuando el estado es Vendido' };
                 }
+                // Limpiar error explícitamente
+                const clienteInput = document.querySelector('[name="cliente"]');
+                if (clienteInput) {
+                    clienteInput.classList.remove('is-invalid');
+                    const select2Container = clienteInput.nextElementSibling;
+                    if (select2Container) {
+                        select2Container.querySelector('.select2-selection').classList.remove('is-invalid');
+                    }
+                }
                 return { isValid: true };
             },
-            
-            estado: function(value) {
+
+            estado: function (value) {
                 if (!value) return { isValid: false, message: 'El estado es obligatorio' };
                 return { isValid: true };
             },
-            
-            fecha_venta: function(value, estadoValue) {
+
+            fecha_venta: function (value, estadoValue) {
                 if (estadoValue === 'VENDIDO' && !value) {
                     return { isValid: false, message: 'La fecha de venta es obligatoria cuando el estado es Vendido' };
                 }
                 return { isValid: true };
-            }
+            },
+
+            metodo_pago: function(value, estadoValue) {
+    if (estadoValue === 'VENDIDO') {
+        if (!value || value === '') {
+            return { 
+                isValid: false, 
+                message: 'El método de pago es obligatorio cuando el estado es Vendido' 
+            };
+        }
+        if (!['CONTADO', 'ABONO'].includes(value)) {
+            return { 
+                isValid: false, 
+                message: 'Seleccione un método de pago válido' 
+            };
+        }
+    }
+    return { isValid: true };
+}
         };
 
         // Función principal de validación refactorizada
         function validateField(field) {
             // Limpiar mensaje de error anterior
             clearError(field);
-            
+
             const value = field.value.trim();
             const estadoInput = document.querySelector('[name="estado"]');
             const estadoValue = estadoInput ? estadoInput.value : '';
-            
+
             // Usar el validador específico para este campo
             if (fieldValidators[field.name]) {
                 const result = fieldValidators[field.name](value, estadoValue);
-                
+
                 if (!result.isValid) {
                     return showError(field, result.message);
                 }
             }
-            
+
             return true;
         }
 
@@ -508,9 +716,17 @@
             e.preventDefault();
             let isValid = true;
 
+             // Debug logs mejorados
+    const formData = new FormData(form);
+    console.log('Datos del formulario:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+
+
             comisionInput.disabled = false;
 
-            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
+            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta', 'metodo_pago', 'cliente'].forEach(fieldName => {
                 const field = form.querySelector(`[name="${fieldName}"]`);
                 if (field && !validateField(field)) {
                     isValid = false;

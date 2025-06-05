@@ -7,4 +7,8 @@ urlpatterns = [
     path('productos/reloj/<int:pk>/editar', reloj_update_view, name='reloj_edit'),
     path('servicios/reloj/', reloj_list_view, name='reloj_venta_list'),
     path('servicios/reloj/<int:pk>/vender', reloj_sell_view, name='reloj_venta'),
+    path('productos-admin/reloj/', reloj_list_view, name='reloj_list_admin'),
+    path('productos-admin/reloj/agregar', reloj_create_view, name='reloj_create_admin'),
+    path('productos-admin/reloj/<int:pk>/editar', reloj_update_view, name='reloj_edit_admin'),
+    path('servicios/reloj/<int:pk>/registrar-abono', reloj_sell_view, name='reloj_abono_create'),
 ]
