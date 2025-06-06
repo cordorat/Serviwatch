@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 from core.models.reloj import Reloj
 from core.forms.abono_form import AbonoForm
 from core.services.abono_service import registrar_abono
+from django.utils.http import url_has_allowed_host_and_scheme
 
 @login_required
 @require_http_methods(["POST"])
@@ -29,9 +30,11 @@ def abono_create_view(request, reloj_id):
             request, 
             f'Abono por ${monto} registrado exitosamente. Saldo pendiente: ${reloj_actualizado.saldo_pendiente}'
         )
-        
-        if next_url:
+
+        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
             return redirect(next_url)
+        else:
+            return redirect('reloj_edit', pk=reloj_id)
             
     except ValueError as e:
         messages.error(request, str(e))
