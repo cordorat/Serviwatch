@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.contrib.messages import get_messages
 from datetime import date
 from core.models.cliente import Cliente
+from core.models.abono import Abono
 
 class RelojFormTest(TestCase):
 
@@ -213,6 +214,125 @@ class RelojFormTest(TestCase):
         form = RelojForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertIn('dueno', form.errors)
+
+        def test_clean_cliente_required_when_vendido(self):
+            """Test que el cliente es requerido cuando el estado es VENDIDO"""
+            data = {
+                'marca': 'Rolex',
+                'referencia': '12345',
+                'precio': '15000',
+                'dueno': 'Juan Perez',
+                'descripcion': 'Reloj de lujo',
+                'tipo': 'NUEVO',
+                'estado': 'VENDIDO',
+                'fecha_venta': date.today().strftime('%d/%m/%Y'),
+                'cliente': '',  # Cliente vacío
+                'pagado': True
+            }
+            form = RelojForm(data=data)
+            self.assertFalse(form.is_valid())
+            self.assertIn('cliente', form.errors)
+
+    def test_clean_metodo_pago_contado(self):
+        """Test que al vender al contado, se marca como pagado y saldo 0"""
+        test_cliente = Cliente.objects.create(
+            nombre='Carlos',
+            apellido='Gomez',
+            telefono='1234567890'
+        )
+        data = {
+            'marca': 'Rolex',
+            'referencia': '12345',
+            'precio': '15000',
+            'dueno': 'Juan Perez',
+            'descripcion': 'Reloj de lujo',
+            'tipo': 'NUEVO',
+            'estado': 'VENDIDO',
+            'fecha_venta': date.today().strftime('%d/%m/%Y'),
+            'cliente': test_cliente.id,
+            'metodo_pago': 'CONTADO'
+        }
+        form = RelojForm(data=data)
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.cleaned_data['pagado'])
+        self.assertEqual(form.cleaned_data['saldo_pendiente'], '0')
+
+    def test_clean_metodo_pago_abono_sin_abonos_previos(self):
+        """Test que al cambiar a abono sin abonos previos, establece saldo pendiente igual al precio"""
+        test_cliente = Cliente.objects.create(
+            nombre='Carlos',
+            apellido='Gomez',
+            telefono='1234567890'
+        )
+        data = {
+            'marca': 'Rolex',
+            'referencia': 'TEST123',
+            'precio': '15000',
+            'dueno': 'Juan Perez',
+            'descripcion': 'Reloj de lujo',
+            'tipo': 'NUEVO',
+            'estado': 'VENDIDO',  # Asegurarnos que esté como VENDIDO
+            'fecha_venta': date.today().strftime('%d/%m/%Y'),
+            'cliente': test_cliente.id,
+            'metodo_pago': 'ABONO',
+            'tiene_comision': False,  # Agregar campo tiene_comision
+            'pagado': False  # Asegurarnos que no esté pagado
+        }
+        
+        # Crear una nueva instancia de reloj
+        reloj = Reloj.objects.create(
+            marca='Rolex',
+            referencia='TEST123',
+            precio='15000',
+            dueno='Juan Perez',
+            tipo='NUEVO',
+            estado='DISPONIBLE'
+        )
+        
+        # Usar la instancia existente en el formulario
+        form = RelojForm(data=data, instance=reloj)
+        self.assertTrue(form.is_valid(), f"Errores del formulario: {form.errors}")
+        self.assertEqual(form.cleaned_data['saldo_pendiente'], '15000')
+
+    def test_clean_metodo_pago_abono_con_abonos_previos(self):
+        """Test que al cambiar a abono con abonos previos, mantiene el saldo pendiente actual"""
+        test_cliente = Cliente.objects.create(
+            nombre='Carlos',
+            apellido='Gomez',
+            telefono='1234567890'
+        )
+        reloj = Reloj.objects.create(
+            marca='Rolex',
+            referencia='TEST123',
+            precio='15000',
+            dueno='Juan Perez',
+            estado='VENDIDO',
+            metodo_pago='ABONO',
+            saldo_pendiente='10000',
+            cliente=test_cliente
+        )
+        Abono.objects.create(
+            reloj=reloj,
+            monto='5000',
+            descripcion='Primer abono'
+        )
+        
+        data = {
+            'marca': 'Rolex',
+            'referencia': 'TEST123',
+            'precio': '15000',
+            'dueno': 'Juan Perez',
+            'descripcion': 'Reloj de lujo',
+            'tipo': 'NUEVO',
+            'estado': 'VENDIDO',
+            'fecha_venta': date.today().strftime('%d/%m/%Y'),
+            'cliente': test_cliente.id,
+            'metodo_pago': 'ABONO',
+            'saldo_pendiente': '10000'
+        }
+        form = RelojForm(data=data, instance=reloj)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['saldo_pendiente'], '10000')
 
 class RelojViewsTest(TestCase):
     def setUp(self):
