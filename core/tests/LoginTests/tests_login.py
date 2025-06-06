@@ -91,4 +91,4 @@ class LoginViewTest(TestCase):
             'usuario': 'usuarioAdmin',
             'contrasenia': 'contrasenia123@'
         })
-        self.assertRedirects(response, reverse('usuario_list'))
+        self.assertRedirects(response, reverse('productos_administrador'))

@@ -9,7 +9,7 @@
     <div class="row justify-content-center mt-5">
         <div class="col-12 d-flex flex-wrap gap-5 justify-content-center">
 
-        <a href="{% url 'reloj_list' %}" class="text-decoration-none text-dark">  
+        <a href="{% if not is.superuser %}{% url 'reloj_list' %}{% else %}{% url 'reloj_list_admin' %}{% endif %}" class="text-decoration-none text-dark">  
             <div class="service-card text-center">
                 <div class="service-icon mx-auto mb-2">
                     <svg viewBox="0 0 24 24" fill="none">
@@ -21,7 +21,7 @@
             </div>
         </a>
 
-        <a href="{% url 'pilas_list' %}" class="text-decoration-none text-dark">
+        <a href="{% if not is.superuser %}{% url 'pilas_list' %}{% else %}{% url 'pilas_list_admin' %}{% endif %}" class="text-decoration-none text-dark">
             <div class="service-card text-center">
                 <div class="service-icon mx-auto mb-2">
                     <svg viewBox="0 0 24 24" fill="none">
