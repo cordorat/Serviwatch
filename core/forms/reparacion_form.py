@@ -35,18 +35,7 @@ class ReparacionForm(forms.ModelForm):
         })
     )
     
-    fecha_entrega_estimada = forms.DateField(
-        input_formats=['%d/%m/%Y'],
-        required=False,
-        widget=forms.DateInput(
-            attrs={
-                'class': 'form-control',
-                'id': 'id_fecha_entrega_estimada',
-                'placeholder': 'Fecha estimada entrega',
-                'autocomplete': 'off'
-            }
-        )
-    )
+
     
 
     class Meta:
@@ -101,7 +90,7 @@ class ReparacionForm(forms.ModelForm):
             'codigo_orden': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código de orden'}),
             'fecha_entrega_estimada': forms.DateInput(attrs={
                 'class': 'form-control text-secondary',
-                'type': 'date',
+                'type': 'text',
                 'placeholder': 'Fecha de entrega estimada'
             }),
             'precio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Precio'}),
@@ -159,10 +148,34 @@ class ReparacionForm(forms.ModelForm):
 
     def clean_fecha_entrega_estimada(self):
         fecha = self.cleaned_data.get('fecha_entrega_estimada')
+        
+        # Si ya es una fecha, solo validar
+        if isinstance(fecha, datetime.date):
+            if fecha < datetime.date.today():
+                raise forms.ValidationError("La fecha de entrega no puede ser anterior a hoy.")
+            return fecha
+            
+        # Si es string, intentar convertir desde el formato dd/mm/yyyy
+        if isinstance(fecha, str):
+            try:
+                # Intentar primero formato DD/MM/YYYY
+                partes = fecha.split('/')
+                if len(partes) == 3:
+                    dia, mes, anio = partes
+                    fecha_obj = datetime.date(int(anio), int(mes), int(dia))
+                else:
+                    # Si no tiene el formato esperado, usar el parser estándar
+                    fecha_obj = datetime.datetime.strptime(fecha, '%d/%m/%Y').date()
+                
+                if fecha_obj < datetime.date.today():
+                    raise forms.ValidationError("La fecha de entrega no puede ser anterior a hoy.")
+                return fecha_obj
+            except ValueError:
+                raise forms.ValidationError("Formato de fecha inválido. Use DD/MM/AAAA.")
+        
         if not fecha:
             raise forms.ValidationError("La fecha de entrega estimada es obligatoria.")
-        if fecha < datetime.date.today():
-            raise forms.ValidationError("La fecha de entrega no puede ser anterior a hoy.")
+            
         return fecha
 
     def clean_precio(self):

@@ -4,6 +4,6 @@ from core.views.Reparacion.reparacion_view import reparacion_list_view, reparaci
 urlpatterns = [
     path('servicios/reparaciones/', reparacion_list_view, name='reparacion_list'),
     path('servicios/reparaciones/agregar', reparacion_create_view, name='reparacion_create'),
-    path('reparacion/edit/<int:pk>/', reparacion_edit_view, name='reparacion_edit'),
+    path('servicios/reparaciones/edit/<int:pk>/', reparacion_edit_view, name='reparacion_edit'),
     
 ]
