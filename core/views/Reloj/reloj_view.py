@@ -17,18 +17,26 @@ templade_a_dirigir = 'reloj/reloj_form.html'
 def reloj_list_view(request):
     filtro_estado = request.GET.get('estado', '')
     filtro_tipo = request.GET.get('tipo', '')
+    filtro_pagado = request.GET.get('pagado', '')
     search_query = request.GET.get('search', '')
 
     relojes = get_all_relojes()
 
     # Verificar si estamos en la URL de servicios
+    filter_params = {}
     if 'servicios' in request.path:
         relojes = relojes.filter(estado='DISPONIBLE')
     elif filtro_estado and filtro_estado != 'todos':
         relojes = relojes.filter(estado=filtro_estado)
-    
+        filter_params['estado'] = filtro_estado
+
     if filtro_tipo and filtro_tipo != 'todos':
         relojes = relojes.filter(tipo=filtro_tipo)
+        filter_params['tipo'] = filtro_tipo
+
+    if filtro_pagado and filtro_pagado != 'todos':
+        relojes = relojes.filter(pagado=filtro_pagado)
+        filter_params['pagado'] = filtro_pagado
 
     if search_query:
         search_query.split()
@@ -53,9 +61,12 @@ def reloj_list_view(request):
         'search': search_query,
         'filtro_estado': filtro_estado,
         'filtro_tipo': filtro_tipo,
+        'filtro_pagado': filtro_pagado,
+        'filter_params': filter_params, 
+        'pagado_options': [('todos', 'Todos'), ('True', 'Pagado'), ('False', 'No Pagado')],
         'estados': [('todos', 'Todos')] + list(Reloj.ESTADO_CHOICES),
         'tipos': [('todos', 'Todos')] + list(Reloj.TIPO_CHOICES),
-        'is_servicios': 'servicios' in request.path  # Agregar flag para el template
+        'is_servicios': 'servicios' in request.path 
     }
 
     return render(request, 'reloj/reloj_list.html', context)
@@ -114,13 +125,26 @@ def reloj_sell_view(request, pk):
     if request.method == 'POST':
         form = RelojForm(request.POST, instance=reloj)
         if form.is_valid():
-            reloj = form.save(commit=False)
+            # Guardar solo los campos relacionados con la venta
             reloj.estado = 'VENDIDO'
+            reloj.cliente = form.cleaned_data['cliente']
+            reloj.fecha_venta = form.cleaned_data['fecha_venta']
+            reloj.metodo_pago = form.cleaned_data['metodo_pago']
+            
+            # Establecer valores según método de pago
+            if reloj.metodo_pago == 'CONTADO':
+                reloj.pagado = True
+                reloj.saldo_pendiente = '0'
+            else:  # ABONO
+                reloj.pagado = False
+                reloj.saldo_pendiente = reloj.precio
+            
             reloj.save()
-            messages.success(request, 'Referencia de reloj vendida con éxito')
+            messages.success(request, 'Reloj vendido exitosamente.')
             return redirect('reloj_venta_list')
         else:
-            messages.error(request, mensaje_de_error)
+            print("Errores del formulario:", form.errors)
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
         form = RelojForm(instance=reloj)
     
@@ -128,6 +152,6 @@ def reloj_sell_view(request, pk):
         'form': form,
         'modo': 'vender',
         'reloj': reloj,
-        'clientes': Cliente.objects.all().order_by('nombre')  
+        'clientes': Cliente.objects.all().order_by('nombre')
     }
-    return render(request, templade_a_dirigir, context)
+    return render(request, 'reloj/reloj_form.html', context)

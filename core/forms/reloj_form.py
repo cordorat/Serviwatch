@@ -1,6 +1,8 @@
 from django import forms
 from core.models.reloj import Reloj
+from core.models.abono import Abono
 from core.models.cliente import Cliente
+from core.services.abono_service import calcular_saldo_pendiente
 
 class ClienteChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
@@ -46,6 +48,16 @@ class RelojForm(forms.ModelForm):
             'max_length': 'El precio no puede exceder los 20 caracteres'
         }
     )
+
+    tiene_comision = forms.BooleanField(
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input custom-switch',
+            'id': 'tiene_comision'
+        }),
+    )
+
     comision = forms.CharField(
         max_length=20,
         required=False,
@@ -131,10 +143,23 @@ class RelojForm(forms.ModelForm):
         empty_label="Seleccione un cliente",
     )
 
+    metodo_pago = forms.ChoiceField(
+        choices=Reloj.METODO_PAGO_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-span form-control text-secondary',
+            'placeholder': 'Método de pago'
+        })
+    )
+
+    saldo_pendiente = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
     class Meta:
         model = Reloj
-        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente']
-        # No incluir 'comision' aquí porque es un campo no editable
+        fields = ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'comision','fecha_venta', 'pagado', 'cliente', 'tiene_comision', 'metodo_pago', 'saldo_pendiente']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -166,7 +191,9 @@ class RelojForm(forms.ModelForm):
     def clean_comision(self):
         try:
             precio = self.cleaned_data.get('precio')
-            if precio is None:
+            tiene_comision = self.cleaned_data.get('tiene_comision')
+
+            if not tiene_comision and precio is None:
                 return 0
             
             comision = int(float(precio) * 0.2)
@@ -190,3 +217,49 @@ class RelojForm(forms.ModelForm):
         if estado == 'VENDIDO' and not cliente:
             raise forms.ValidationError('El cliente es obligatorio cuando el estado es Vendido')
         return cliente
+
+    def clean(self):
+        cleaned_data = super().clean()
+        estado = cleaned_data.get('estado')
+        metodo_pago = cleaned_data.get('metodo_pago')
+        precio = cleaned_data.get('precio', '0')
+        tiene_comision = cleaned_data.get('tiene_comision')
+        
+        if estado == 'VENDIDO':
+            if not metodo_pago:
+                cleaned_data['metodo_pago'] = 'CONTADO'
+            elif metodo_pago not in dict(Reloj.METODO_PAGO_CHOICES):
+                raise forms.ValidationError({
+                    'metodo_pago': 'Seleccione un método de pago válido'
+                })
+            
+            if metodo_pago == 'CONTADO':
+                cleaned_data['pagado'] = True
+                cleaned_data['saldo_pendiente'] = '0'
+            elif metodo_pago == 'ABONO':
+                # Asegurarse de que el precio sea un string
+                if self.instance and self.instance.pk:
+                    abonos_existentes = Abono.objects.filter(reloj=self.instance).exists()
+
+                    print(f"Abonos existentes: {abonos_existentes}")
+                    if not abonos_existentes:
+                        cleaned_data['saldo_pendiente'] = str(precio)
+
+                    else:
+                        saldo_actual = calcular_saldo_pendiente(self.instance)
+                        cleaned_data['saldo_pendiente'] = saldo_actual
+                        print(f"Saldo pendiente: {saldo_actual}")
+
+        if self.instance and self.instance.pk:
+            if (precio == self.instance.precio and 
+                tiene_comision == self.instance.tiene_comision):
+                return cleaned_data
+
+        try:
+            comision = int(precio) * 0.2 if tiene_comision else 0
+            cleaned_data['comision'] = str(int(comision))
+
+        except (ValueError, TypeError):
+            cleaned_data['comision'] = '0'
+                
+        return cleaned_data
