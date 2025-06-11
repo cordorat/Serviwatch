@@ -7,7 +7,7 @@
 <div class="productos-container mt-5">
     <h2 class="titulo text-center mb-4">PRODUCTOS</h2>
     <div class="row justify-content-center mt-5">
-        <div class="col-12 d-flex flex-wrap gap-5 justify-content-center">
+        <div class="col-12 d-flex flex-wrap gap-4 justify-content-center">
 
         <a href="{% if not is.superuser %}{% url 'reloj_list' %}{% else %}{% url 'reloj_list_admin' %}{% endif %}" class="text-decoration-none text-dark">  
             <div class="service-card text-center">

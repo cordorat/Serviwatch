@@ -104,6 +104,12 @@
       border-radius: 50%;
       display: block;
     }
+
+    .bell {
+      display: flex;
+      margin-top: 5px;
+    }
+
   </style>
   <link rel="stylesheet" href="{% static 'css/paginacion.css' %}">
   <link rel="stylesheet" href="{% static 'css/tabla.css' %}">
@@ -123,7 +129,7 @@
 
     <div class="header-icons">
       {% if not user.is_superuser %}
-      <div class="ms-auto">
+      <div class="bell">
         <a href="/alertas/" class="notification-bell-link">
           <i class="bi bi-bell fs-3"></i>
           {% if total_alertas > 0 %}

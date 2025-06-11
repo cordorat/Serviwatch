@@ -34,21 +34,6 @@
         {% endif %}
       </div>
 
-      <div class="mb-4">
-        <div class="input-group mb-3">
-          <span class="input-group-text form-span" id="basic-addon2">
-            <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
-          </span>
-          <input type="text" name="precio" id="id_precio"
-            class="form-control {% if form.precio.errors %}is-invalid{% endif %}"
-            value="{{ form.precio.value|default:'' }}" placeholder="Precio" maxlength="6" required>
-        </div>
-        {% if form.precio.errors %}
-        <div class="error-message mt-2">
-          <span class="text-danger">{{ form.precio.errors.0 }}</span>
-        </div>
-        {% endif %}
-      </div>
 
       <div class="mb-4">
         <div class="input-group mb-3">
@@ -129,10 +114,9 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const codigoField = document.querySelector('input[name="codigo"]');
-    const precioField = document.querySelector('input[name="precio"]');
     const cantidadField = document.querySelector('input[name="cantidad"]');
 
-    const allFields = [codigoField, precioField, cantidadField];
+    const allFields = [codigoField, cantidadField];
 
     // Marcar campos con errores del servidor
     document.querySelectorAll('.error-message').forEach(function (errorMessage) {
@@ -146,10 +130,9 @@
       if (!value) {
         // Manejar campos vacíos
         if (fieldName === 'codigo') return 'El código es obligatorio.';
-        if (fieldName === 'precio') return 'El precio es obligatorio.';
         if (fieldName === 'cantidad') return 'La cantidad es obligatoria.';
-      } else if ((fieldName === 'precio' || fieldName === 'cantidad') && !/^\d+$/.test(value)) {
-        // Validación numérica para precio y cantidad
+      } else if ((fieldName === 'cantidad') && !/^\d+$/.test(value)) {
+        // Validación numérica para cantidad
         return `El ${fieldName} solo debe contener números.`;
       }
       

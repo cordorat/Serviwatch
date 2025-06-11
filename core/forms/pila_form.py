@@ -13,17 +13,7 @@ class PilasForm(forms.ModelForm):
             'max_length': 'El codigo debe tener maximo 30 caracteres'
         }
     )
-    precio = forms.CharField(
-        required=True,
-        max_length=6,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'precio'
-        }),
-        error_messages={
-            'required': 'El precio es obligatorio',
-            'max_length': 'El precio debe tener maximo 6 caracteres'
-        }
-    )
+
     cantidad = forms.CharField(
         required=True,
         max_length=3,
@@ -37,7 +27,7 @@ class PilasForm(forms.ModelForm):
     )
     class Meta:
         model = Pilas
-        fields = ['codigo', 'precio', 'cantidad']
+        fields = ['codigo', 'cantidad']
 
     def clean_codigo(self):
         codigo = self.cleaned_data.get('codigo')
@@ -47,15 +37,7 @@ class PilasForm(forms.ModelForm):
             if Pilas.objects.filter(codigo=codigo).exists():
                 raise forms.ValidationError("Este codigo ya esta registrado")
         return codigo
-    def clean_precio(self):
-        precio = self.cleaned_data.get('precio')
-
-        if not precio.isdigit():
-            raise forms.ValidationError("El precio solo debe contener números.")
-        
-        precio = precio.lstrip('0')  # Eliminar ceros a la izquierda
-
-        return precio
+    
         
     def clean_cantidad(self):
         cantidad = self.cleaned_data.get('cantidad')
