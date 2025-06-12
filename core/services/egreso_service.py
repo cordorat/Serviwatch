@@ -66,6 +66,39 @@ def obtener_total_egresos_dia(fecha=None):
     total = Egreso.objects.filter(fecha=fecha).aggregate(total=Sum('valor'))['total']
     return total or 0
 
+def _parsear_fecha(fecha_str):
+    """
+    Intenta analizar una fecha en diferentes formatos.
+    """
+    formatos = ['%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y']
+    for formato in formatos:
+        try:
+            return datetime.strptime(fecha_str, formato).date()
+        except ValueError:
+            continue
+    # Si ninguno funciona, lanzar error
+    raise ValueError(f"Formato de fecha no reconocido {fecha_str}")
+
+def _crear_egreso_y_responder(request, datos):
+    """Extrae la lógica de crear un egreso y generar la respuesta apropiada."""
+    # Guarda en la base de datos
+    crear_egreso(datos)
+
+    #Mensaje de éxito,
+    messages.success(request, "Egreso ingresado con éxito")
+
+    #Limpia la sesión,
+    del request.session['egreso_data']
+
+    #Maneja el tipo de respuesta según la solicitud,
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': "Egreso ingresado con éxito"
+        })
+
+    return redirect('egreso')
+
 #--------------------REPORTE DE EGRESOS--------------------#
 
 
