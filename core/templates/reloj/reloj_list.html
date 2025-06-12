@@ -16,7 +16,6 @@
 
   .form-select-sm {
     min-width: 120px;
-    /* o el ancho que prefieras */
   }
 
   .header-icons-reparacion {
@@ -41,7 +40,9 @@
       RELOJES
       {% endif %}
   </h2>
+  {% if 'productos' in request.path %}
     <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+  {% endif %}
   </div>
 
   <!-- Campo de búsqueda -->
@@ -78,6 +79,15 @@
           data-bs-placement="top" title="Filtrar relojes por tipo">
           {% for valor, texto in tipos %}
           <option value="{{ valor }}" {% if filtro_tipo == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+
+        <select name="pagado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+          data-bs-placement="top" title="Filtrar relojes por estado de pago">
+          {% for valor, texto in pagado_options %}
+          <option value="{{ valor }}" {% if filtro_pagado == valor %}selected{% endif %}>
             {{ texto }}
           </option>
           {% endfor %}
@@ -139,7 +149,7 @@
 
         <li class="page-item">
           <a class="page-link"
-            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }} {% endif %}">
+            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}{% endif %}">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
@@ -147,13 +157,12 @@
 
         {% for num in page_obj.paginator.page_range %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}">{{ num }}</a>
         </li>
         {% endfor %}
 
         <li class="page-item">
-          <a class="page-link" href="{% if page_obj.has_next %} ?page={{ page_obj.next_page_number }} {% endif %}"
-            aria-label="Next">
+          <a class="page-link" href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}{% endif %}" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
           </a>
         </li>

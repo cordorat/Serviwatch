@@ -8,4 +8,7 @@ urlpatterns = [
     path('productos/editar/<int:id>', pila_create_view, name='pila_editar'),
     path('servicios/pilas/', ventaPilas_list_view, name='ventaPila_list'),
     path('servicios/pilas/venta/', ventaPila_view, name='ventaPila_create'),
+    path('productos-admin/pilas/', pilas_list_view, name='pilas_list_admin'),
+    path('productos-admin/pilas/agregar/', pila_create_view, name='pilas_form_admin'),
+    path('productos-admin/pilas/editar/<int:id>/', pila_create_view, name='pilas_edit_admin'),
 ]
