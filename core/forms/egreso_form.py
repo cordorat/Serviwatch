@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from datetime import date
 
-clase_formulario = 'form-control'
+clase_formulario = 'form-control text-secondary'
 
 class EgresoForm(forms.ModelForm):
     """
