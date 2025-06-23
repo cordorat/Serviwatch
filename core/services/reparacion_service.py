@@ -101,9 +101,7 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
         alignment=1,  # Centrado
         fontStyle='italic',
         textColor=colors.gray
-    )
-
-       # Estilo para texto en celdas
+    )       # Estilo para texto en celdas
     cell_style = ParagraphStyle(
         'CellStyle',
         parent=normal_style,
@@ -111,6 +109,17 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
         leading=10,  # Espacio entre líneas
         spaceBefore=2,
         spaceAfter=2
+    )
+    
+    # Estilo específico para descripciones largas
+    description_style = ParagraphStyle(
+        'DescriptionStyle',
+        parent=normal_style,
+        fontSize=7,
+        leading=8,  # Espacio entre líneas reducido
+        spaceBefore=1,
+        spaceAfter=1,
+        wordWrap='LTR'  # Permitir word wrap
     )
 
     # Intentar incluir el logo si está disponible
@@ -152,14 +161,16 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
         codigo = Paragraph(str(rep.codigo_orden), cell_style)
         cliente = Paragraph(f"{rep.cliente.nombre} {rep.cliente.apellido}" if rep.cliente else "N/A", cell_style)
         telefono = Paragraph(rep.cliente.telefono if rep.cliente else "N/A", cell_style)
-        marca = Paragraph(rep.marca_reloj, cell_style)
-        
-        # La descripción como Paragraph permitirá ajuste automático
-        descripcion = Paragraph(rep.descripcion, cell_style)
+        marca = Paragraph(rep.marca_reloj, cell_style)        # La descripción como Paragraph permitirá ajuste automático
+        # Truncar descripción si es muy larga para evitar problemas de layout
+        descripcion_text = rep.descripcion
+        if len(descripcion_text) > 100:
+            descripcion_text = descripcion_text[:97] + "..."
+        descripcion = Paragraph(descripcion_text, description_style)
         
         fecha_ingreso = Paragraph(rep.fecha_ingreso.strftime('%d/%m/%Y'), cell_style)
         fecha_estimada = Paragraph(rep.fecha_entrega_estimada.strftime('%d/%m/%Y') if rep.fecha_entrega_estimada else "N/A", cell_style)
-        tecnico = Paragraph(rep.tecnico.nombre, cell_style)
+        tecnico = Paragraph(rep.tecnico.nombre if rep.tecnico else "N/A", cell_style)
         precio = Paragraph(f"${rep.precio:,.2f}", cell_style)
         
         table_data.append([
