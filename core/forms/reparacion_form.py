@@ -17,6 +17,20 @@ class ReparacionForm(forms.ModelForm):
         for field in self.fields:
             if self[field].errors:
                 self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
+                
+        # Si estamos editando una instancia existente
+        if self.instance and self.instance.pk and self.instance.fecha_entrega_estimada:
+            # Convertir la fecha del modelo (date object) al formato DD/MM/YYYY para mostrar
+            fecha_obj = self.instance.fecha_entrega_estimada
+            if isinstance(fecha_obj, datetime.date):
+                self.fields['fecha_entrega_estimada'].initial = fecha_obj.strftime('%d/%m/%Y')
+        
+        # Configurar atributos de los campos
+        clase_formulario = 'form-control text-secondary'
+        
+        for field_name, field in self.fields.items():
+            if field_name not in ['cliente', 'tecnico', 'pagado', 'mantenimiento']:
+                field.widget.attrs.update({'class': clase_formulario})
             
     cliente = ClienteChoiceField(
         queryset=Cliente.objects.all(),
@@ -39,7 +53,7 @@ class ReparacionForm(forms.ModelForm):
         max_length=10,
         widget=forms.TextInput(attrs={
             'class': 'form-control text-secondary',
-            'placeholder': 'DD/MM/AAAA'
+            'placeholder': 'Fecha de entrega estimada',
         }),
         help_text="Formato: DD/MM/AAAA"
     )
