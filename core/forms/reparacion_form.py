@@ -35,14 +35,20 @@ class ReparacionForm(forms.ModelForm):
         })
     )
     
-
+    pagado = forms.BooleanField(
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        })
+    )
     
 
     class Meta:
         model = Reparacion
         fields = ['cliente', 'marca_reloj', 'descripcion', 'codigo_orden',
-                 'fecha_entrega_estimada', 'precio', 'espacio_fisico', 
-                 'estado', 'tecnico']
+                'fecha_entrega_estimada', 'precio', 'espacio_fisico', 
+                'estado', 'tecnico', 'mantenimiento']
         error_messages = {
             'cliente': {
                 'required': 'Por favor seleccione un cliente',

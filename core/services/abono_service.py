@@ -24,8 +24,6 @@ def registrar_abono(reloj_id, monto, descripcion=""):
     try:
         reloj = Reloj.objects.get(id=reloj_id)
         
-        if reloj.metodo_pago != 'ABONO':
-            raise ValueError("Solo se pueden registrar abonos para relojes con método de pago ABONO")
 
         # Asegurarse de que haya un saldo pendiente inicial
         if not reloj.saldo_pendiente:

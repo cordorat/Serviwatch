@@ -37,16 +37,21 @@
   font-weight: bold;
   }
 
-.form-group {
-  margin-bottom: 0;
-  min-width: 120px;
-}
+  .form-group {
+    margin-bottom: 0;
+    min-width: 120px;
+  }
 
-.filtro-container-reparacion {
-  display: flex;
-  align-items: flex-end; /* Alinear con la parte inferior */
-  gap: 10px;
-}
+  .filtro-container-reparacion {
+    display: flex;
+    align-items: flex-end; /* Alinear con la parte inferior */
+    gap: 10px;
+  }
+
+  .custom-table-botoncito a {
+    display: inline-block;
+  }
+  
 </style>
 
 <div class="main-content">
@@ -78,7 +83,7 @@
       </div>
     </form>
     <div class="filtro-container-reparacion ms-3 d-flex gap-2">
-      <form method="get" action="{% url 'reloj_list' %}" id="filtroForm" class="d-flex gap-2 form-reloj">
+      <form method="get" action="{%if 'servicios' in request.path%}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}" id="filtroForm" class="d-flex gap-2 form-reloj">
         <!-- Mantener la búsqueda actual si existe -->
       {% if search %}
       <input type="hidden" name="search" value="{{ search }}">
@@ -95,6 +100,7 @@
           {% endfor %}
         </select>
       </div>
+      {% endif %}
 
       <div class="form-group">
         <label for="tipo-select" class="form-label fw-bold">Tipo:</label>
@@ -107,6 +113,8 @@
         </select>
       </div>
 
+      
+      {% if 'productos' in request.path %}
       <div class="form-group">
         <label for="pagado-select" class="form-label fw-bold">Pago:</label>
         <select id="pagado-select" name="pagado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar relojes por estado de pago">
@@ -117,7 +125,7 @@
           {% endfor %}
         </select>
       </div>
-        {% endif %}
+      {% endif %}
       </form>
     </div>
   </div>
@@ -132,7 +140,10 @@
           <th>Referencia </th>
           <th>Precio </th>
           <th>Tipo</th>
+          <th>Dueño</th>
+          <th>Cliente</th>
           <th>Estado</th>
+          <th>Pagado</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -152,11 +163,32 @@
             {{ reloj.tipo }}
           </td>
           <td>
+            {% if reloj.dueno %}
+              {{ reloj.dueno }}
+            {% else %}
+              Sin dueño
+            {% endif %}
+          </td>
+          <td>
+            {% if reloj.cliente %}
+              {{ reloj.cliente }}
+            {% else %}
+              Sin cliente
+            {% endif %}
+          </td>
+          <td>
             {% if reloj.estado == 'DISPONIBLE' %}
             <span class="badge bg-success">{{ reloj.estado }}</span>
             {% else %}
             <span class="badge bg-danger">{{ reloj.estado }}</span>
             {% endif %}	
+          </td>
+          <td>
+            {% if reloj.pagado %}
+            <span class="badge bg-success">PAGADO</span>
+            {% else %}
+            <span class="badge bg-danger">PENDIENTE</span>
+            {% endif %}
           </td>
           <td>
             {% if 'servicios' in request.path %}

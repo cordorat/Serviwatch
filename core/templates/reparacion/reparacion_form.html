@@ -7,6 +7,28 @@
     border: 1px solid red;
     box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
   }
+
+  /* Color lima para el switch cuando está activo */
+  .custom-switch:checked {
+    background-color: #D4E484;
+    border-color: #626E15;
+  }
+
+    /* Aumentar el tamaño del switch para que combine mejor */
+  .custom-switch {
+    width: 4rem;
+    height: 1.5rem;
+  }
+
+    /* Ajustes al "círculo" interior del switch */
+  .custom-switch:checked::before {
+    background-color: white;
+    transform: translateX(1.5rem);
+  }
+
+  .form-check-input {
+    width: 40px !important;
+  }
 </style>
 
 {% if editing %}
@@ -57,9 +79,11 @@
             </div>
           </div>
           <div class="error-message">
-            {% if form.cliente.errors %} {% for error in form.cliente.errors %}
+            {% if form.cliente.errors %} 
+            {% for error in form.cliente.errors %}
             <span class="text-danger">{{ error }}</span>
-            {% endfor %} {% endif %}
+            {% endfor %} 
+            {% endif %}
           </div>
         </div>
 
@@ -73,10 +97,11 @@
               {{ form.marca_reloj}}
             </div>
             <div class="error-message">
-              {% if form.marca_reloj.errors %} {% for error in
-              form.marca_reloj.errors %}
+              {% if form.marca_reloj.errors %} 
+              {% for error in form.marca_reloj.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
 
             <div class="input-group mt-3">
@@ -86,10 +111,11 @@
               {{ form.descripcion }}
             </div>
             <div class="error-message">
-              {% if form.descripcion.errors %} {% for error in
-              form.descripcion.errors %}
+              {% if form.descripcion.errors %} 
+              {% for error in form.descripcion.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
 
             <div class="input-group mt-3">
@@ -99,10 +125,11 @@
               {{ form.codigo_orden }}
             </div>
             <div class="error-message">
-              {% if form.codigo_orden.errors %} {% for error in
-              form.codigo_orden.errors %}
+              {% if form.codigo_orden.errors %} 
+              {% for error in form.codigo_orden.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
 
             <div class="input-group mt-3">
@@ -112,10 +139,11 @@
               {{ form.fecha_entrega_estimada }}
             </div>
             <div class="error-message">
-              {% if form.fecha_entrega_estimada.errors %} {% for error in
-              form.fecha_entrega_estimada.errors %}
+              {% if form.fecha_entrega_estimada.errors %} 
+              {% for error in form.fecha_entrega_estimada.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
           </div>
 
@@ -127,9 +155,11 @@
               {{ form.precio}}
             </div>
             <div class="error-message">
-              {% if form.precio.errors %} {% for error in form.precio.errors %}
+              {% if form.precio.errors %} 
+              {% for error in form.precio.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
 
             <div class="input-group mt-3">
@@ -139,10 +169,11 @@
               {{ form.espacio_fisico}}
             </div>
             <div class="error-message">
-              {% if form.espacio_fisico.errors %} {% for error in
-              form.espacio_fisico.errors %}
+              {% if form.espacio_fisico.errors %} 
+              {% for error in form.espacio_fisico.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
 
             <div class="input-group mt-3">
@@ -152,9 +183,11 @@
               {{ form.estado }}
             </div>
             <div class="error-message">
-              {% if form.estado.errors %} {% for error in form.estado.errors %}
+              {% if form.estado.errors %} 
+              {% for error in form.estado.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
             </div>
 
             <div class="input-group mt-3">
@@ -164,10 +197,16 @@
               {{ form.tecnico}}
             </div>
             <div class="error-message">
-              {% if form.tecnico.errors %} {% for error in form.tecnico.errors
-              %}
+              {% if form.tecnico.errors %} 
+              {% for error in form.tecnico.errors %}
               <span class="text-danger">{{ error }}</span>
-              {% endfor %} {% endif %}
+              {% endfor %} 
+              {% endif %}
+            </div>
+
+            <div class="form-check form-switch mt-3">
+              <input class="form-check-input custom-switch" type="checkbox" id="mantenimiento" name="mantenimiento" {% if form.mantenimiento.value %}checked{% endif %}>
+              <label class="form-check-label ms-2 mt-1" for="mantenimiento">Matenimiento</label>
             </div>
           </div>
         </div>
