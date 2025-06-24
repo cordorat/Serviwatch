@@ -103,3 +103,19 @@ class Reloj(models.Model):
     def __str__(self):
         return f"{self.marca} - {self.referencia} - ${self.precio} - {self.get_tipo_display()}"
     
+    def save(self, *args, **kwargs):
+        # Si es nuevo o no tiene saldo_pendiente, inicializarlo con el precio
+        if not self.pk or not self.saldo_pendiente:
+            self.saldo_pendiente = str(self.precio) if self.precio else '0'
+            print(f"Reloj {self.id}: Inicializando saldo_pendiente={self.saldo_pendiente}")
+        
+        # Si tiene_comision está marcado, calcular la comisión
+        if self.tiene_comision and self.precio:
+            try:
+                precio = int(self.precio)
+                self.comision = str(int(precio * 0.2))  # 20% del precio
+            except (ValueError, TypeError):
+                self.comision = '0'
+        
+        super().save(*args, **kwargs)
+    

@@ -35,12 +35,18 @@
 
     .btn-circle:hover {
         background-color: #626E15;
-        color: white;
+        border-color: black !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .btn-circle i {
         font-size: 1.2rem;
     }
+
+    .form-check-input {
+        width: 40px !important;
+    }
+
 </style>
 
 <div class="container">
@@ -136,6 +142,8 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+
+                    <!-- Fecha de venta -->
                     {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <div class="input-group mt-3" id="basic-addon1">
                         <span class="input-group-text form-span" id="basic-addon1">
@@ -150,7 +158,6 @@
                         {% endfor %}
                         {% endif %}
                     </div>
-
                     {% endif %}
 
                     <!--Saber si se va a tener una comisión o no-->
@@ -192,9 +199,9 @@
                     </div>
                     <div class="error-message">
                         {% if form.dueno.errors %}
-                        {% for error in form.dueno.errors %}
-                        <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            {% for error in form.dueno.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         {% endif %}
                     </div>
 
@@ -229,9 +236,8 @@
                         {% endif %}
                     </div>
 
-
-                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <!-- Estado -->
+                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-smartwatch fs-4 text-secondary"></i>
@@ -240,9 +246,23 @@
                     </div>
                     <div class="error-message">
                         {% if form.estado.errors %}
-                        {% for error in form.estado.errors %}
-                        <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            {% for error in form.estado.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Método de pago -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-credit-card fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.metodo_pago }}
+                        {% if modo == 'vender' %}
+                        <button type="button" id="btnAgregarAbono" class="btn btn-circle" data-bs-toggle="modal"
+                            data-bs-target="#abonoModal" style="display: none;">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
                         {% endif %}
                     </div>
 
@@ -260,7 +280,7 @@
                     <!-- Checkbox alineado -->
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" {% if form.pagado.value %}checked{% endif %}>
-                        <label class="form-check-label ms-2" for="pagado">Pagado</label>
+                        <label class="form-check-label ms-2 mt-1" for="pagado">Pagado</label>
                     </div>
 
                     {% endif %}
@@ -292,11 +312,11 @@
             <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
                 <h4 class="titulo m-0">
                     {% if modo == 'editar' %}
-                    RELOJ ACTUALIZADO CORRECTAMENTE
+                        RELOJ ACTUALIZADO CORRECTAMENTE
                     {% elif modo == 'crear' %}
-                    RELOJ AGREGADO CORRECTAMENTE
+                        RELOJ AGREGADO CORRECTAMENTE
                     {% elif modo == 'vender' %}
-                    RELOJ VENDIDO CORRECTAMENTE
+                        RELOJ VENDIDO CORRECTAMENTE
                     {% endif %}
                 </h4>
             </div>
@@ -422,54 +442,57 @@
         const metodoPagoInput = form.querySelector('[name="metodo_pago"]');
         const abonoForm = document.getElementById('abonoForm');
 
+
+        
+
         if (abonoForm) {
             abonoForm.addEventListener('submit', function (e) {
                 e.preventDefault();
 
                 const montoInput = document.querySelector('#monto');
+                const descripcionInput = document.querySelector('#descripcion');
                 const monto = parseInt(montoInput.value) || 0;
-                const saldoPendienteElement = document.querySelector('#abonoModal .text-danger');
-                const saldoPendienteActual = parseInt(saldoPendienteElement.textContent.replace(/[^0-9]/g, ''));
+                const precioInput = document.querySelector('[name="precio"]');
+                const precioValue = parseInt(precioInput.value) || 0;
 
                 if (!monto) {
                     alert('El monto es requerido');
                     return false;
                 }
 
-                if (monto > saldoPendienteActual) {
-                    alert('El monto del abono no puede ser mayor al saldo pendiente');
+                if (monto > precioValue) {
+                    alert('El monto del abono no puede ser mayor al precio total');
                     return false;
                 }
 
-                // Enviar el formulario usando fetch para manejar la respuesta
-                fetch(this.action, {
-                    method: 'POST',
-                    body: new FormData(this),
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                    .then(response => response.ok ? response.text() : Promise.reject(response))
-                    .then(() => {
-                        // Actualizar el saldo pendiente en el modal
-                        const nuevoSaldo = saldoPendienteActual - monto;
-                        saldoPendienteElement.textContent = `$${nuevoSaldo}`;
+                // Calcular el saldo pendiente después del abono
+                const saldoPendiente = precioValue - monto;
 
-                        // Limpiar el formulario
-                        montoInput.value = '';
-                        document.querySelector('#descripcion').value = '';
+                // Almacenar los datos del abono en el formulario principal
+                let abonoMontoInput = form.querySelector('[name="abono_inicial_monto"]');
+                if (!abonoMontoInput) {
+                    abonoMontoInput = document.createElement('input');
+                    abonoMontoInput.type = 'hidden';
+                    abonoMontoInput.name = 'abono_inicial_monto';
+                    form.appendChild(abonoMontoInput);
+                }
+                abonoMontoInput.value = monto;
 
-                        // Cerrar el modal
-                        const abonoModal = bootstrap.Modal.getInstance(document.getElementById('abonoModal'));
-                        abonoModal.hide();
+                let abonoDescInput = form.querySelector('[name="abono_inicial_descripcion"]');
+                if (!abonoDescInput) {
+                    abonoDescInput = document.createElement('input');
+                    abonoDescInput.type = 'hidden';
+                    abonoDescInput.name = 'abono_inicial_descripcion';
+                    form.appendChild(abonoDescInput);
+                }
+                abonoDescInput.value = descripcionInput.value || '';
 
-                        // Recargar la página para actualizar todos los datos
-                        window.location.reload();
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error al procesar el abono');
-                    });
+                // Mostrar un feedback visual al usuario
+                alert(`Abono de $${monto} registrado. Se aplicará al guardar el reloj.`);
+
+                // Cerrar el modal
+                const abonoModal = bootstrap.Modal.getInstance(document.getElementById('abonoModal'));
+                abonoModal.hide();
             });
         }
 
@@ -477,8 +500,8 @@
             const btnAgregarAbono = document.getElementById('btnAgregarAbono');
 
             function actualizarBotonAbono() {
-                const modoEditar = '{{ modo }}' === 'editar';
-                const esVendido = estadoInput.value === 'VENDIDO';
+                const modoEditar = '{{ modo }}' === 'editar' || '{{ modo }}' === 'vender';
+                const esVendido = estadoInput.value === 'VENDIDO' || estadoInput.value === 'DISPONIBLE';
                 const esAbono = metodoPagoInput.value === 'ABONO';
 
                 if (modoEditar && esVendido && esAbono) {
@@ -681,17 +704,19 @@
             },
 
             cliente: function (value, estadoValue) {
-                if (estadoValue === 'VENDIDO' && !value) {
-                    return { isValid: false, message: 'El cliente es obligatorio cuando el estado es Vendido' };
+                // Validación de cliente para venta
+                const modoActual = '{{ modo }}';
+                if ((estadoValue === 'VENDIDO' || modoActual === 'vender') && !value) {
+                    return { 
+                        isValid: false, 
+                        message: 'El cliente es obligatorio para relojes en venta' 
+                    };
                 }
                 // Limpiar error explícitamente
                 const clienteInput = document.querySelector('[name="cliente"]');
                 if (clienteInput) {
-                    clienteInput.classList.remove('is-invalid');
-                    const select2Container = clienteInput.nextElementSibling;
-                    if (select2Container) {
-                        select2Container.querySelector('.select2-selection').classList.remove('is-invalid');
-                    }
+                    clearError(clienteInput);
+                    $(clienteInput).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
                 }
                 return { isValid: true };
             },
@@ -822,7 +847,22 @@
         flatpickr(fechaVentaInput, {
             dateFormat: "d/m/Y",
             allowInput: false,
-            locale: "es"
+            locale: "es",
+            onReady: function(selectedDates, dateStr, instance) {
+                // Convertir cualquier formato ISO a formato d/m/Y para mostrar
+                const input = instance.input;
+                if (input.value && input.value.includes("-")) {
+                    // Si es formato YYYY-MM-DD, convertirlo
+                    const [year, month, day] = input.value.split("-");
+                    if (year && month && day) {
+                        const newDate = `${day}/${month}/${year}`;
+                        console.log("Convirtiendo fecha de ISO a d/m/Y:", input.value, "->", newDate);
+                        input.value = newDate;
+                        // Reinicializar el datepicker con el nuevo valor
+                        instance.setDate(newDate, true);
+                    }
+                }
+            }
         });
     });
 </script>
