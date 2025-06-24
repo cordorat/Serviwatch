@@ -33,12 +33,14 @@ def alerta_view(request):
         items = Pilas.objects.filter(cantidad__lt=5).order_by('cantidad')
         
     elif tipo == 'proxima_revision':
-        # Ejemplo: reparaciones en prueba que han estado más de 3 días
-        # Asumiendo que las reparaciones en estado "Prueba" deberían revisarse
-        fecha_limite_revision = fecha_actual - timedelta(days=3)
+        # Reparaciones con mantenimiento que han pasado más de 1 mes desde su ingreso
+        # Consideramos que necesitan revisión después de 30 días de haber ingresado
+        fecha_limite_revision = fecha_actual - timedelta(days=365*3)  # Hace 1 mes
+        
         items = Reparacion.objects.filter(
-            estado='Prueba',
-            fecha_ingreso__lte=fecha_limite_revision
+            mantenimiento=True,
+            estado='Entregado',  # Incluye entregadas
+            fecha_ingreso__lte=fecha_limite_revision  # Ingresaron hace 1 mes o más
         ).order_by('fecha_ingreso')
     
     # Obtener contadores para los recuadros de categorías
@@ -50,9 +52,11 @@ def alerta_view(request):
     
     contador_stock = Pilas.objects.filter(cantidad__lt=5).count()
     
+    # Actualizar también el contador_revision
     contador_revision = Reparacion.objects.filter(
-        estado='Prueba',
-        fecha_ingreso__lte=fecha_actual - timedelta(days=3)
+        mantenimiento=True,
+        estado='Entregado',
+        fecha_ingreso__lte=fecha_actual - timedelta(days=365*3)  # Hace 1 mes o más
     ).count()
     
     # Paginación

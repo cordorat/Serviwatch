@@ -97,7 +97,6 @@
                     {% elif tipo_actual == 'proxima_revision' %}
                     <th>Código</th>
                     <th>Cliente</th>
-                    <th>Días en Prueba</th>
                     <th>Técnico</th>
                     <th>Acciones</th>
                     {% endif %}
@@ -131,7 +130,6 @@
                     {% elif tipo_actual == 'proxima_revision' %}
                     <td>{{ item.codigo_orden }}</td>
                     <td>{{ item.cliente.nombre }} {{ item.cliente.apellido }}</td>
-                    <td>{{ item.fecha_ingreso|timesince }}</td>
                     <td>{{ item.tecnico.nombre }} {{ item.tecnico.apellidos }}</td>
                     <td>
                         <a href="{% url 'reparacion_edit' item.id %}?return_to=alertas&tipo={{ tipo_actual }}&page={{ page_obj.number|default:1 }}"

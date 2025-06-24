@@ -29,7 +29,7 @@ class ReparacionForm(forms.ModelForm):
         clase_formulario = 'form-control text-secondary'
         
         for field_name, field in self.fields.items():
-            if field_name not in ['cliente', 'tecnico', 'pagado', 'mantenimiento']:
+            if field_name not in ['cliente', 'tecnico', 'pagado', 'mantenimiento', 'estado']:
                 field.widget.attrs.update({'class': clase_formulario})
             
     cliente = ClienteChoiceField(
@@ -48,6 +48,8 @@ class ReparacionForm(forms.ModelForm):
             'class': 'form-control form-span text-secondary'
         })
     )
+    
+    
     
     fecha_entrega_estimada = forms.CharField(
         max_length=10,
