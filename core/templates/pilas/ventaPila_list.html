@@ -67,32 +67,37 @@
     }
 
     .cantidad-input {
-        width: 80px !important; /* Reducir ancho */
+        width: 80px !important;
+        /* Reducir ancho */
         text-align: center;
-        padding-right: 5px; /* Reducir padding derecho */
-        padding-left: 5px; /* Reducir padding izquierdo */
+        padding-right: 5px;
+        /* Reducir padding derecho */
+        padding-left: 5px;
+        /* Reducir padding izquierdo */
     }
-    
+
     /* Asegurar que los números grandes se muestren correctamente */
     .cantidad-input::-webkit-inner-spin-button,
     .cantidad-input::-webkit-outer-spin-button {
         margin-left: 0;
     }
-    
+
     /* Ajustar el contenedor del grupo de formulario */
     .form-group {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; 
+        align-items: flex-start;
         width: 100%;
         position: relative;
     }
-    
+
     /* Asegurar que el mensaje de error esté alineado con el input */
     .error-message {
-        width: 80px; /* Mismo ancho que el input */
+        width: 80px;
+        /* Mismo ancho que el input */
         text-align: left;
-        font-size: 12px; /* Texto más pequeño */
+        font-size: 12px;
+        /* Texto más pequeño */
     }
 
     /* Estilos para hacer que la tabla ocupe más espacio */
@@ -141,15 +146,14 @@
         padding-left: 0;
     }
 
-</style>
-<style>
     /* Estilos para los mensajes de error */
     .error-message.pila {
         color: #dc3545;
         font-size: 0.875rem;
         margin-top: 0.25rem;
         display: none;
-        width: 80px; /* Mismo ancho que el input */
+        width: 80px;
+        /* Mismo ancho que el input */
         text-align: left;
         /* Eliminar cualquier margen adicional */
         margin-left: 0;
@@ -170,6 +174,22 @@
         display: none;
         border: 1px solid #dc3545;
         animation: fadeIn 0.5s;
+    }
+
+    .precio-input {
+        width: 80px !important;
+        /* Reducir ancho */
+        text-align: center;
+        padding-right: 5px;
+        /* Reducir padding derecho */
+        padding-left: 5px;
+        /* Reducir padding izquierdo */
+    }
+
+    /* Asegurar que los números grandes se muestren correctamente */
+    .precio-input::-webkit-inner-spin-button,
+    .precio-input::-webkit-outer-spin-button {
+        margin-left: 0;
     }
 </style>
 
@@ -217,19 +237,25 @@
                 </thead>
                 <tbody>
                     {% for pila in pilas %}
+                    
                     <tr>
                         <td>{{ pila.codigo }}</td>
-                        <td>${{ pila.precio }}</td>
-                        <td class="{% if pila.cantidad|add:"0" < 10 %}text-danger{% endif %} fw-bold">
+                        <td class="text-start">
+                            <div class="form-group">
+                                <input type="number" name="precio_{{ pila.id }}" id="precio_{{ pila.id }}"
+                                    class="form-control precio-input" placeholder="0" min="0" max="{{ pila.precio }}"
+                                    data-max-stock="{{ pila.cantidad }}">
+                                <div class="error-message pila" id="error_precio_{{ pila.id }}"></div>
+                            </div>
+                        </td>
+                        <td class="{% if pila.cantidad|add:" 0" < 7 %}text-danger{% endif %} fw-bold">
                             {{ pila.cantidad }}
                         </td>
                         <td class="text-start">
                             <div class="form-group">
-                                <input type="number" name="cantidad_{{ pila.id }}" 
-                                    id="cantidad_{{ pila.id }}"
-                                    class="form-control cantidad-input" 
-                                    placeholder="0" min="0" max="{{ pila.cantidad }}"
-                                    data-max-stock="{{ pila.cantidad }}">
+                                <input type="number" name="cantidad_{{ pila.id }}" id="cantidad_{{ pila.id }}"
+                                    class="form-control cantidad-input" placeholder="0" min="0"
+                                    max="{{ pila.cantidad }}" data-max-stock="{{ pila.cantidad }}">
                                 <div class="error-message pila" id="error_cantidad_{{ pila.id }}"></div>
                             </div>
                         </td>
@@ -249,35 +275,35 @@
     <nav aria-label="Paginación" class="mt-4">
         <ul class="pagination justify-content-center">
             {% if pilas.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="Primera">
-                        <span aria-hidden="true">&laquo;&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ pilas.previous_page_number }}" aria-label="Anterior">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="Primera">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pilas.previous_page_number }}" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
             {% endif %}
 
             {% for i in pilas.paginator.page_range %}
-                <li class="page-item {% if pilas.number == i %}active{% endif %}">
-                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                </li>
+            <li class="page-item {% if pilas.number == i %}active{% endif %}">
+                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
             {% endfor %}
 
             {% if pilas.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ pilas.next_page_number }}" aria-label="Siguiente">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ pilas.paginator.num_pages }}" aria-label="Última">
-                        <span aria-hidden="true">&raquo;&raquo;</span>
-                    </a>
-                </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pilas.next_page_number }}" aria-label="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pilas.paginator.num_pages }}" aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
             {% endif %}
         </ul>
     </nav>
@@ -286,26 +312,26 @@
 
 <!-- Script para validar stock, enviar formulario y mostrar modal -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         // Agregar validación de stock a todos los inputs de cantidad
         const cantidadInputs = document.querySelectorAll('.cantidad-input');
-        cantidadInputs.forEach(function(input) {
-            input.addEventListener('change', function() {
+        cantidadInputs.forEach(function (input) {
+            input.addEventListener('change', function () {
                 const maxStock = this.getAttribute('data-max-stock');
                 validateStock(this, maxStock);
             });
         });
 
         // Configurar botón para enviar formulario
-        document.getElementById('btn-procesar').addEventListener('click', function() {
+        document.getElementById('btn-procesar').addEventListener('click', function () {
             // Limpiar mensajes de error previos
             clearErrors();
-            
+
             // Verificar si hay al menos una pila seleccionada
             let haySeleccion = false;
             const inputs = document.querySelectorAll('input[type=number]');
-            inputs.forEach(function(input) {
+            inputs.forEach(function (input) {
                 if (input.value && parseInt(input.value) > 0) {
                     haySeleccion = true;
                 }
@@ -314,7 +340,7 @@
             if (haySeleccion) {
                 // Verificar stock antes de enviar
                 let stockValido = true;
-                inputs.forEach(function(input) {
+                inputs.forEach(function (input) {
                     if (input.value && parseInt(input.value) > 0) {
                         const maxStock = input.getAttribute('max');
                         if (parseInt(input.value) > parseInt(maxStock)) {
@@ -332,29 +358,29 @@
             } else {
                 // Mostrar mensaje de error
                 showErrorBanner('Debe seleccionar al menos una pila para la venta');
-                
+
                 // Resaltar todos los campos como posibles opciones
-                inputs.forEach(function(input) {
+                inputs.forEach(function (input) {
                     input.classList.add('input-error');
                     input.classList.add('shake');
                     setTimeout(() => input.classList.remove('shake'), 500);
                 });
             }
         });
-        
+
         // Verificar si venimos de procesar una venta
         if (localStorage.getItem('procesando_venta') === 'true') {
             // Eliminar la marca para no mostrar el modal en futuras cargas
             localStorage.removeItem('procesando_venta');
-            
+
             // Mostrar modal de confirmación
-            setTimeout(function() {
+            setTimeout(function () {
                 try {
                     var confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
                     confirmationModal.show();
-                    
+
                     // Cerrar el modal después de 3 segundos
-                    setTimeout(function() {
+                    setTimeout(function () {
                         confirmationModal.hide();
                     }, 3000);
                 } catch (error) {
@@ -373,46 +399,46 @@
             errorDiv.style.display = 'none';
             errorDiv.textContent = '';
         }
-        
+
         // Quitar estilo de error
         input.classList.remove('input-error');
-        
+
         // Validar valor
         if (input.value && parseInt(input.value) > parseInt(maxStock)) {
             markInputError(input, `Excede el stock disponible (${maxStock})`);
         }
-        
+
         if (input.value && parseInt(input.value) < 0) {
             input.value = 0;
         }
-        
+
         // Ocultar banner de error global si algún campo tiene valor
         if (input.value && parseInt(input.value) > 0) {
             hideErrorBanner();
         }
     }
-    
+
     // Función para marcar un input como error
     function markInputError(input, message) {
         input.classList.add('input-error');
         input.classList.add('shake');
         setTimeout(() => input.classList.remove('shake'), 500);
-        
+
         const errorDiv = document.getElementById('error_' + input.id);
         if (errorDiv) {
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
         }
     }
-    
+
     // Función para limpiar todos los errores
     function clearErrors() {
         // Ocultar banner de error
         hideErrorBanner();
-        
+
         // Limpiar errores de inputs
         const inputs = document.querySelectorAll('input[type=number]');
-        inputs.forEach(function(input) {
+        inputs.forEach(function (input) {
             input.classList.remove('input-error');
             const errorDiv = document.getElementById('error_' + input.id);
             if (errorDiv) {
@@ -421,12 +447,12 @@
             }
         });
     }
-    
+
     // Función para mostrar banner de error
     function showErrorBanner(message) {
         const banner = document.getElementById('error-banner');
         const errorMessage = document.getElementById('error-message');
-        
+
         if (banner && errorMessage) {
             errorMessage.textContent = message;
             banner.style.display = 'block';
@@ -434,7 +460,7 @@
             setTimeout(() => banner.classList.remove('shake'), 500);
         }
     }
-    
+
     // Función para ocultar banner de error
     function hideErrorBanner() {
         const banner = document.getElementById('error-banner');

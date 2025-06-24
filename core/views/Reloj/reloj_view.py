@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from core.models.reloj import Reloj
 from core.models.cliente import Cliente
+from datetime import datetime
 
 mensaje_de_error = 'Por favor corrige los errores en el formulario.'
 templade_a_dirigir = 'reloj/reloj_form.html'
@@ -25,7 +26,7 @@ def reloj_list_view(request):
     # Verificar si estamos en la URL de servicios
     filter_params = {}
     if 'servicios' in request.path:
-        relojes = relojes.filter(estado='DISPONIBLE')
+        relojes = relojes.filter(pagado=False)
     elif filtro_estado and filtro_estado != 'todos':
         relojes = relojes.filter(estado=filtro_estado)
         filter_params['estado'] = filtro_estado
@@ -124,27 +125,78 @@ def reloj_sell_view(request, pk):
     
     if request.method == 'POST':
         form = RelojForm(request.POST, instance=reloj)
+        
+        # Obtener el monto del abono inicial
+        abono_inicial_monto = request.POST.get('abono_inicial_monto')
+        abono_inicial_desc = request.POST.get('abono_inicial_descripcion', 'Abono inicial')
+        
         if form.is_valid():
-            # Guardar solo los campos relacionados con la venta
+            # Guardar la venta del reloj
+            reloj = form.save(commit=False)
             reloj.estado = 'VENDIDO'
-            reloj.cliente = form.cleaned_data['cliente']
-            reloj.fecha_venta = form.cleaned_data['fecha_venta']
-            reloj.metodo_pago = form.cleaned_data['metodo_pago']
+            reloj.fecha_venta = form.cleaned_data.get('fecha_venta')
             
-            # Establecer valores según método de pago
+            # Establecer el saldo pendiente según el método de pago y el abono
             if reloj.metodo_pago == 'CONTADO':
-                reloj.pagado = True
                 reloj.saldo_pendiente = '0'
-            else:  # ABONO
-                reloj.pagado = False
-                reloj.saldo_pendiente = reloj.precio
+                reloj.pagado = True
+            elif reloj.metodo_pago == 'ABONO':
+                # Si hay abono inicial, aplicarlo
+                if abono_inicial_monto and int(abono_inicial_monto) > 0:
+                    precio = int(reloj.saldo_pendiente)  # Usar saldo_pendiente en lugar del precio
+                    abono = int(abono_inicial_monto)
+                    nuevo_saldo = max(0, precio - abono)
+                    
+                    # Asignar el nuevo saldo pendiente
+                    reloj.saldo_pendiente = str(nuevo_saldo)
+                    reloj.pagado = (nuevo_saldo == 0)
+                    
+                    print(f"DEBUG - Precio: {precio}, Abono: {abono}, Nuevo saldo: {nuevo_saldo}")
+                else:
+                    # Si no hay abono, el saldo es el precio total
+                    reloj.saldo_pendiente = reloj.precio
+                    reloj.pagado = False
             
+            # Guardar el reloj con los cambios
             reloj.save()
-            messages.success(request, 'Reloj vendido exitosamente.')
+            
+            # Si hay abono, registrarlo
+            if abono_inicial_monto and int(abono_inicial_monto) > 0:
+                from core.models.abono import Abono
+                from django.utils import timezone
+                
+                # Crear el registro de abono
+                abono = Abono.objects.create(
+                    reloj=reloj,
+                    monto=abono_inicial_monto,
+                    descripcion=abono_inicial_desc,
+                    fecha=timezone.now()
+                )
+                
+                # Registrar el ingreso
+                from core.services.ingreso_service import crear_ingreso
+                datos_ingreso = {
+                    'fecha': timezone.now().strftime('%d/%m/%Y'),
+                    'valor': abono_inicial_monto,
+                    'descripcion': f"Abono inicial reloj {reloj.referencia} - {reloj.marca}"
+                }
+                crear_ingreso(datos_ingreso)
+                
+                messages.success(
+                    request, 
+                    f'Reloj vendido con abono de ${abono_inicial_monto}. Saldo pendiente: ${reloj.saldo_pendiente}'
+                )
+            else:
+                messages.success(request, 'Reloj vendido exitosamente.')
+            
+            # Guardar de nuevo para asegurar que todos los cambios se aplican
+            reloj.save()
+            
+            # Verificar que el saldo pendiente se actualizó correctamente
+            reloj_actualizado = Reloj.objects.get(pk=reloj.pk)
+            print(f"DEBUG - Saldo pendiente final en BD: {reloj_actualizado.saldo_pendiente}")
+            
             return redirect('reloj_venta_list')
-        else:
-            print("Errores del formulario:", form.errors)
-            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
         form = RelojForm(instance=reloj)
     

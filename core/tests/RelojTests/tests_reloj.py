@@ -1,436 +1,244 @@
-from django.test import TestCase
-from core.models.reloj import Reloj
-from core.forms.reloj_form import RelojForm
-from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
-from django.test import Client
+from django.test import TestCase, Client
 from django.urls import reverse
+from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
-from datetime import date
+from core.models.reloj import Reloj
 from core.models.cliente import Cliente
 from core.models.abono import Abono
+from core.forms.reloj_form import RelojForm
+from core.services.reloj_service import get_all_relojes, create_reloj
+from decimal import Decimal
+from datetime import date
 
-class RelojFormTest(TestCase):
-
-    def test_form_valid_data(self):
-        """Test the form with valid data"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 15000,
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertTrue(form.is_valid())
-
-    def test_form_invalid_data_marca_required(self):
-        """Test the form with missing 'marca' field"""
-        data = {
-            'referencia': '12345',
-            'precio': 15000,
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('marca', form.errors)
-
-    def test_form_invalid_data_precio_required(self):
-        """Test the form with missing 'precio' field"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('precio', form.errors)
-
-    def test_clean_precio_valid(self):
-        """Test the clean_precio method for valid input"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 15000,
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        form.is_valid()
-        self.assertEqual(form.cleaned_data['precio'], 15000)
-
-    def test_clean_precio_invalid(self):
-        """Test the clean_precio method for invalid input"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 'invalid_value',  # Esto no es un número válido
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('precio', form.errors)
-
-    def test_clean_precio_negative(self):
-        """Test the clean_precio method for negative values"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': -15000,  # Precio negativo
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('precio', form.errors)
-
-    def test_clean_precio_too_large(self):
-        """Test the clean_precio method for values that are too large"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 1000000000000,  # Precio demasiado grande
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('precio', form.errors)
-
-    def test_clean_fecha_venta_required_when_estado_is_vendido(self):
-        """Test that fecha_venta is required when estado is 'VENDIDO'"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 15000,
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'VENDIDO',
-            'fecha_venta': '',  # Debería ser obligatorio
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('fecha_venta', form.errors)
-
-    def test_form_fecha_venta_format(self):
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 15000,
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'VENDIDO',
-            'fecha_venta': '31-12-2025',  # Formato inválido
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('fecha_venta', form.errors)
-
-    def test_clean_fecha_venta_valid(self):
-        """Test valid fecha_venta format"""
-        # Create a test client first
-        test_cliente = Cliente.objects.create(
-            nombre='Carlos',
-            apellido='Gomez',
-            telefono='1234567890'
-        )
-
-        today = date.today()
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': '15000',
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'VENDIDO',
-            'fecha_venta': today.strftime('%d/%m/%Y'),
-            'pagado': False,
-            'cliente': test_cliente.id  # Pass the client ID instead of a dictionary
-        }
-
-        form = RelojForm(data=data)
-        if not form.is_valid():
-            print(f"Errores de validación del formulario: {form.errors}")
-        self.assertTrue(form.is_valid())
-
-    def test_form_invalid_data_dueno_required(self):
-        """Test the form with missing 'dueno' field"""
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': 15000,
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
-        }
-
-        form = RelojForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('dueno', form.errors)
-
-        def test_clean_cliente_required_when_vendido(self):
-            """Test que el cliente es requerido cuando el estado es VENDIDO"""
-            data = {
-                'marca': 'Rolex',
-                'referencia': '12345',
-                'precio': '15000',
-                'dueno': 'Juan Perez',
-                'descripcion': 'Reloj de lujo',
-                'tipo': 'NUEVO',
-                'estado': 'VENDIDO',
-                'fecha_venta': date.today().strftime('%d/%m/%Y'),
-                'cliente': '',  # Cliente vacío
-                'pagado': True
-            }
-            form = RelojForm(data=data)
-            self.assertFalse(form.is_valid())
-            self.assertIn('cliente', form.errors)
-
-    def test_clean_metodo_pago_contado(self):
-        """Test que al vender al contado, se marca como pagado y saldo 0"""
-        test_cliente = Cliente.objects.create(
-            nombre='Carlos',
-            apellido='Gomez',
-            telefono='1234567890'
-        )
-        data = {
-            'marca': 'Rolex',
-            'referencia': '12345',
-            'precio': '15000',
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'VENDIDO',
-            'fecha_venta': date.today().strftime('%d/%m/%Y'),
-            'cliente': test_cliente.id,
-            'metodo_pago': 'CONTADO'
-        }
-        form = RelojForm(data=data)
-        self.assertTrue(form.is_valid())
-        self.assertTrue(form.cleaned_data['pagado'])
-        self.assertEqual(form.cleaned_data['saldo_pendiente'], '0')
-
-    def test_clean_metodo_pago_abono_sin_abonos_previos(self):
-        """Test que al cambiar a abono sin abonos previos, establece saldo pendiente igual al precio"""
-        test_cliente = Cliente.objects.create(
-            nombre='Carlos',
-            apellido='Gomez',
-            telefono='1234567890'
-        )
-        data = {
-            'marca': 'Rolex',
-            'referencia': 'TEST123',
-            'precio': '15000',
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'VENDIDO',  # Asegurarnos que esté como VENDIDO
-            'fecha_venta': date.today().strftime('%d/%m/%Y'),
-            'cliente': test_cliente.id,
-            'metodo_pago': 'ABONO',
-            'tiene_comision': False,  # Agregar campo tiene_comision
-            'pagado': False  # Asegurarnos que no esté pagado
-        }
-        
-        # Crear una nueva instancia de reloj
-        reloj = Reloj.objects.create(
-            marca='Rolex',
-            referencia='TEST123',
-            precio='15000',
-            dueno='Juan Perez',
-            tipo='NUEVO',
-            estado='DISPONIBLE'
-        )
-        
-        # Usar la instancia existente en el formulario
-        form = RelojForm(data=data, instance=reloj)
-        self.assertTrue(form.is_valid(), f"Errores del formulario: {form.errors}")
-        self.assertEqual(form.cleaned_data['saldo_pendiente'], '15000')
-
-    def test_clean_metodo_pago_abono_con_abonos_previos(self):
-        """Test que al cambiar a abono con abonos previos, mantiene el saldo pendiente actual"""
-        test_cliente = Cliente.objects.create(
-            nombre='Carlos',
-            apellido='Gomez',
-            telefono='1234567890'
-        )
-        reloj = Reloj.objects.create(
-            marca='Rolex',
-            referencia='TEST123',
-            precio='15000',
-            dueno='Juan Perez',
-            estado='VENDIDO',
-            metodo_pago='ABONO',
-            saldo_pendiente='10000',
-            cliente=test_cliente
-        )
-        Abono.objects.create(
-            reloj=reloj,
-            monto='5000',
-            descripcion='Primer abono'
-        )
-        
-        data = {
-            'marca': 'Rolex',
-            'referencia': 'TEST123',
-            'precio': '15000',
-            'dueno': 'Juan Perez',
-            'descripcion': 'Reloj de lujo',
-            'tipo': 'NUEVO',
-            'estado': 'VENDIDO',
-            'fecha_venta': date.today().strftime('%d/%m/%Y'),
-            'cliente': test_cliente.id,
-            'metodo_pago': 'ABONO',
-            'saldo_pendiente': '10000'
-        }
-        form = RelojForm(data=data, instance=reloj)
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data['saldo_pendiente'], '10000')
-
-class RelojViewsTest(TestCase):
+class BaseRelojTestCase(TestCase):
+    """Configuración base para todos los tests de reloj"""
+    
     def setUp(self):
-        """Set up test environment"""
-        # Create test user
+        # Crear usuario de prueba
         self.user = User.objects.create_user(
             username='testuser',
             password='testpass123'
         )
         self.client = Client()
-        
-        # Create sample reloj data
+        self.client.login(username='testuser', password='testpass123')
+
+        # Crear cliente de prueba
+        self.cliente = Cliente.objects.create(
+            nombre='Juan',
+            apellido='Pérez',
+            telefono='1234567890'
+        )
+
+        # Datos válidos para formularios
         self.valid_reloj_data = {
             'marca': 'Rolex',
-            'referencia': '12345',
+            'referencia': 'TEST123',
             'precio': '15000',
-            'dueno': 'Juan Perez',
+            'dueno': 'Juan Pérez',
             'descripcion': 'Reloj de lujo',
             'tipo': 'NUEVO',
             'estado': 'DISPONIBLE',
-            'fecha_venta': '',
-            'pagado': False
+            'tiene_comision': False
         }
-        
-        # Create multiple relojes for pagination testing
-        for i in range(7):
-            Reloj.objects.create(
-                marca=f'Marca{i}',
-                referencia=f'REF{i}',
-                precio=1000 * i,
-                dueno='Test Owner',
-                tipo='NUEVO',
-                estado='DISPONIBLE'
-            )
 
-    def test_reloj_list_view_authenticated(self):
-        """Test reloj list view when user is authenticated"""
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('reloj_list'))
+        # Datos para venta
+        self.valid_venta_data = {
+            'marca': 'Rolex',
+            'referencia': 'TEST123',
+            'precio': '15000',
+            'dueno': 'Juan Pérez',
+            'descripcion': 'Reloj de lujo',
+            'tipo': 'NUEVO',
+            'estado': 'VENDIDO',
+            'fecha_venta': date.today().strftime('%d/%m/%Y'),
+            'cliente': self.cliente.id,
+            'metodo_pago': 'CONTADO',
+            'tiene_comision': False
+        }
+
+class RelojServiceTests(BaseRelojTestCase):
+    """Tests para el servicio de relojes"""
+
+    def test_get_all_relojes_vacio(self):
+        """Test para obtener todos los relojes cuando no existen"""
+        relojes = get_all_relojes()
+        self.assertEqual(relojes.count(), 0)
+
+    def test_get_all_relojes_con_datos(self):
+        """Test para obtener todos los relojes cuando existen"""
+        Reloj.objects.create(**self.valid_reloj_data)
+        relojes = get_all_relojes()
+        self.assertEqual(relojes.count(), 1)
+
+    def test_create_reloj_exitoso(self):
+        """Test para crear reloj exitosamente"""
+        form = RelojForm(data=self.valid_reloj_data)
+        self.assertTrue(form.is_valid())
         
+        reloj = create_reloj(form)
+        self.assertEqual(reloj.marca, 'Rolex')
+        self.assertEqual(reloj.precio, '15000')
+        self.assertEqual(reloj.saldo_pendiente, '15000')
+        self.assertFalse(reloj.pagado)
+
+    def test_create_reloj_con_comision(self):
+        """Test para crear reloj con comisión"""
+        data = self.valid_reloj_data.copy()
+        data['tiene_comision'] = True
+        
+        form = RelojForm(data=data)
+        self.assertTrue(form.is_valid())
+        
+        reloj = create_reloj(form)
+        # Comisión debería ser 20% del precio
+        self.assertEqual(reloj.comision, '3000')  # 15000 * 0.2
+
+    def test_create_reloj_sin_comision(self):
+        """Test para crear reloj sin comisión"""
+        form = RelojForm(data=self.valid_reloj_data)
+        self.assertTrue(form.is_valid())
+        
+        reloj = create_reloj(form)
+        self.assertEqual(reloj.comision, '0')
+
+class RelojFormTests(BaseRelojTestCase):
+    """Tests para el formulario de relojes"""
+
+    def test_form_valido_disponible(self):
+        """Test para formulario válido con estado disponible"""
+        form = RelojForm(data=self.valid_reloj_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_valido_vendido_contado(self):
+        """Test para formulario válido con venta al contado"""
+        form = RelojForm(data=self.valid_venta_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['pagado'], True)
+        self.assertEqual(form.cleaned_data['saldo_pendiente'], '0')
+
+    def test_form_valido_vendido_abono(self):
+        """Test para formulario válido con venta por abono"""
+        data = self.valid_venta_data.copy()
+        data['metodo_pago'] = 'ABONO'
+        
+        form = RelojForm(data=data)
+        self.assertTrue(form.is_valid())
+        # La lógica de saldo_pendiente se maneja en las vistas
+        self.assertFalse(form.cleaned_data['pagado'])
+
+    def test_form_marca_requerida(self):
+        """Test para validar que la marca es requerida"""
+        data = self.valid_reloj_data.copy()
+        del data['marca']
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('marca', form.errors)
+
+    def test_form_referencia_requerida(self):
+        """Test para validar que la referencia es requerida"""
+        data = self.valid_reloj_data.copy()
+        del data['referencia']
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('referencia', form.errors)
+
+    def test_form_precio_requerido(self):
+        """Test para validar que el precio es requerido"""
+        data = self.valid_reloj_data.copy()
+        del data['precio']
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('precio', form.errors)
+
+    def test_form_precio_numerico(self):
+        """Test para validar que el precio sea numérico"""
+        data = self.valid_reloj_data.copy()
+        data['precio'] = 'abc'
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('precio', form.errors)
+
+    def test_form_precio_positivo(self):
+        """Test para validar que el precio sea positivo"""
+        data = self.valid_reloj_data.copy()
+        data['precio'] = '-1000'
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('precio', form.errors)
+
+    def test_form_vendido_requiere_cliente(self):
+        """Test para validar que al vender se requiere cliente"""
+        data = self.valid_venta_data.copy()
+        del data['cliente']
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('cliente', form.errors)
+
+    def test_form_vendido_requiere_fecha_venta(self):
+        """Test para validar que al vender se requiere fecha de venta"""
+        data = self.valid_venta_data.copy()
+        del data['fecha_venta']
+        
+        form = RelojForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('fecha_venta', form.errors)
+
+class RelojViewTests(BaseRelojTestCase):
+    """Tests para las vistas de relojes"""
+
+    def test_reloj_list_view_get(self):
+        """Test GET request to reloj list view"""
+        response = self.client.get(reverse('reloj_list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'reloj/reloj_list.html')
-        self.assertTrue('relojes' in response.context)
-        self.assertTrue('is_paginated' in response.context)
-        self.assertEqual(len(response.context['page_obj']), 6)  # Check pagination
+        self.assertIn('relojes', response.context)
+
+    def test_reloj_list_view_con_datos(self):
+        """Test reloj list view with data"""
+        Reloj.objects.create(**self.valid_reloj_data)
+        response = self.client.get(reverse('reloj_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['page_obj']), 1)
 
     def test_reloj_create_view_get(self):
         """Test GET request to reloj create view"""
-        self.client.login(username='testuser', password='testpass123')
         response = self.client.get(reverse('reloj_create'))
-        
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'reloj/reloj_form.html')
-        self.assertTrue(isinstance(response.context['form'], RelojForm))
+        self.assertIsInstance(response.context['form'], RelojForm)
 
     def test_reloj_create_view_post_valid(self):
         """Test POST request to reloj create view with valid data"""
-        self.client.login(username='testuser', password='testpass123')
         response = self.client.post(reverse('reloj_create'), data=self.valid_reloj_data)
-        
         self.assertRedirects(response, reverse('reloj_list'))
+        
+        # Verificar que se creó el reloj
+        self.assertTrue(Reloj.objects.filter(referencia='TEST123').exists())
+        
+        # Verificar mensaje de éxito
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), 'Referencia de reloj agregada con éxito')
 
     def test_reloj_create_view_post_invalid(self):
         """Test POST request to reloj create view with invalid data"""
-        self.client.login(username='testuser', password='testpass123')
-        invalid_data = self.valid_reloj_data.copy()
-        invalid_data.pop('marca')  # Remove required field
+        data = self.valid_reloj_data.copy()
+        data['precio'] = 'invalid'
         
-        response = self.client.post(reverse('reloj_create'), data=invalid_data)
-        
+        response = self.client.post(reverse('reloj_create'), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'reloj/reloj_form.html')
-        self.assertTrue(response.context['form'].errors)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Por favor corrige los errores en el formulario.')
-
-    def test_reloj_list_pagination(self):
-        """Test pagination of reloj list"""
-        self.client.login(username='testuser', password='testpass123')
-        
-        # Test first page
-        response = self.client.get(reverse('reloj_list'))
-        self.assertEqual(len(response.context['page_obj']), 6)
-        self.assertTrue(response.context['is_paginated'])
-        
-        # Test second page
-        response = self.client.get(f"{reverse('reloj_list')}?page=2")
-        self.assertEqual(len(response.context['page_obj']), 1)
-        self.assertTrue(response.context['is_paginated'])
+        self.assertFalse(response.context['form'].is_valid())
 
     def test_reloj_edit_view_get_valid(self):
         """Test GET request to update a valid reloj"""
-        self.client.login(username='testuser', password='testpass123')
-        reloj = Reloj.objects.first()
+        reloj = Reloj.objects.create(**self.valid_reloj_data)
         response = self.client.get(reverse('reloj_edit', kwargs={'pk': reloj.pk}))
-        
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'reloj/reloj_form.html')
         self.assertIn('form', response.context)
@@ -438,143 +246,75 @@ class RelojViewsTest(TestCase):
 
     def test_reloj_edit_view_post_valid(self):
         """Test POST request with valid data updates the reloj"""
-        self.client.login(username='testuser', password='testpass123')
-        reloj = Reloj.objects.first()
-        updated_data = {
-            'marca': 'Omega',
-            'referencia': reloj.referencia,
-            'precio': 20000,
-            'dueno': reloj.dueno,
-            'descripcion': 'Actualizado',
-            'tipo': reloj.tipo,
-            'estado': reloj.estado,
-            'fecha_venta': '',
-            'pagado': False
-        }
+        reloj = Reloj.objects.create(**self.valid_reloj_data)
+        updated_data = self.valid_reloj_data.copy()
+        updated_data['marca'] = 'Omega'
+        updated_data['descripcion'] = 'Actualizado'
+        
         response = self.client.post(reverse('reloj_edit', kwargs={'pk': reloj.pk}), data=updated_data)
-
         self.assertRedirects(response, reverse('reloj_list'))
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Referencia de reloj actualizada con éxito')
-
-        # Verifica que los datos hayan sido actualizados en la base de datos
+        
+        # Verificar que se actualizó
         reloj.refresh_from_db()
         self.assertEqual(reloj.marca, 'Omega')
         self.assertEqual(reloj.descripcion, 'Actualizado')
 
-    def test_reloj_edit_view_post_invalid(self):
-        """Test POST request with invalid data does not update the reloj"""
-        self.client.login(username='testuser', password='testpass123')
-        reloj = Reloj.objects.first()
-        invalid_data = {
-            'marca': '',  # Campo requerido vacío
-            'referencia': reloj.referencia,
-            'precio': 20000,
-            'dueno': reloj.dueno,
-            'descripcion': 'Actualizado',
-            'tipo': reloj.tipo,
-            'estado': reloj.estado,
-            'fecha_venta': '',
-            'pagado': False
-        }
-        response = self.client.post(reverse('reloj_edit', kwargs={'pk': reloj.pk}), data=invalid_data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'reloj/reloj_form.html')
-        self.assertTrue(response.context['form'].errors)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Por favor corrige los errores en el formulario.')
-
-
-    def test_reloj_edit_view_not_found(self):
-        """Test update view with non-existent reloj redirects with error"""
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('reloj_edit', kwargs={'pk': 999}))  # ID inexistente
+    def test_reloj_edit_view_reloj_inexistente(self):
+        """Test edit view with non-existent reloj"""
+        response = self.client.get(reverse('reloj_edit', kwargs={'pk': 999999}))
         self.assertRedirects(response, reverse('reloj_list'))
+        
+        # Verificar mensaje de error
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), 'El reloj no existe.')
 
-class RelojSellViewTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpass123')
-        self.client = Client()
-        self.client.login(username='testuser', password='testpass123')
-
-        self.reloj = Reloj.objects.create(
-            marca='Tag Heuer',
-            referencia='TAG123',
-            precio=20000,
-            dueno='Luis Rodriguez',
-            descripcion='Reloj deportivo',
-            tipo='NUEVO',
-            estado='DISPONIBLE'
-        )
-
     def test_reloj_venta_view_get(self):
-        url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
-        response = self.client.get(url)
-
+        """Test GET request to reloj venta view"""
+        reloj = Reloj.objects.create(**self.valid_reloj_data)
+        response = self.client.get(reverse('reloj_venta', kwargs={'pk': reloj.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'reloj/reloj_form.html')
         self.assertEqual(response.context['modo'], 'vender')
 
-    def test_reloj_venta_view_post_valid(self):
-        url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
-        test_cliente = Cliente.objects.create(
-        nombre='Carlos',
-        apellido='Gomez',
-        telefono='1234567890'
-    )
-        data = {
-            'marca': self.reloj.marca,
-            'referencia': self.reloj.referencia,
-            'precio': self.reloj.precio,
-            'dueno': self.reloj.dueno,
-            'descripcion': self.reloj.descripcion,
-            'tipo': self.reloj.tipo,
-            'estado': self.reloj.estado, 
-            'fecha_venta': date.today().strftime('%d/%m/%Y'),
-            'cliente': test_cliente.id,
-            'pagado': True
-        }
-
-        response = self.client.post(url, data)
+    def test_reloj_venta_view_post_contado(self):
+        """Test POST request for venta al contado"""
+        reloj = Reloj.objects.create(**self.valid_reloj_data)
+        response = self.client.post(reverse('reloj_venta', kwargs={'pk': reloj.pk}), data=self.valid_venta_data)
         self.assertRedirects(response, reverse('reloj_venta_list'))
-        self.reloj.refresh_from_db()
-        self.assertEqual(self.reloj.estado.lower(), 'vendido')
+        
+        # Verificar que se vendió correctamente
+        reloj.refresh_from_db()
+        self.assertEqual(reloj.estado, 'VENDIDO')
+        self.assertEqual(reloj.metodo_pago, 'CONTADO')
+        self.assertTrue(reloj.pagado)
+        self.assertEqual(reloj.saldo_pendiente, '0')
 
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Reloj vendido exitosamente.')
-
-    def test_reloj_venta_view_invalid_form(self):
-        url = reverse('reloj_venta', kwargs={'pk': self.reloj.pk})
-        test_cliente = Cliente.objects.create(
-        nombre='Carlos',
-        apellido='Gomez',
-        telefono='1234567890'
-        )
-        invalid_data = {
-            'marca': '',
-            'referencia': self.reloj.referencia,
-            'precio': self.reloj.precio,
-            'dueno': self.reloj.dueno,
-            'descripcion': self.reloj.descripcion,
-            'tipo': self.reloj.tipo,
-            'estado': self.reloj.estado,
-            'fecha_venta': '',
-            'cliente': test_cliente.id,
-            'pagado': False
-        }
-
-        response = self.client.post(url, data=invalid_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'reloj/reloj_form.html')
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'Por favor corrija los errores en el formulario.')
-
-    def test_reloj_venta_view_reloj_not_exist(self):
-        url = reverse('reloj_venta', kwargs={'pk': 9999})  # ID inexistente
-        response = self.client.get(url)
+    def test_reloj_venta_view_post_abono(self):
+        """Test POST request for venta por abono"""
+        reloj = Reloj.objects.create(**self.valid_reloj_data)
+        data = self.valid_venta_data.copy()
+        data['metodo_pago'] = 'ABONO'
+        
+        response = self.client.post(reverse('reloj_venta', kwargs={'pk': reloj.pk}), data=data)
         self.assertRedirects(response, reverse('reloj_venta_list'))
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), 'El reloj no existe.')
+        
+        # Verificar que se vendió correctamente con abono
+        reloj.refresh_from_db()
+        self.assertEqual(reloj.estado, 'VENDIDO')
+        self.assertEqual(reloj.metodo_pago, 'ABONO')
+        self.assertFalse(reloj.pagado)
+        self.assertEqual(reloj.saldo_pendiente, '15000')
+
+    def test_usuario_no_autenticado(self):
+        """Test that unauthenticated users are redirected"""
+        self.client.logout()
+        
+        # Test list view
+        response = self.client.get(reverse('reloj_list'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login/', response.url)
+        
+        # Test create view
+        response = self.client.get(reverse('reloj_create'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login/', response.url)

@@ -38,8 +38,16 @@ def reparacion_list_view(request):
             Q(cliente__apellido__icontains=search_query) |
             Q(cliente__telefono__icontains=search_query) |
             Q(tecnico__nombre__icontains=search_query) |
-            Q(tecnico__apellidos__icontains=search_query) 
+            Q(tecnico__apellidos__icontains=search_query) |
+            Q(descripcion__icontains=search_query) |
+            Q(marca_reloj__icontains=search_query)
         )
+        
+        # Agregar búsqueda por mantenimiento si los términos son relevantes
+        mantenimiento_terms = ['mantenimiento', 'preventivo', 'maintenance']
+        if any(term in search_query.lower() for term in mantenimiento_terms):
+            base_query |= Q(mantenimiento=True)
+        
         query |= base_query
 
         # Si hay múltiples términos, buscar coincidencias de nombre+apellido
@@ -66,6 +74,7 @@ def reparacion_list_view(request):
 
         reparaciones_qs = reparaciones_qs.filter(query).distinct()
 
+    reparaciones_qs = reparaciones_qs.order_by('-fecha_ingreso')
     paginator = Paginator(reparaciones_qs, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

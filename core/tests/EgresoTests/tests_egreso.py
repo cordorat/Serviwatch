@@ -154,10 +154,11 @@ class EgresoFormTest(TestCase):
         form = EgresoForm()
         
         # Verificar que los widgets tienen los atributos esperados
-        # Primero comprobamos si existe el atributo, luego su valor
+        # El campo fecha tiene definición manual con 'form-control text-secondary'
         self.assertIn('class', form.fields['fecha'].widget.attrs)
         self.assertEqual(form.fields['fecha'].widget.attrs['class'], 'form-control text-secondary')
         
+        # Los campos valor y descripcion usan Meta.widgets con 'form-control text-secondary'
         self.assertIn('min', form.fields['valor'].widget.attrs)
         self.assertEqual(form.fields['valor'].widget.attrs['min'], '0')
         self.assertIn('class', form.fields['valor'].widget.attrs)

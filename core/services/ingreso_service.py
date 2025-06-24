@@ -14,29 +14,31 @@ from reportlab.lib.pagesizes import landscape
 
 
 def crear_ingreso(datos):
-    try:
-        # Verificar que todos los datos necesarios estén presentes
-        required_keys = ['fecha', 'valor', 'descripcion']
-        for key in required_keys:
-            if key not in datos:
-                raise ValidationError(f"Falta el dato requerido: {key}")
-
-        # Crear una instancia de Ingreso
+    """
+    Crea un nuevo ingreso a partir de los datos proporcionados.
+    """
+    try:        
+        # Convertir el valor a entero si es posible
+        try:
+            valor = int(datos['valor'])
+        except ValueError:
+            valor = 0        
+        # Validar la fecha
+        try:
+            fecha = datetime.strptime(datos['fecha'], '%d/%m/%Y').date()
+        except ValueError:
+            fecha = datetime.now().date()
+                    
+        # Crear el ingreso
         ingreso = Ingreso(
-            fecha=datos['fecha'],
-            valor=datos['valor'],
+            fecha=fecha,
+            valor=valor,
             descripcion=datos['descripcion']
         )
-        # Guardar el ingreso en la base de datos
         ingreso.save()
         return ingreso
-
-    except ValidationError as ve:
-        # Manejar errores de validación
-        raise ve
     except Exception as e:
-        # Manejar cualquier otro tipo de error
-        raise DatabaseError(f"Error al crear el ingreso: {str(e)}")
+        return None
     
     
 def obtener_total_ingresos_dia(fecha=None):

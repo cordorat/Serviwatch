@@ -1,18 +1,15 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %}
 <div class="main-content">
   <div class="header-icons">
     <h2 class="titulo">PILAS</h2>
   </div>
-  <br>
+  <br />
   <!-- Header with Add button -->
   <div class="header-icons">
     <a href="{% url 'pilas_form' %}" class="btn btn-add me-3">Agregar Pila</a>
   </div>
 
-  <br>
+  <br />
 
   <!-- Lista de pilas -->
   <div class="table-container">
@@ -20,7 +17,6 @@
       <thead class="table-header">
         <tr>
           <th>Código</th>
-          <th>Precio</th>
           <th>Stock</th>
           <th>Acciones</th>
         </tr>
@@ -29,10 +25,13 @@
         {% for pila in pilas %}
         <tr>
           <td>{{ pila.codigo }}</td>
-          <td>${{ pila.precio }}</td>
           <td>{{ pila.cantidad }}</td>
           <td>
-            <a href="{% url 'pila_editar' id=pila.id %}" class="btn btn-sm btn-outline-primary" title="Editar pila">
+            <a
+              href="{% url 'pila_editar' id=pila.id %}"
+              class="btn btn-sm btn-outline-primary"
+              title="Editar pila"
+            >
               <i class="bi bi-pencil fs-4"></i>
             </a>
           </td>
@@ -52,55 +51,52 @@
     <div class="custom-pagination">
       <!-- Botón primera página -->
       {% if pilas.has_previous %}
-      <a href="?page=1" class="pagination-btn pagination-arrow">
-        &lt;&lt;
-      </a>
+      <a href="?page=1" class="pagination-btn pagination-arrow"> &lt;&lt; </a>
       {% else %}
-      <span class="pagination-btn pagination-arrow disabled">
-        &lt;&lt;
-      </span>
+      <span class="pagination-btn pagination-arrow disabled"> &lt;&lt; </span>
       {% endif %}
-      
+
       <!-- Botón anterior -->
       {% if pilas.has_previous %}
-      <a href="?page={{ pilas.previous_page_number }}" class="pagination-btn pagination-arrow">
+      <a
+        href="?page={{ pilas.previous_page_number }}"
+        class="pagination-btn pagination-arrow"
+      >
         &lt;
       </a>
       {% else %}
-      <span class="pagination-btn pagination-arrow disabled">
-        &lt;
-      </span>
+      <span class="pagination-btn pagination-arrow disabled"> &lt; </span>
       {% endif %}
-      
+
       <!-- Números de página -->
-      {% for i in pilas.paginator.page_range %}
-        {% if pilas.number == i %}
-        <span class="pagination-btn active">{{ i }}</span>
-        {% else %}
-        <a href="?page={{ i }}" class="pagination-btn">{{ i }}</a>
-        {% endif %}
-      {% endfor %}
-      
+      {% for i in pilas.paginator.page_range %} {% if pilas.number == i %}
+      <span class="pagination-btn active">{{ i }}</span>
+      {% else %}
+      <a href="?page={{ i }}" class="pagination-btn">{{ i }}</a>
+      {% endif %} {% endfor %}
+
       <!-- Botón siguiente -->
       {% if pilas.has_next %}
-      <a href="?page={{ pilas.next_page_number }}" class="pagination-btn pagination-arrow">
+      <a
+        href="?page={{ pilas.next_page_number }}"
+        class="pagination-btn pagination-arrow"
+      >
         &gt;
       </a>
       {% else %}
-      <span class="pagination-btn pagination-arrow disabled">
-        &gt;
-      </span>
+      <span class="pagination-btn pagination-arrow disabled"> &gt; </span>
       {% endif %}
-      
+
       <!-- Botón última página -->
       {% if pilas.has_next %}
-      <a href="?page={{ pilas.paginator.num_pages }}" class="pagination-btn pagination-arrow">
+      <a
+        href="?page={{ pilas.paginator.num_pages }}"
+        class="pagination-btn pagination-arrow"
+      >
         &gt;&gt;
       </a>
       {% else %}
-      <span class="pagination-btn pagination-arrow disabled">
-        &gt;&gt;
-      </span>
+      <span class="pagination-btn pagination-arrow disabled"> &gt;&gt; </span>
       {% endif %}
     </div>
   </div>
@@ -108,52 +104,52 @@
 </div>
 
 <style>
-    .custom-pagination-container {
-      display: flex;
-      justify-content: flex-start;
-      margin-top: 20px;
-      margin-left: 15px;
-    }
-    
-    .custom-pagination {
-      display: flex;
-      gap: 5px;
-    }
-    
-    .pagination-btn {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 40px;
-      height: 40px;
-      background: #ffffff;
-      background: linear-gradient(to bottom, #ffffff, #f5f5f5);
-      border: 2px solid #8a9a5b;
-      border-radius: 8px;
-      color: #8a9a5b;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 18px;
-      box-shadow: none;
-    }
-    
-    .pagination-btn:hover {
-      background: #f8f8f8;
-    }
-    
-    .pagination-btn.active {
-      background: #f0f0f0;
-    }
-    
-    .pagination-btn.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .pagination-arrow {
-      font-weight: bold;
-      color: #8a9a5b;
-    }
+  .custom-pagination-container {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 20px;
+    margin-left: 15px;
+  }
+
+  .custom-pagination {
+    display: flex;
+    gap: 5px;
+  }
+
+  .pagination-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    background: linear-gradient(to bottom, #ffffff, #f5f5f5);
+    border: 2px solid #8a9a5b;
+    border-radius: 8px;
+    color: #8a9a5b;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: none;
+  }
+
+  .pagination-btn:hover {
+    background: #f8f8f8;
+  }
+
+  .pagination-btn.active {
+    background: #f0f0f0;
+  }
+
+  .pagination-btn.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .pagination-arrow {
+    font-weight: bold;
+    color: #8a9a5b;
+  }
 </style>
 
 {% endblock %}
