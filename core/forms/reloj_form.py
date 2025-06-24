@@ -8,7 +8,7 @@ class ClienteChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.nombre} - {obj.apellido} - {obj.telefono}"
 
-clase_formulario = 'form-control text-secondary'
+clase_formulario = 'form-control'
 
 class RelojForm(forms.ModelForm):
     marca = forms.CharField(
@@ -168,6 +168,11 @@ class RelojForm(forms.ModelForm):
         self.fields['cliente'].widget.attrs['placeholder'] = 'Seleccione un cliente'
         self.fields['estado'].initial = 'DISPONIBLE'  # Asegúrate de que el estado tenga un valor por defecto
         self.fields['pagado'].initial = False
+        
+        # Acomodar el campo fecha_venta para que el formato sea dd/mm/yyyy en la BD
+        if self.instance and self.instance.fecha_venta:
+            self.initial['fecha_venta'] = self.instance.fecha_venta.strftime('%d/%m/%Y')
+        
         for field in self.fields:
             if self[field].errors:
                 self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})

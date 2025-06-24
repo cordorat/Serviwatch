@@ -21,6 +21,7 @@ class Reparacion(models.Model):
     espacio_fisico = models.CharField(max_length=15)
     estado = models.CharField(max_length=15, choices=ESTADOS, default='Cotización')
     tecnico = models.ForeignKey(Empleado, on_delete=models.SET_NULL, null=True, related_name='reparaciones')
+    mantenimiento = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Reparación {self.codigo_orden} - {self.cliente}"
