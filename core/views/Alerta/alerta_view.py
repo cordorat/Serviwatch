@@ -6,6 +6,9 @@ from core.models.reparacion import Reparacion
 from core.models.pilas import Pilas
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models.functions import Cast
+from django.db.models import IntegerField
+
 
 @login_required
 @require_http_methods(["GET"])
@@ -30,7 +33,10 @@ def alerta_view(request):
         
     elif tipo == 'stock_bajo':
         # Pilas con stock bajo (menos de 5 unidades)
-        items = Pilas.objects.filter(cantidad__lt=5).order_by('cantidad')
+        # Usar casting para convertir CharField a IntegerField para comparación numérica
+        items = Pilas.objects.annotate(
+            cantidad_int=Cast('cantidad', IntegerField())
+        ).filter(cantidad_int__lt=5).order_by('cantidad_int')
         
     elif tipo == 'proxima_revision':
         # Reparaciones con mantenimiento que han pasado más de 1 mes desde su ingreso
@@ -50,7 +56,10 @@ def alerta_view(request):
         estado__in=['Cotización', 'Reparación', 'Prueba', 'Listo']
     ).count()
     
-    contador_stock = Pilas.objects.filter(cantidad__lt=5).count()
+    contador_stock = Pilas.objects.annotate(
+        cantidad_int=Cast('cantidad', IntegerField())
+    ).filter(cantidad_int__lt=5).count()
+
     
     # Actualizar también el contador_revision
     contador_revision = Reparacion.objects.filter(
