@@ -9,6 +9,7 @@ from datetime import timedelta
 from django.db.models.functions import Cast
 from django.db.models import IntegerField
 
+
 @login_required
 @require_http_methods(["GET"])
 def alerta_view(request):
@@ -58,6 +59,7 @@ def alerta_view(request):
     contador_stock = Pilas.objects.annotate(
         cantidad_int=Cast('cantidad', IntegerField())
     ).filter(cantidad_int__lt=5).count()
+
     
     # Actualizar también el contador_revision
     contador_revision = Reparacion.objects.filter(
