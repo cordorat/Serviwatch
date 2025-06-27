@@ -6,6 +6,9 @@ from core.models.reparacion import Reparacion
 from core.models.pilas import Pilas
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models.functions import Cast
+from django.db.models import IntegerField
+
 
 @login_required
 @require_http_methods(["GET"])
