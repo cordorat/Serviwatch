@@ -28,14 +28,22 @@ def pila_create_view(request, id=None):
     if request.method == 'POST':
         form = PilasForm(request.POST, instance=pila)
         if form.is_valid():
-            # Use the service to create a pila
             
-            if modo == 'editar':
-                messages.success(request, 'Referencia de pila editada con exito.')
-            else:
-                messages.success(request, 'Referencia de pila agregada con éxito')
-            create_pila(form)
-            return redirect('pilas_list')
+            try:
+                pila_guardada = create_pila(form)
+            # Use the service to create a pila
+                if modo == 'editar':
+                    messages.success(request, 'Referencia de pila editada con exito.')
+                else:
+                    messages.success(request, 'Referencia de pila agregada con éxito')
+                    
+                return redirect('pilas_list')
+            
+            except Exception as e:
+                messages.error(request, f'Error al guardar la pila: {str(e)}')
+        else:
+            messages.error(request, 'Error al procesar el formulario. Por favor, corrige los errores.')        
+                
     else:
         form = PilasForm(instance=pila)
     

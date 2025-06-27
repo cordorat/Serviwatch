@@ -103,10 +103,9 @@ class PilasViewTest(TestCase):
         self.assertTrue('form' in response.context)
 
     def test_pila_create_view_post_success(self):
-        """Test successful battery creation"""
+        """Test successful battery creation (precio no requerido en formulario)"""
         data = {
             'codigo': 'CR2050',
-            'precio': '1500',
             'cantidad': '25'
         }
         response = self.client.post(self.create_url, data)
@@ -121,10 +120,9 @@ class PilasViewTest(TestCase):
         self.assertEqual(str(messages[0]), 'Referencia de pila agregada con éxito')
 
     def test_pila_create_view_post_invalid(self):
-        """Test with invalid form data"""
+        """Test with invalid form data (solo campos requeridos)"""
         data = {
-            'codigo': 'CR2050',
-            'precio': 'invalid',  # Should be numeric
+            'codigo': '',  # Código vacío
             'cantidad': '25'
         }
         response = self.client.post(self.create_url, data)
@@ -132,7 +130,7 @@ class PilasViewTest(TestCase):
         self.assertTemplateUsed(response, 'pilas/pila_form.html')
         self.assertTrue('form' in response.context)
         self.assertFalse(response.context['form'].is_valid())
-        self.assertFalse(Pilas.objects.filter(codigo='CR2050').exists())
+        self.assertFalse(Pilas.objects.filter(codigo='').exists())
     def test_pila_edit_view_get(self):
         """Prueba que la vista de edición carga el formulario correctamente con datos existentes"""
         # Crear una pila de prueba
@@ -150,7 +148,7 @@ class PilasViewTest(TestCase):
         self.assertEqual(response.context['form'].instance, pila)
 
     def test_pila_edit_view_post_success(self):
-        """Prueba la edición exitosa de una pila"""
+        """Prueba la edición exitosa de una pila (precio no enviado en formulario)"""
         pila = Pilas.objects.create(
             codigo="TEST123",
             precio="1500",
@@ -158,7 +156,6 @@ class PilasViewTest(TestCase):
         )
         data = {
             'codigo': 'TEST123',
-            'precio': '2000',  # Precio cambiado
             'cantidad': '15'   # Cantidad cambiada
         }
         response = self.client.post(
@@ -167,9 +164,9 @@ class PilasViewTest(TestCase):
         )
         self.assertRedirects(response, self.list_url)
         
-        # Verificar que la pila fue actualizada
+        # Verificar que la pila fue actualizada (precio se mantiene igual)
         pila_actualizada = Pilas.objects.get(id=pila.id)
-        self.assertEqual(pila_actualizada.precio, '2000')
+        self.assertEqual(pila_actualizada.precio, '1500')  # Precio sin cambios
         self.assertEqual(pila_actualizada.cantidad, '15')
         
         # Verificar mensaje de éxito
@@ -191,8 +188,7 @@ class PilasViewTest(TestCase):
             cantidad="10"
         )
         data = {
-            'codigo': 'TEST123',
-            'precio': 'invalido',  # Precio inválido
+            'codigo': '',  # Código inválido (vacío)
             'cantidad': '15'
         }
         response = self.client.post(
@@ -214,10 +210,9 @@ class PilasFormTest(TestCase):
         )
 
     def test_valid_form(self):
-        """Test that the form validates with correct data"""
+        """Test that the form validates with correct data (precio no requerido)"""
         data = {
             'codigo': 'CR2025', 
-            'precio': '1500',
             'cantidad': '20'
         }
         form = PilasForm(data)
@@ -227,29 +222,16 @@ class PilasFormTest(TestCase):
         """Test that the form validates codigo uniqueness"""
         data = {
             'codigo': 'CR2032',  # Already exists in setUp
-            'precio': '2000',
             'cantidad': '5'
         }
         form = PilasForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['codigo'], ['Este codigo ya esta registrado'])
 
-    def test_precio_numeric_validation(self):
-        """Test that precio must be numeric"""
-        data = {
-            'codigo': 'CR2026',
-            'precio': 'abc',  # Invalid: non-numeric
-            'cantidad': '5'
-        }
-        form = PilasForm(data)
-        self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['precio'], ['El precio solo debe contener números.'])
-
     def test_cantidad_numeric_validation(self):
         """Test that cantidad must be numeric"""
         data = {
             'codigo': 'CR2027',
-            'precio': '1200',
             'cantidad': 'xyz'  # Invalid: non-numeric
         }
         form = PilasForm(data)
@@ -257,9 +239,8 @@ class PilasFormTest(TestCase):
         self.assertEqual(form.errors['cantidad'], ['La cantidad solo debe contener números.'])
 
     def test_required_fields(self):
-        """Test that all fields are required"""
+        """Test that required fields are validated (precio no es requerido)"""
         form = PilasForm({})
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['codigo'], ['El codigo es obligatorio'])
-        self.assertEqual(form.errors['precio'], ['El precio es obligatorio'])
         self.assertEqual(form.errors['cantidad'], ['La cantidad es obligatorio'])

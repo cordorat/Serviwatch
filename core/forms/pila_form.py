@@ -26,21 +26,10 @@ class PilasForm(forms.ModelForm):
         }
     )
 
-    precio = forms.CharField(
-        required=True,
-        max_length=6,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'precio'
-        }),
-        error_messages={
-            'required': 'El precio es obligatorio',
-            'max_length': 'El precio debe tener maximo 6 caracteres'
-        }
-    )
 
     class Meta:
         model = Pilas
-        fields = ['codigo', 'precio', 'cantidad']
+        fields = ['codigo', 'cantidad']
 
     def clean_codigo(self):
         codigo = self.cleaned_data.get('codigo')
@@ -60,14 +49,12 @@ class PilasForm(forms.ModelForm):
         if not cantidad.isdigit():
             raise forms.ValidationError("La cantidad solo debe contener números.")
         
-        cantidad = cantidad.lstrip('0') or '0'  # Evitar string vacío
-        return cantidad
-
-    def clean_precio(self):
-        precio = self.cleaned_data.get('precio')
-
-        if not precio.isdigit():
-            raise forms.ValidationError("El precio solo debe contener números.")
+        # Convertir a entero y luego a string para eliminar ceros a la izquierda
+        # pero mantener el valor correcto
+        cantidad_int = int(cantidad)
+        if cantidad_int < 0:
+            raise forms.ValidationError("La cantidad debe ser un número positivo.")
         
-        precio = precio.lstrip('0') or '0'  # Evitar string vacío
-        return precio
+        return str(cantidad_int)
+
+    # Eliminada la validación de precio, ya que no se usa en este formulario

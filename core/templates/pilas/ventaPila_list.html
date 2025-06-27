@@ -243,8 +243,7 @@
                         <td class="text-start">
                             <div class="form-group">
                                 <input type="number" name="precio_{{ pila.id }}" id="precio_{{ pila.id }}"
-                                    class="form-control precio-input" placeholder="0" min="0" max="{{ pila.precio }}"
-                                    data-max-stock="{{ pila.cantidad }}">
+                                    class="form-control precio-input" placeholder="0" min="0">
                                 <div class="error-message pila" id="error_precio_{{ pila.id }}"></div>
                             </div>
                         </td>
@@ -338,11 +337,12 @@
             });
 
             if (haySeleccion) {
-                // Verificar stock antes de enviar
+                // Verificar stock antes de enviar (solo para campos de cantidad)
                 let stockValido = true;
-                inputs.forEach(function (input) {
+                const cantidadInputs = document.querySelectorAll('.cantidad-input');
+                cantidadInputs.forEach(function (input) {
                     if (input.value && parseInt(input.value) > 0) {
-                        const maxStock = input.getAttribute('max');
+                        const maxStock = input.getAttribute('data-max-stock');
                         if (parseInt(input.value) > parseInt(maxStock)) {
                             stockValido = false;
                             markInputError(input, `Excede el stock disponible (${maxStock})`);

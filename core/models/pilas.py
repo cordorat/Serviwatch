@@ -2,7 +2,7 @@ from django.db import models
 
 class Pilas (models.Model):
     codigo = models.CharField(max_length=30, unique=True)
-    precio = models.CharField(max_length=6)
+    precio = models.CharField(max_length=6, blank=True, default='0')
     cantidad = models.CharField(max_length=3)
 
     def __str__(self):
