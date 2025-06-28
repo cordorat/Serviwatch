@@ -92,7 +92,6 @@
                     {% elif tipo_actual == 'stock_bajo' %}
                     <th>Referencia</th>
                     <th>Cantidad</th>
-                    <th>Precio</th>
                     <th>Acciones</th>
                     {% elif tipo_actual == 'proxima_revision' %}
                     <th>Código</th>
@@ -121,7 +120,6 @@
                     {% elif tipo_actual == 'stock_bajo' %}
                     <td>{{ item.codigo }}</td>
                     <td>{{ item.cantidad }}</td>
-                    <td>{{ item.precio }}</td>
                     <td>
                         <a href="#" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-eye"></i> Ver
