@@ -294,12 +294,12 @@
 </div>
 
 <!-- Modal de confirmación -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmationModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
-            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
-                <h4 class="titulo m-0">
+            <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
+                <h4 class="titulo m-0" id="modalMessage">
                     {% if modo == 'editar' %}
                         RELOJ ACTUALIZADO CORRECTAMENTE
                     {% elif modo == 'crear' %}
@@ -307,7 +307,7 @@
                     {% elif modo == 'vender' %}
                         RELOJ VENDIDO CORRECTAMENTE
                     {% endif %}
-                </h4>
+                </h4>                <a href="{% url 'reloj_list' %}" class="btn save mt-3">VOLVER</a>
             </div>
         </div>
     </div>
@@ -781,27 +781,30 @@
                 if (field && !validateField(field)) {
                     isValid = false;
                 }
-            });
-
-            if (isValid) {
+            });            if (isValid) {
                 try {
                     const formData = new FormData(form);
                     const response = await fetch(form.action, {
                         method: 'POST',
                         body: formData,
-                        credentials: 'same-origin'  // Esto es importante para el CSRF token
+                        credentials: 'same-origin'
                     });
 
                     if (response.ok) {
-                        modal.show();
-                        setTimeout(() => {
-                            window.location.href = "{% if modo == 'vender' %}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}";
-                        }, 1000);
+                        // Verificar si la respuesta es una redirección (indica éxito)
+                        if (response.redirected || response.status === 200) {
+                            modal.show();
+                        } else {
+                            console.error('Error: La operación no se completó correctamente');
+                            alert('Error al guardar el reloj. Por favor, inténtalo de nuevo.');
+                        }
                     } else {
-                        console.error('Error al enviar el formulario');
+                        console.error('Error al enviar el formulario:', response.status);
+                        alert('Error al guardar el reloj. Por favor, inténtalo de nuevo.');
                     }
                 } catch (error) {
                     console.error('Error:', error);
+                    alert('Error de conexión. Por favor, inténtalo de nuevo.');
                 }
             } else {
                 const firstError = form.querySelector('.is-invalid');

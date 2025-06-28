@@ -3,12 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from core.forms.reloj_form import RelojForm
-from core.services.reloj_service import get_all_relojes, create_reloj
+from core.services.reloj_service import get_all_relojes, create_reloj, generar_pdf_relojes
 from django.core.paginator import Paginator
 from django.db.models import Q
 from core.models.reloj import Reloj
 from core.models.cliente import Cliente
 from datetime import datetime
+from django.http import HttpResponse
 
 mensaje_de_error = 'Por favor corrige los errores en el formulario.'
 templade_a_dirigir = 'reloj/reloj_form.html'
@@ -207,3 +208,55 @@ def reloj_sell_view(request, pk):
         'clientes': Cliente.objects.all().order_by('nombre')
     }
     return render(request, 'reloj/reloj_form.html', context)
+
+@require_http_methods(["GET"])
+def reporte_relojes_pdf(request):
+    """
+    Vista para generar un reporte PDF de relojes con los mismos filtros
+    que se están usando en la vista de lista.
+    """
+    filtro_estado = request.GET.get('estado', '')
+    filtro_tipo = request.GET.get('tipo', '')
+    filtro_pagado = request.GET.get('pagado', '')
+    search_query = request.GET.get('search', '')
+
+    # Usar la misma lógica de filtrado que en reloj_list_view
+    relojes_qs = get_all_relojes()
+
+    # Verificar si estamos en la URL de servicios (relojes no pagados)
+    if 'servicios' in request.META.get('HTTP_REFERER', ''):
+        relojes_qs = relojes_qs.filter(pagado=False)
+    elif filtro_estado and filtro_estado != 'todos':
+        relojes_qs = relojes_qs.filter(estado=filtro_estado)
+
+    if filtro_tipo and filtro_tipo != 'todos':
+        relojes_qs = relojes_qs.filter(tipo=filtro_tipo)
+
+    if filtro_pagado and filtro_pagado != 'todos':
+        relojes_qs = relojes_qs.filter(pagado=filtro_pagado)
+
+    if search_query:
+        query = Q()
+        base_query = (
+            Q(referencia__icontains=search_query) 
+        )
+        query |= base_query
+        relojes_qs = relojes_qs.filter(query).distinct()
+
+    relojes_qs = relojes_qs.order_by('referencia')
+    
+    try:
+        # Generar el PDF
+        pdf = generar_pdf_relojes(relojes_qs, filtro_estado, filtro_tipo, request)
+        
+        # Devolver el PDF como respuesta HTTP
+        estado_texto = filtro_estado if filtro_estado and filtro_estado != 'todos' else 'todos'
+        tipo_texto = filtro_tipo if filtro_tipo and filtro_tipo != 'todos' else 'todos'
+        filename = f"reporte_relojes_{estado_texto}_{tipo_texto}.pdf"
+        
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'filename="{filename}"'
+        return response
+        
+    except Exception as e:
+        return HttpResponse(f"Error al generar el reporte: {str(e)}", status=500)
