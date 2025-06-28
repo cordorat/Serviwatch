@@ -6,6 +6,9 @@ from core.models.reparacion import Reparacion
 from core.models.pilas import Pilas
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models.functions import Cast
+from django.db.models import IntegerField
+
 
 @login_required
 @require_http_methods(["GET"])
@@ -29,8 +32,20 @@ def alerta_view(request):
         ).order_by('fecha_entrega_estimada')
         
     elif tipo == 'stock_bajo':
-        # Pilas con stock bajo (menos de 5 unidades)
-        items = Pilas.objects.filter(cantidad__lt=5).order_by('cantidad')
+        # Pilas con stock bajo (menor o igual a 7 unidades)
+        # Como cantidad es CharField, necesitamos filtrar en Python
+        all_pilas = Pilas.objects.all()
+        items = []
+        for pila in all_pilas:
+            try:
+                cantidad_int = int(pila.cantidad)
+                if cantidad_int <= 7:
+                    items.append(pila)
+            except ValueError:
+                # Si no se puede convertir a entero, consideramos que tiene stock bajo
+                items.append(pila)
+        # Ordenar por cantidad (convertida a entero)
+        items.sort(key=lambda p: int(p.cantidad) if p.cantidad.isdigit() else 0)
         
     elif tipo == 'proxima_revision':
         # Reparaciones con mantenimiento que han pasado más de 1 mes desde su ingreso
@@ -50,7 +65,17 @@ def alerta_view(request):
         estado__in=['Cotización', 'Reparación', 'Prueba', 'Listo']
     ).count()
     
-    contador_stock = Pilas.objects.filter(cantidad__lt=5).count()
+    # Calcular contador de stock bajo (cantidad <= 7)
+    all_pilas_for_count = Pilas.objects.all()
+    contador_stock = 0
+    for pila in all_pilas_for_count:
+        try:
+            cantidad_int = int(pila.cantidad)
+            if cantidad_int <= 7:
+                contador_stock += 1
+        except ValueError:
+            # Si no se puede convertir, consideramos que tiene stock bajo
+            contador_stock += 1
     
     # Actualizar también el contador_revision
     contador_revision = Reparacion.objects.filter(
