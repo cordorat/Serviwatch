@@ -330,6 +330,28 @@ class PilasViewTest(TestCase):
         edit_url = reverse('pila_editar', kwargs={'id': self.test_pila.id})
         response = self.client.get(edit_url)
         self.assertEqual(response.status_code, 302)
+    
+    @patch('core.views.Pilas.pilas_view.create_pila')
+    def test_pila_create_service_exception(self, mock_create_pila):
+        """Test manejo de excepciones del servicio"""
+        self.client.login(username='testuser', password='testpass123')
+        mock_create_pila.side_effect = Exception("Error del servicio")
+        
+        data = {'codigo': 'ERROR001', 'cantidad': '10'}
+        response = self.client.post(self.create_url, data)
+        
+        # Cuando ocurre excepción, la vista renderiza el formulario con el mensaje de error
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'pilas/pila_form.html')
+        
+        # Verificar mensaje de error específico con el mensaje de la excepción
+        messages = list(get_messages(response.wsgi_request))
+        error_messages = [str(msg) for msg in messages]
+        self.assertTrue(any('Error al guardar la pila: Error del servicio' in msg for msg in error_messages))
+        
+        # Verificar que el formulario tiene los datos enviados
+        self.assertEqual(response.context['form']['codigo'].value(), 'ERROR001')
+        self.assertEqual(response.context['form']['cantidad'].value(), '10')
 
 
 class PilasIntegrationTest(TestCase):
