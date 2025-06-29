@@ -154,12 +154,13 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
         telefono = Paragraph(rep.cliente.telefono if rep.cliente else "N/A", cell_style)
         marca = Paragraph(rep.marca_reloj, cell_style)
         
-        # La descripción como Paragraph permitirá ajuste automático
-        descripcion = Paragraph(rep.descripcion, cell_style)
+        # La descripción como Paragraph permitirá ajuste automático, limitando la longitud
+        descripcion_text = rep.descripcion[:200] + "..." if len(rep.descripcion) > 200 else rep.descripcion
+        descripcion = Paragraph(descripcion_text, cell_style)
         
         fecha_ingreso = Paragraph(rep.fecha_ingreso.strftime('%d/%m/%Y'), cell_style)
         fecha_estimada = Paragraph(rep.fecha_entrega_estimada.strftime('%d/%m/%Y') if rep.fecha_entrega_estimada else "N/A", cell_style)
-        tecnico = Paragraph(rep.tecnico.nombre, cell_style)
+        tecnico = Paragraph(rep.tecnico.nombre if rep.tecnico else "Sin asignar", cell_style)
         precio = Paragraph(f"${rep.precio:,.2f}", cell_style)
         
         table_data.append([
@@ -193,11 +194,15 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
         
         # Borde para todas las celdas
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ])
     
     # Aplicar el estilo a la tabla
     table.setStyle(table_style)
+    
+    # Permitir que la tabla se divida entre páginas
+    table.spaceAfter = 20
+    table.splitByRow = True
     elements.append(table)
     
     # Agregar pie de página

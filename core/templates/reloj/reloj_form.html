@@ -307,7 +307,8 @@
                     {% elif modo == 'vender' %}
                         RELOJ VENDIDO CORRECTAMENTE
                     {% endif %}
-                </h4>                <a href="{% url 'reloj_list' %}" class="btn save mt-3">VOLVER</a>
+                </h4>
+                <button id="modalVolverBtn" class="btn save mt-3" onclick="redirectToCorrectPage()">VOLVER</button>
             </div>
         </div>
     </div>
@@ -857,6 +858,18 @@
             }
         });
     });
+
+    // Función para redirigir a la página correcta según el modo
+    function redirectToCorrectPage() {
+        const modo = '{{ modo }}';
+        const modalMessage = document.getElementById('modalMessage').textContent.trim();
+        
+        if (modo === 'vender' || modalMessage === 'RELOJ VENDIDO CORRECTAMENTE') {
+            window.location.href = "{% url 'reloj_venta_list' %}";
+        } else {
+            window.location.href = "{% url 'reloj_list' %}";
+        }
+    }
 </script>
 
 {% endblock %}

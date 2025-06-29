@@ -430,3 +430,150 @@ class UrlsTestCase(TestCase):
         self.assertEqual(resolve(url).func, ingreso_view)
     
     # Añade pruebas para otras URLs relacionadas con ingresos
+
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.contrib.auth.models import User
+from core.views.Ingreso.confirmar_ingreso_view import confirmar_ingreso_view
+from core.views.Ingreso.reporte_ingreso_view import reporte_ingresos_pdf, reporte_ingresos_form
+from unittest.mock import patch
+import json
+
+
+class ConfirmarIngresoViewTest(TestCase):
+    """Tests para la vista de confirmación de ingreso"""
+    
+    def setUp(self):
+        """Configuración inicial para las pruebas"""
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        self.client.login(username='testuser', password='testpass123')
+        
+        # Datos de ingreso para la sesión
+        self.ingreso_data = {
+            'fecha': '2023-06-15',
+            'valor': 100000,
+            'descripcion': 'Prueba de ingreso'
+        }
+    
+    def test_confirmar_ingreso_sin_datos_sesion(self):
+        """Prueba confirmar ingreso sin datos en sesión"""
+        response = self.client.get(reverse('confirmar_ingreso'))
+        self.assertRedirects(response, reverse('ingreso'))
+    
+    def test_confirmar_ingreso_get_con_datos_sesion(self):
+        """Prueba vista GET con datos en sesión"""
+        session = self.client.session
+        session['ingreso_data'] = self.ingreso_data
+        session.save()
+        
+        response = self.client.get(reverse('confirmar_ingreso'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ingreso/confirmar_ingreso.html')
+        self.assertIn('ingreso', response.context)
+    
+    @patch('core.views.Ingreso.confirmar_ingreso_view.ingreso_service.crear_ingreso')
+    def test_confirmar_ingreso_post_confirmar(self, mock_crear_ingreso):
+        """Prueba confirmar ingreso con POST confirmar"""
+        session = self.client.session
+        session['ingreso_data'] = self.ingreso_data
+        session.save()
+        
+        response = self.client.post(reverse('confirmar_ingreso'), {'confirmar': 'true'})
+        
+        mock_crear_ingreso.assert_called_once()
+        self.assertRedirects(response, reverse('ingreso'))
+        # Verificar que la sesión se limpió
+        self.assertNotIn('ingreso_data', self.client.session)
+    
+    @patch('core.views.Ingreso.confirmar_ingreso_view.ingreso_service.crear_ingreso')
+    def test_confirmar_ingreso_post_confirmar_ajax(self, mock_crear_ingreso):
+        """Prueba confirmar ingreso con POST confirmar vía AJAX"""
+        session = self.client.session
+        session['ingreso_data'] = self.ingreso_data
+        session.save()
+        
+        response = self.client.post(
+            reverse('confirmar_ingreso'), 
+            {'confirmar': 'true'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+        self.assertIn('con éxito', data['message'])
+    
+    def test_confirmar_ingreso_post_editar(self):
+        """Prueba POST con botón editar"""
+        session = self.client.session
+        session['ingreso_data'] = self.ingreso_data
+        session.save()
+        
+        response = self.client.post(reverse('confirmar_ingreso'), {'editar': 'true'})
+        self.assertRedirects(response, reverse('ingreso'))
+
+
+class ReporteIngresoViewTest(TestCase):
+    """Tests para las vistas de reporte de ingresos"""
+    
+    def setUp(self):
+        """Configuración inicial para las pruebas"""
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        self.client.login(username='testuser', password='testpass123')
+    
+    def test_reporte_ingresos_form_get(self):
+        """Prueba vista GET del formulario de reportes"""
+        response = self.client.get(reverse('reporte_ingresos_form'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ingreso/ingreso_reporte_form.html')
+        self.assertIn('form', response.context)
+    
+    def test_reporte_ingresos_pdf_sin_parametros(self):
+        """Prueba PDF sin parámetros de fecha"""
+        response = self.client.get(reverse('reporte_ingresos_pdf'))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'proporcionar el rango de fechas', response.content)
+    
+    def test_reporte_ingresos_pdf_fecha_invalida(self):
+        """Prueba PDF con formato de fecha inválido"""
+        response = self.client.get(reverse('reporte_ingresos_pdf'), {
+            'inicio': 'fecha-invalida',
+            'fin': '2023-06-30'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Formato de fecha', response.content)
+    
+    def test_reporte_ingresos_pdf_fecha_inicio_posterior(self):
+        """Prueba PDF con fecha inicio posterior a fecha fin"""
+        response = self.client.get(reverse('reporte_ingresos_pdf'), {
+            'inicio': '2023-06-30',
+            'fin': '2023-06-01'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'fecha de inicio no puede ser posterior', response.content)
+    
+    @patch('core.views.Ingreso.reporte_ingreso_view.generar_pdf_ingresos')
+    @patch('core.views.Ingreso.reporte_ingreso_view.obtener_ingresos_rango')
+    @patch('core.views.Ingreso.reporte_ingreso_view.obtener_total_ingresos_rango')
+    def test_reporte_ingresos_pdf_exitoso(self, mock_total, mock_ingresos, mock_pdf):
+        """Prueba generación exitosa de PDF"""
+        mock_ingresos.return_value = []
+        mock_total.return_value = 0
+        mock_pdf.return_value = b'PDF content'
+        
+        response = self.client.get(reverse('reporte_ingresos_pdf'), {
+            'inicio': '2023-06-01',
+            'fin': '2023-06-30'
+        })
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('filename=', response['Content-Disposition'])

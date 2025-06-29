@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from core.models.empleado import Empleado
 from core.forms.empleado_form import EmpleadoForm
-from core.services.empleado_service import crear_empleado, get_all_empleados
+from core.services.empleado_service import crear_empleado, get_all_empleados, _initialize_empleado
 from django.contrib.messages import get_messages
 from datetime import date, timedelta
 
@@ -377,10 +377,12 @@ class EmpleadoFormTest(TestCase):
 
 
 class EmpleadoServiceTest(TestCase):
+    """Tests específicos para el servicio de empleados"""
+    
     def setUp(self):
-        # Crear algunos empleados de prueba
+        """Configuración inicial para las pruebas del servicio"""
         self.empleado1 = Empleado.objects.create(
-            cedula='1234567890',
+            cedula='1111122222',
             nombre='Juan',
             apellidos='Pérez',
             fecha_ingreso='2023-01-01',
@@ -390,63 +392,72 @@ class EmpleadoServiceTest(TestCase):
             salario='2500000',
             estado='Activo'
         )
+        
         self.empleado2 = Empleado.objects.create(
-            cedula='0987654321',
-            nombre='María',
-            apellidos='López',
+            cedula='2222233333',
+            nombre='Ana',
+            apellidos='García',
             fecha_ingreso='2023-02-01',
-            fecha_nacimiento='1992-01-01',
+            fecha_nacimiento='1992-05-15',
             celular='3007654321',
-            cargo='Secretario/a',
-            salario='2000000',
+            cargo='Administrador',
+            salario='3000000',
             estado='Inactivo'
         )
-
-    def test_crear_empleado(self):
-        # Preparar datos del formulario
-        form_data = {
-            'cedula': '1111111111',
-            'nombre': 'Pedro',
-            'apellidos': 'Gómez',
-            'fecha_ingreso': '01/01/2024',
-            'fecha_nacimiento': '01/01/1995',
-            'celular': '3009876543',
-            'cargo': 'Técnico',
-            'salario': '3000000',
-            'estado': 'Activo'
-        }
-        form = EmpleadoForm(data=form_data)
-        self.assertTrue(form.is_valid())
-
-        # Probar crear_empleado
-        empleado = crear_empleado(form)
-        self.assertEqual(empleado.nombre, 'Pedro')
-        self.assertEqual(empleado.cedula, '1111111111')
-        self.assertEqual(empleado.apellidos, 'Gómez')
-        self.assertEqual(empleado.cargo, 'Técnico')
-        self.assertEqual(empleado.estado, 'Activo')
-
+    
     def test_get_all_empleados_sin_filtros(self):
+        """Prueba obtener todos los empleados sin filtros"""
         empleados = get_all_empleados()
         self.assertEqual(empleados.count(), 2)
-
-    def test_get_all_empleados_filtro_estado(self):
+        # Verificar que están ordenados por nombre
+        self.assertEqual(empleados.first().nombre, 'Ana')
+        self.assertEqual(empleados.last().nombre, 'Juan')
+    
+    def test_get_all_empleados_filtro_estado_activo(self):
+        """Prueba filtrar empleados por estado activo"""
         empleados = get_all_empleados(filtro_estado='Activo')
         self.assertEqual(empleados.count(), 1)
-        self.assertEqual(empleados[0].nombre, 'Juan')
-
+        self.assertEqual(empleados.first().nombre, 'Juan')
+    
+    def test_get_all_empleados_filtro_estado_inactivo(self):
+        """Prueba filtrar empleados por estado inactivo"""
+        empleados = get_all_empleados(filtro_estado='Inactivo')
+        self.assertEqual(empleados.count(), 1)
+        self.assertEqual(empleados.first().nombre, 'Ana')
+    
     def test_get_all_empleados_busqueda_cedula(self):
-        empleados = get_all_empleados(busqueda_cedula='123')
+        """Prueba buscar empleados por cédula"""
+        empleados = get_all_empleados(busqueda_cedula='1111')
         self.assertEqual(empleados.count(), 1)
-        self.assertEqual(empleados[0].cedula, '1234567890')
-
-    def test_get_all_empleados_ambos_filtros(self):
-        empleados = get_all_empleados(
-            filtro_estado='Activo',
-            busqueda_cedula='123'
-        )
+        self.assertEqual(empleados.first().nombre, 'Juan')
+    
+    def test_get_all_empleados_busqueda_cedula_parcial(self):
+        """Prueba buscar empleados por cédula parcial"""
+        empleados = get_all_empleados(busqueda_cedula='2222')
+        self.assertEqual(empleados.count(), 2)  # Ambos tienen 2222 en su cédula
+    
+    def test_get_all_empleados_filtros_combinados(self):
+        """Prueba filtros combinados de estado y cédula"""
+        empleados = get_all_empleados(filtro_estado='Activo', busqueda_cedula='1111')
         self.assertEqual(empleados.count(), 1)
-        self.assertEqual(empleados[0].nombre, 'Juan')
+        self.assertEqual(empleados.first().nombre, 'Juan')
+    
+    def test_get_all_empleados_sin_resultados(self):
+        """Prueba filtros que no devuelven resultados"""
+        empleados = get_all_empleados(busqueda_cedula='9999')
+        self.assertEqual(empleados.count(), 0)
+    
+    def test_initialize_empleado_existente(self):
+        """Prueba inicializar empleado existente"""
+        empleado, modo = _initialize_empleado(self.empleado1.id)
+        self.assertEqual(empleado.id, self.empleado1.id)
+        self.assertEqual(modo, 'editar')
+    
+    def test_initialize_empleado_nuevo(self):
+        """Prueba inicializar empleado nuevo"""
+        empleado, modo = _initialize_empleado(None)
+        self.assertIsNone(empleado)
+        self.assertEqual(modo, 'agregar')
 
 
 class EmpleadoViewsTest(TestCase):

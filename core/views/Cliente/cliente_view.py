@@ -66,38 +66,35 @@ def cliente_create_view(request, id=None):
         return _render_cliente_form(request, form, modo)
     
     # Para solicitudes POST, procesamos el formulario
-    form = ClienteForm(request.POST, instance=cliente)  # Definir form aquí para que esté disponible en todo el scope
+    form = ClienteForm(request.POST, instance=cliente)
     
-    # Verificar si es una solicitud AJAX
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        if form.is_valid():
-            
-            crear_cliente(form)
-            
-            # Manejar solicitudes AJAX
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Cliente editado exitosamente.' if modo == 'editar' else 'Cliente creado exitosamente.'
-                })
-                
-            # Para solicitudes normales
-            if modo == 'editar':
-                messages.success(request, 'Cliente editado exitosamente.')
-            else:
-                messages.success(request, 'Cliente creado exitosamente.')
-                
-            form.save()
-            # Si hay una URL de redirección especificada
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
-            
-            # No redirigimos por defecto, dejamos que el cliente maneje la navegación
-    else:
-        form = ClienteForm(instance=cliente)
+    if form.is_valid():
+        # Crear o actualizar el cliente
+        crear_cliente(form)
         
+        # Verificar si es una solicitud AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Cliente editado exitosamente.' if modo == 'editar' else 'Cliente creado exitosamente.'
+            })
+        
+        # Para solicitudes normales, agregar mensaje de éxito
+        if modo == 'editar':
+            messages.success(request, 'Cliente editado exitosamente.')
+        else:
+            messages.success(request, 'Cliente creado exitosamente.')
+        
+        # Si hay una URL de redirección especificada
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        
+        # Redireccionar a la lista de clientes por defecto
+        return redirect('cliente_list')
+    
+    # Si el formulario no es válido, renderizarlo con errores
     return render(request, 'cliente/cliente_form.html', {
         'form': form,
         'modo': modo
-        })
+    })

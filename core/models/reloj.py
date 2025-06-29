@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MaxLengthValidator, RegexValidator
 from core.models.cliente import Cliente
-from core.models.abono import Abono
 
 class Reloj(models.Model):
 
