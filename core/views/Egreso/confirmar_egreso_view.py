@@ -1,8 +1,6 @@
 from core.services.egreso_service import _parsear_fecha, _crear_egreso_y_responder
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from datetime import datetime
-from django.http import JsonResponse
 
 formato_fecha = '%d/%m/%Y'
 
@@ -22,25 +20,6 @@ def confirmar_egreso_view(request):
                 'descripcion': egreso_data['descripcion']
             }
             return _crear_egreso_y_responder(request, datos)
-            
-            # Guarda en la base de datos
-            egreso_service.crear_egreso(datos)
-            
-            # Mensaje de éxito
-            messages.success(request, "Egreso ingresado con éxito")
-            
-            # Limpia la sesión
-            del request.session['egreso_data']
-            
-            # Manejar solicitudes AJAX
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'message': "Egreso ingresado con éxito"
-                })
-            
-            # Para solicitudes normales
-            return redirect('egreso')
         
         elif 'editar' in request.POST:
             # Mantiene los datos en sesión y regresa al formulario
