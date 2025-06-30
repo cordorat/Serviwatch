@@ -271,3 +271,19 @@ form.ingreso-form.custom-form {
 }
 
 
+/* Clase específica para formulario de ganancia */
+.ganancia-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con ganancia-form*/
+form.ganancia-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+

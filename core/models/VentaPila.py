@@ -1,5 +1,7 @@
 from django.db import models
 from core.models.pilas import Pilas
+from core.models.ingreso import Ingreso
+from datetime import date
 
 
 class VentaPila(models.Model):

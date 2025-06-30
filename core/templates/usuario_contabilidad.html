@@ -1,5 +1,9 @@
-{% extends 'base.html' %} {% load static %} {% block title %}Contabilidad de
-Relojería{% endblock %} {% block content %}
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Contabilidad de
+Relojería
+{% endblock %} 
+{% block content %}
 <div class="productos-container mt-5">
   <h2 class="titulo-ventana text-center mb-4">CONTABILIDAD</h2>
   <div class="row justify-content-center mt-5">
@@ -29,6 +33,19 @@ Relojería{% endblock %} {% block content %}
           <div class="service-title">Ingresos</div>
         </div>
       </a>
+
+      <a href="{% url 'ganancia' %}" class="text-decoration-none text-dark">
+        <div class="service-card text-center">
+          <div class="service-icon mx-auto mb-2">
+            <?xml version="1.0" encoding="UTF-8"?>
+            <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24">
+              <path
+                d="M12 2C12.5523 2 13 2.44772 13 3V4C15.2091 4 17 5.79086 17 8C17 8.55228 16.5523 9 16 9C15.4477 9 15 8.55228 15 8C15 6.89543 14.1046 6 13 6H11C9.89543 6 9 6.89543 9 8C9 9.10457 9.89543 10 11 10H13C15.2091 10 17 11.7909 17 14C17 16.2091 15.2091 18 13 18V19C13 19.5523 12.5523 20 12 20C11.4477 20 11 19.5523 11 19V18C8.79086 18 7 16.2091 7 14C7 13.4477 7.44772 13 8 13C8.55228 13 9 13.4477 9 14C9 15.1046 9.89543 16 11 16H13C14.1046 16 15 15.1046 15 14C15 12.8954 14.1046 12 13 12H11C8.79086 12 7 10.2091 7 8C7 5.79086 8.79086 4 11 4V3C11 2.44772 11.4477 2 12 2Z" />
+            </svg>
+          </div>
+          <div class="service-title">Ganancia</div>
+        </div>
+      </a>
     </div>
 
 
@@ -44,29 +61,35 @@ Relojería{% endblock %} {% block content %}
         justify-content: center;
         text-align: center;
         padding: 15px;
-        transition: all 0.3s ease;
-
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
       }
 
       .service-card:hover {
         transform: translateY(-5px);
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-
       }
 
       .productos-container {
-        max-width: 900px;
+        max-width: 1200px;
         margin: 0 auto !important;
         padding: 20px;
       }
 
       .content {
         display: flex;
-        justify-content: normal;
         align-items: flex-start;
         width: 100%;
         padding: 20px;
+      }
+
+      /* Contenedor para mantener los botones en línea */
+      .col-12 {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 20px !important;
+        justify-content: center !important;
+        align-items: center !important;
       }
 
       .service-icon {
@@ -75,10 +98,62 @@ Relojería{% endblock %} {% block content %}
       }
 
       .service-title {
-        font-size: 40px;
+        font-size: 50px;
         font-weight: 600;
         text-transform: uppercase;
         font-family: "inter", sans-serif;
+      }
+
+      @media (max-width: 1100px) {
+        .service-card {
+          width: 280px;
+          height: 320px;
+        }
+
+        .service-icon {
+          width: 150px;
+          height: 150px;
+        }
+
+        .service-title {
+          font-size: 40px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .service-card {
+          width: 240px;
+          height: 280px;
+        }
+
+        .service-icon {
+          width: 120px;
+          height: 120px;
+        }
+
+        .service-title {
+          font-size: 32px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .col-12 {
+          flex-wrap: wrap !important;
+        }
+
+        .service-card {
+          width: 200px;
+          height: 240px;
+        }
+
+        .service-icon {
+          width: 100px;
+          height: 100px;
+        }
+
+        .service-title {
+          font-size: 24px;
+        }
       }
 
       @media (max-width: 500px) {
@@ -90,6 +165,10 @@ Relojería{% endblock %} {% block content %}
         .service-icon {
           width: 40px;
           height: 40px;
+        }
+
+        .service-title {
+          font-size: 16px;
         }
       }
     </style>

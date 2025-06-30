@@ -66,53 +66,35 @@ def cliente_create_view(request, id=None):
         return _render_cliente_form(request, form, modo)
     
     # Para solicitudes POST, procesamos el formulario
-    form = ClienteForm(request.POST, instance=cliente)  # Definir form aquí para que esté disponible en todo el scope
+    form = ClienteForm(request.POST, instance=cliente)
     
-    # Verificar si es una solicitud AJAX
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        if form.is_valid():
-            try:
-                crear_cliente(form)
-                return _handle_ajax_response(modo=modo)
-            except Exception as e:
-                # Si hay error al guardar (por ejemplo, por duplicado)
-                errors = {'__all__': [str(e)]}
-                if 'unique' in str(e).lower() or 'duplicate' in str(e).lower():
-                    # Intentar determinar qué campo está duplicado
-                    if 'telefono' in str(e).lower():
-                        errors = {'telefono': ['Este número de teléfono ya está registrado para otro cliente.']}
-                    else:
-                        errors = {'__all__': ['Ya existe un cliente con estos datos.']}
-                
-                return JsonResponse({
-                    'success': False,
-                    'errors': errors,
-                    'message': 'No se pudo guardar el cliente.'
-                }, status=400)
-        else:
-            # Formulario inválido
-            return _handle_ajax_response(form=form, success=False)
-    
-    # Para solicitudes no-AJAX
     if form.is_valid():
-        try:
-            # Guardar el cliente
-            crear_cliente(form)
-            
-            # Mensaje de éxito
-            messages.success(request, 'Cliente creado exitosamente.' if modo == 'agregar' else 'Cliente editado exitosamente.')
-            
-            # Redirigir si hay una URL especificada
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
-            
-            # Redirección por defecto
-            return redirect('cliente_list')
-            
-        except Exception as e:
-            # Manejar errores
-            messages.error(request, f'Error: {str(e)}')
+        # Crear o actualizar el cliente
+        crear_cliente(form)
+        
+        # Verificar si es una solicitud AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Cliente editado exitosamente.' if modo == 'editar' else 'Cliente creado exitosamente.'
+            })
+        
+        # Para solicitudes normales, agregar mensaje de éxito
+        if modo == 'editar':
+            messages.success(request, 'Cliente editado exitosamente.')
+        else:
+            messages.success(request, 'Cliente creado exitosamente.')
+        
+        # Si hay una URL de redirección especificada
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        
+        # Redireccionar a la lista de clientes por defecto
+        return redirect('cliente_list')
     
-    # Si llegamos aquí, hay errores en el formulario o hubo una excepción
-    return _render_cliente_form(request, form, modo)
+    # Si el formulario no es válido, renderizarlo con errores
+    return render(request, 'cliente/cliente_form.html', {
+        'form': form,
+        'modo': modo
+    })

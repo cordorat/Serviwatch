@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.urls import reverse
 from core.forms.pila_form import PilasForm
 from core.services.pilas_service import get_pilas_paginated, create_pila
 from core.models.pilas import Pilas
@@ -61,6 +62,7 @@ def _process_valid_form(request, form, modo):
         else:
             messages.success(request, 'Referencia de pila agregada con éxito')
         
+        # Redirigir a la lista de pilas
         return redirect('pilas_list')
         
     except Exception as e:

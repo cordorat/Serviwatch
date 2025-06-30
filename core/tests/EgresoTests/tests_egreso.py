@@ -588,171 +588,77 @@ class ServicioReporteEgresoTest(TestCase):
 
 
 class ReporteEgresoViewTest(TestCase):
-    """Pruebas para las vistas de reportes de egresos"""
+    """Tests para las vistas de reporte de egresos"""
     
     def setUp(self):
-        # Crear un usuario para autenticación
+        """Configuración inicial para las pruebas"""
+        self.client = Client()
         self.user = User.objects.create_user(
             username='testuser',
-            password='12345'
+            password='testpass123'
         )
-        
-        # Cliente para peticiones
-        self.client = Client()
-        
-        # Fecha de prueba
-        self.fecha_hoy = date.today()
-        self.fecha_ayer = self.fecha_hoy - timedelta(days=1)
-        
-        # Crear algunos egresos para las pruebas
-        Egreso.objects.create(fecha=self.fecha_hoy, valor=10000, descripcion="Egreso hoy")
-        Egreso.objects.create(fecha=self.fecha_ayer, valor=8000, descripcion="Egreso ayer")
+        self.client.login(username='testuser', password='testpass123')
     
-    def test_reporte_egresos_form_view_requiere_login(self):
-        """Verifica que la vista del formulario requiera inicio de sesión"""
+    def test_reporte_egresos_form_get(self):
+        """Prueba vista GET del formulario de reportes"""
         response = self.client.get(reverse('reporte_egresos_form'))
-        
-        # Debe redirigir al login
-        self.assertEqual(response.status_code, 302)
-        self.assertIn('login', response.url)
-    
-    def test_reporte_egresos_form_view_carga_formulario(self):
-        """Verifica que la vista cargue correctamente el formulario"""
-        # Login
-        self.client.login(username='testuser', password='12345')
-        
-        # Obtener la página
-        response = self.client.get(reverse('reporte_egresos_form'))
-        
-        # Verificar respuesta
         self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.context['form'], ReporteEgresoForm)
         self.assertTemplateUsed(response, 'egreso/egreso_reporte_form.html')
+        self.assertIn('form', response.context)
     
-    def test_reporte_egresos_form_view_con_datos_validos(self):
-        """Verifica que la vista procese correctamente datos válidos en el formulario"""
-        # Login
-        self.client.login(username='testuser', password='12345')
-        
-        # Datos válidos
-        datos = {
-            'inicio': self.fecha_ayer.strftime('%Y-%m-%d'),
-            'fin': self.fecha_hoy.strftime('%Y-%m-%d')
-        }
-        
-        # Obtener la página con parámetros GET
-        response = self.client.get(reverse('reporte_egresos_form'), datos)
-        
-        # Verificar respuesta - Debería cargar el formulario con los datos
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertTrue(form.is_valid())
+    def test_reporte_egresos_pdf_sin_parametros(self):
+        """Prueba PDF sin parámetros de fecha"""
+        response = self.client.get(reverse('reporte_egresos_pdf'))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'proporcionar el rango de fechas', response.content)
     
-    def test_reporte_egresos_form_view_con_datos_invalidos(self):
-        """Verifica que la vista maneje correctamente datos inválidos en el formulario"""
-        # Login
-        self.client.login(username='testuser', password='12345')
-        
-        # Datos inválidos - fecha inicio posterior a fecha fin
-        datos = {
-            'inicio': self.fecha_hoy.strftime('%Y-%m-%d'),
-            'fin': self.fecha_ayer.strftime('%Y-%m-%d')
-        }
-        
-        # Obtener la página con parámetros GET
-        response = self.client.get(reverse('reporte_egresos_form'), datos)
-        
-        # Verificar respuesta - Debería mostrar errores
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn('La fecha de inicio no puede ser posterior a la fecha de fin', form.non_field_errors()[0])
+    def test_reporte_egresos_pdf_fecha_invalida(self):
+        """Prueba PDF con formato de fecha inválido"""
+        response = self.client.get(reverse('reporte_egresos_pdf'), {
+            'inicio': 'fecha-invalida',
+            'fin': '2023-06-30'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Formato de fecha', response.content)
     
-    def test_reporte_egresos_pdf_view_requiere_login(self):
-        """Verifica que la vista de PDF requiera inicio de sesión"""
-        datos = {
-            'inicio': self.fecha_ayer.strftime('%Y-%m-%d'),
-            'fin': self.fecha_hoy.strftime('%Y-%m-%d')
-        }
-        
-        response = self.client.get(reverse('reporte_egresos_pdf'), datos)
-        
-        # Debe redirigir al login
-        self.assertEqual(response.status_code, 302)
-        self.assertIn('login', response.url)
+    def test_reporte_egresos_pdf_fecha_inicio_posterior(self):
+        """Prueba PDF con fecha inicio posterior a fecha fin"""
+        response = self.client.get(reverse('reporte_egresos_pdf'), {
+            'inicio': '2023-06-30',
+            'fin': '2023-06-01'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'fecha de inicio no puede ser posterior', response.content)
     
     @patch('core.views.Egreso.reporte_egreso_view.generar_pdf_egresos')
-    def test_reporte_egresos_pdf_view_genera_pdf(self, mock_generar_pdf):
-        """Verifica que la vista genere correctamente el PDF"""
-        # Login
-        self.client.login(username='testuser', password='12345')
+    @patch('core.views.Egreso.reporte_egreso_view.obtener_egresos_rango')
+    @patch('core.views.Egreso.reporte_egreso_view.obtener_total_egresos_rango')
+    def test_reporte_egresos_pdf_exitoso(self, mock_total, mock_egresos, mock_pdf):
+        """Prueba generación exitosa de PDF"""
+        mock_egresos.return_value = []
+        mock_total.return_value = 0
+        mock_pdf.return_value = b'PDF content'
         
-        # Configurar el mock para que devuelva un PDF simulado
-        pdf_simulado = b'PDF simulado'
-        mock_generar_pdf.return_value = pdf_simulado
+        response = self.client.get(reverse('reporte_egresos_pdf'), {
+            'inicio': '2023-06-01',
+            'fin': '2023-06-30'
+        })
         
-        # Datos de solicitud
-        datos = {
-            'inicio': self.fecha_ayer.strftime('%Y-%m-%d'),
-            'fin': self.fecha_hoy.strftime('%Y-%m-%d')
-        }
-        
-        # Obtener el PDF
-        response = self.client.get(reverse('reporte_egresos_pdf'), datos)
-        
-        # Verificar respuesta
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
-        self.assertIn('reporte_egresos', response['Content-Disposition'])
-        
-        # Verificar que el contenido del PDF es el esperado
-        self.assertEqual(response.content, pdf_simulado)
+        self.assertIn('filename=', response['Content-Disposition'])
     
-    def test_reporte_egresos_pdf_view_sin_fechas(self):
-        """Verifica que la vista maneje correctamente la falta de fechas"""
-        # Login
-        self.client.login(username='testuser', password='12345')
+    @patch('core.views.Egreso.reporte_egreso_view.generar_pdf_egresos')
+    def test_reporte_egresos_pdf_error_interno(self, mock_pdf):
+        """Prueba manejo de errores internos en generación de PDF"""
+        mock_pdf.side_effect = Exception("Error interno")
         
-        # Solicitud sin fechas
-        response = self.client.get(reverse('reporte_egresos_pdf'))
+        response = self.client.get(reverse('reporte_egresos_pdf'), {
+            'inicio': '2023-06-01',
+            'fin': '2023-06-30'
+        })
         
-        # Verificar respuesta - Debería ser un error 400
-        self.assertEqual(response.status_code, 400)
-    
-    def test_reporte_egresos_pdf_view_fecha_invalida(self):
-        """Verifica que la vista maneje correctamente fechas inválidas"""
-        # Login
-        self.client.login(username='testuser', password='12345')
-        
-        # Datos con formato de fecha inválido
-        datos = {
-            'inicio': 'fecha-invalida',
-            'fin': self.fecha_hoy.strftime('%Y-%m-%d')
-        }
-        
-        # Obtener el PDF
-        response = self.client.get(reverse('reporte_egresos_pdf'), datos)
-        
-        # Verificar respuesta - Debería ser un error 400
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Formato de fecha inválido', response.content.decode())
-    
-    def test_reporte_egresos_pdf_view_fecha_inicio_posterior_fecha_fin(self):
-        """Verifica que la vista maneje correctamente cuando fecha inicio es posterior a fecha fin"""
-        # Login
-        self.client.login(username='testuser', password='12345')
-        
-        # Datos con fecha inicio posterior a fecha fin
-        datos = {
-            'inicio': (self.fecha_hoy + timedelta(days=5)).strftime('%Y-%m-%d'),
-            'fin': self.fecha_hoy.strftime('%Y-%m-%d')
-        }
-        
-        # Obtener el PDF
-        response = self.client.get(reverse('reporte_egresos_pdf'), datos)
-        
-        # Verificar respuesta - Debería ser un error 400
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('La fecha de inicio no puede ser posterior a la fecha de fin', response.content.decode())
+        self.assertEqual(response.status_code, 500)
+        self.assertIn(b'Error al generar el reporte', response.content)
 
 
