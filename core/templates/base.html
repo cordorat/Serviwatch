@@ -172,9 +172,9 @@
       <nav class="main-nav">
         <ul>
           {% if user.is_superuser %}
-          <li class="{% if '/productos-admin/' in request.path or request.path == '/productos-admin' %} active {% endif %}">
+          <li class="{% if '/productos-admin/' in request.path or request.path == '/productos-admin' or '/servicios/' in request.path or '/productos/' in request.path %} active {% endif %}">
             <a href="{% url 'productos_administrador' %}"
-              class="{% if not '/productos-admin/' in request.path or request.path == '/productos-admin' %} menu-link {% endif %}">
+              class="{% if not '/productos-admin/' in request.path and not '/servicios/' in request.path and not '/productos/' in request.path %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
               </span>
@@ -201,8 +201,8 @@
               Gestión de usuarios
             </a>
           </li>
-          <li class="{% if '/contable-admin/' in request.path or request.path == '/contable-admin' %} active {% endif %}">
-            <a href="{% url 'contabilidad_administrador'%}" class="{% if not '/contable-admin/' in request.path or request.path == '/contable-admin' %} menu-link {% endif %}">
+          <li class="{% if '/contable-admin/' in request.path or request.path == '/contable-admin' or '/contable/' in request.path %} active {% endif %}">
+            <a href="{% url 'contabilidad_administrador' %}" class="{% if '/contable-admin/' not in request.path and '/contable/' not in request.path %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
               </span>
