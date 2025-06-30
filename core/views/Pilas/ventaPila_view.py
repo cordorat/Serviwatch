@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.urls import reverse
 from core.services.pilas_service import get_pilas_paginated, update_pila_stock_venta
 from core.models.pilas import Pilas
 from core.models.VentaPila import VentaPila
@@ -103,6 +104,7 @@ def ventaPila_view(request):
                 crear_ingreso(datos_ingreso)
 
             messages.success(request, "Venta agregada correctamente.")
+            # Redirigir a la lista de ventas
             return redirect('ventaPila_list')
 
         except Exception as e:

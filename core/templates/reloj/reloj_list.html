@@ -25,6 +25,12 @@
     align-items: center;
   }
 
+  .report-button-container {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+  }
+
   .form-reloj {
     display: flex;
     flex-direction: row;
@@ -127,6 +133,11 @@
       </div>
       {% endif %}
       </form>
+    </div>    <div class="report-button-container">
+      <a href="{% if 'servicios' in request.path %}{% url 'reporte_relojes_venta_pdf' %}{% else %}{% url 'reporte_relojes_pdf' %}{% endif %}?estado={{ filtro_estado }}&tipo={{ filtro_tipo }}&pagado={{ filtro_pagado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
+      target="_blank"> 
+          Generar reporte
+      </a>
     </div>
   </div>
 

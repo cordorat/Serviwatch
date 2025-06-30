@@ -58,57 +58,68 @@ def _render_usuario_form(request, form, modo='crear', success=False):
 @require_http_methods(["GET", "POST"])
 def usuario_create_view(request):
     # Verificar primero si es una solicitud de éxito
-    if request.GET.get('success') == 'true':
+    success = request.GET.get('success') == 'true'
+    
+    # Si es success=true, mostrar un formulario completamente nuevo sin validación
+    if success:
         form = FormularioRegistroUsuario()  # Formulario vacío sin validación
-        return _render_usuario_form(request, form, success=True)
+        return render(request, 'usuario/usuario_form.html', {
+            'form': form,
+            'modo': 'crear',
+            'success': True
+        })
     
-    # Para solicitudes GET sin success
-    if request.method == 'GET':
+    # Flujo normal para POST y GET sin success
+    if request.method == 'POST':
+        form = FormularioRegistroUsuario(request.POST)
+        if form.is_valid():
+            try:
+                data = form.cleaned_data
+                usuario = crear_usuario(
+                    username=data['username'],
+                    password=data['password1'],
+                    email=data['email']
+                )
+                
+                # Si es una solicitud AJAX, devolver respuesta JSON
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Usuario agregado correctamente'
+                    })
+                
+                messages.success(request, 'SE AGREGÓ EL USUARIO CON ÉXITO')
+                return redirect('usuario_list')
+            except ValidationError as e:
+                form.add_error(None, str(e))
+                
+                # Si es una solicitud AJAX, devolver errores en JSON
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    errors = {field: error[0] for field, error in form.errors.items()}
+                    return JsonResponse({
+                        'success': False,
+                        'errors': errors
+                    }, status=400)
+                    
+                messages.error(request, 'Error al crear el usuario')
+        else:
+            # Si es una solicitud AJAX, devolver errores en JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                errors = {field: error[0] for field, error in form.errors.items()}
+                return JsonResponse({
+                    'success': False,
+                    'errors': errors
+                }, status=400)
+                
+            messages.error(request, 'Por favor corrija los errores en el formulario')
+    else:
         form = FormularioRegistroUsuario()
-        return _render_usuario_form(request, form)
     
-    # Procesar solicitudes POST
-    form = FormularioRegistroUsuario(request.POST)
-    if not form.is_valid():
-        # Manejar formulario inválido
-        messages.error(request, 'Por favor corrija los errores en el formulario')
-        
-        # Si es AJAX, devolver errores
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {field: error[0] for field, error in form.errors.items()}
-            return _handle_ajax_response(False, errors=errors, status=400)
-            
-        return _render_usuario_form(request, form)
-    
-    # Si el formulario es válido, intentar crear el usuario
-    try:
-        data = form.cleaned_data
-        crear_usuario(
-            username=data['username'],
-            password=data['password1'],
-            email=data['email']
-        )
-        
-        # Manejar creación exitosa
-        messages.success(request, 'SE AGREGÓ EL USUARIO CON ÉXITO')
-        
-        # Si es AJAX, devolver respuesta exitosa
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return _handle_ajax_response(True)
-            
-        return redirect('usuario_list')
-        
-    except ValidationError as e:
-        # Manejar error de validación
-        form.add_error(None, str(e))
-        messages.error(request, 'Error al crear el usuario')
-        
-        # Si es AJAX, devolver errores
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {field: error[0] for field, error in form.errors.items()}
-            return _handle_ajax_response(False, errors=errors, status=400)
-        
-        return _render_usuario_form(request, form)
+    return render(request, 'usuario/usuario_form.html', {
+        'form': form,
+        'modo': 'crear',
+        'success': False
+    })
 
 @login_required
 @require_http_methods(["GET", "POST"])

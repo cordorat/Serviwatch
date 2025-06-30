@@ -126,7 +126,10 @@
             </form>
         </div>
         <div class="report-button-container">
-            <a href="#" class="btn btn-add btn-add-empleado me-3"> Generar reporte</a>
+            <a href="{% url 'reporte_reparaciones_pdf' %}?estado={{ filtro_estado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
+            target="_blank"> 
+                Generar reporte
+            </a>
         </div>
     </div>
 

@@ -33,9 +33,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'current-password'
         }),
         error_messages={
-            'required': mensaje_campo_requerido,
-            'min_length': mensaje_tamaño_minimo,
-            'max_length': mensaje_tamaño_maximo,
+            'required': 'Este campo es obligatorio',
+            'min_length': 'La contraseña debe tener al menos 8 caracteres',
+            'max_length': 'La contraseña no puede tener más de 16 caracteres',
         }
     )
     
@@ -50,9 +50,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': mensaje_campo_requerido,
-            'min_length': mensaje_tamaño_minimo,
-            'max_length': mensaje_tamaño_maximo,
+            'required': 'Este campo es obligatorio',
+            'min_length': 'La contraseña debe tener al menos 8 caracteres',
+            'max_length': 'La contraseña no puede tener más de 16 caracteres',
         }
     )
     
@@ -67,9 +67,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': mensaje_campo_requerido,
-            'min_length': mensaje_tamaño_minimo,
-            'max_length': mensaje_tamaño_maximo,
+            'required': 'Este campo es obligatorio',
+            'min_length': 'La contraseña debe tener al menos 8 caracteres',
+            'max_length': 'La contraseña no puede tener más de 16 caracteres',
         }
     )
 
