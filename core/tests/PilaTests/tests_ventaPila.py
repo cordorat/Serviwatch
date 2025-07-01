@@ -1,14 +1,10 @@
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.contrib.messages.storage.fallback import FallbackStorage
 from core.models.pilas import Pilas
 from core.models.VentaPila import VentaPila
 from core.services.pilas_service import update_pila_stock_venta
-from core.views.Pilas.ventaPila_view import ventaPilas_list_view, ventaPila_view
-from datetime import datetime
 from django.contrib.messages import get_messages
-import json
 
 class TestPilasService(TestCase):
     """Pruebas para el servicio de pilas"""
@@ -90,8 +86,9 @@ class TestVentaPilaView(TestCase):
         # Hacer POST request
         response = self.client.post(reverse('ventaPila_create'), post_data)
         
-        # Verificar redirección
-        self.assertRedirects(response, reverse('ventaPila_list'))
+        # Verificar redirección CON el parámetro success=true
+        expected_url = f"{reverse('ventaPila_list')}?success=true"
+        self.assertRedirects(response, expected_url)
         
         # Verificar mensaje de éxito
         messages = list(get_messages(response.wsgi_request))

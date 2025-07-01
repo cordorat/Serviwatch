@@ -1,4 +1,3 @@
-
 from core.models.egreso import Egreso
 from django.db.models import Sum
 from datetime import date
@@ -7,6 +6,7 @@ from django.db.utils import DatabaseError
 from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import redirect
+from datetime import datetime
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -14,9 +14,9 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from django.utils import timezone
-from datetime import datetime
+from reportlab.lib.pagesizes import landscape
 
-formato_fecha = '%d/%m/%Y'
+FORMATO_FECHA = '%d/%m/%Y'
 
 def crear_egreso(datos):
     try:
@@ -54,6 +54,39 @@ def obtener_total_egresos_dia(fecha=None):
 
     total = Egreso.objects.filter(fecha=fecha).aggregate(total=Sum('valor'))['total']
     return total or 0
+
+def _parsear_fecha(fecha_str):
+    """
+    Intenta analizar una fecha en diferentes formatos.
+    """
+    formatos = ['%Y-%m-%d', '%d-%m-%Y', FORMATO_FECHA]
+    for formato in formatos:
+        try:
+            return datetime.strptime(fecha_str, formato).date()
+        except ValueError:
+            continue
+    # Si ninguno funciona, lanzar error
+    raise ValueError(f"Formato de fecha no reconocido {fecha_str}")
+
+def _crear_egreso_y_responder(request, datos):
+    """Extrae la lógica de crear un egreso y generar la respuesta apropiada."""
+    # Guarda en la base de datos
+    crear_egreso(datos)
+
+    #Mensaje de éxito,
+    messages.success(request, "Egreso ingresado con éxito")
+
+    #Limpia la sesión,
+    del request.session['egreso_data']
+
+    #Maneja el tipo de respuesta según la solicitud,
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': "Egreso ingresado con éxito"
+        })
+
+    return redirect('egreso')
 
 #--------------------REPORTE DE EGRESOS--------------------#
 
@@ -108,13 +141,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     
     # Configurar estilos
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Heading1'],
-        alignment=1,  # Centrado
-        spaceAfter=12,
-        textColor=colors.black
-    )
+    
     subtitle_style = ParagraphStyle(
         'SubtitleStyle',
         parent=styles['Heading2'],
@@ -145,7 +172,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
         pass
     
     # Encabezado con datos de la empresa
-    #elements.append(Paragraph("ServiWatch", title_style))
+    
     elements.append(Paragraph("Calle 25 Norte # 5 an -17", normal_style))
     elements.append(Paragraph("Tel: 555-1234", normal_style))
     elements.append(Spacer(1, 0.5*inch))
@@ -155,7 +182,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     
     # Período del reporte
     elements.append(Paragraph(
-        f"Período: {fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')}", 
+        f"Período: {fecha_inicio.strftime(FORMATO_FECHA)} - {fecha_fin.strftime(FORMATO_FECHA)}", 
         date_style
     ))
     elements.append(Spacer(1, 0.25*inch))
@@ -168,7 +195,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     # Agregar cada egreso a la tabla
     for egreso in egresos:
         table_data.append([
-            egreso.fecha.strftime('%d/%m/%Y'),
+            egreso.fecha.strftime(FORMATO_FECHA),
             egreso.descripcion,
             f"${egreso.valor:,.2f}"
         ])
@@ -233,37 +260,3 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     buffer.close()
     
     return pdf
-
-def _parsear_fecha(fecha_str):
-    """Extrae la lógica de parseo de fecha en diferentes formatos."""
-    formatos = ['%Y-%m-%d', formato_fecha, '%d-%m-%Y']
-    
-    for formato in formatos:
-        try:
-            return datetime.strptime(fecha_str, formato).date()
-        except ValueError:
-            continue
-    
-    # Si ningún formato funciona, lanzamos error
-    raise ValueError(f"Formato de fecha no reconocido: {fecha_str}")
-
-
-def _crear_egreso_y_responder(request, datos):
-    """Extrae la lógica de crear un egreso y generar la respuesta apropiada."""
-    # Guarda en la base de datos
-    crear_egreso(datos)
-    
-    # Mensaje de éxito
-    messages.success(request, "Egreso ingresado con éxito")
-    
-    # Limpia la sesión
-    del request.session['egreso_data']
-    
-    # Maneja el tipo de respuesta según la solicitud
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({
-            'success': True,
-            'message': "Egreso ingresado con éxito"
-        })
-    
-    return redirect('egreso')

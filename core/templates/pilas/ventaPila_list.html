@@ -64,6 +64,12 @@
         min-height: 100%;
         overflow-y: auto;
         padding-bottom: 30px;
+        width: 100%;
+        padding-right: 0;
+        padding-left: 0;
+        margin-right: 0;
+        margin-left: 0;
+        max-width: none;
     }
 
     .cantidad-input {
@@ -100,15 +106,6 @@
         /* Texto más pequeño */
     }
 
-    /* Estilos para hacer que la tabla ocupe más espacio */
-    .main-content {
-        width: 100%;
-        padding-right: 0;
-        padding-left: 0;
-        margin-right: 0;
-        margin-left: 0;
-        max-width: none;
-    }
 
     .table-container {
         width: 100%;
@@ -196,25 +193,25 @@
 <div class="main-content">
     <div class="header-icons">
         <h2 class="titulo">VENTA DE PILAS</h2>
+        <button type="button" id="btn-procesar" class="btn btn-add me-3">Procesar venta</button>
     </div>
 
     <!-- Botón para procesar venta -->
     <div class="header-icons header-icons-venta">
-        <button type="button" id="btn-procesar" class="btn btn-add me-3">Procesar venta</button>
     </div>
     <div class="error-banner" id="error-banner">
         <span id="error-message">Error en la validación</span>
     </div>
 
     <!-- Modal de confirmación -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center" style="background-color: #f1f1f1;">
-                <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
-                    <h4 class="titulo m-0">
-                        PILA VENDIDA
+                <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
+                    <h4 class="titulo m-0" id="modalMessage">
+                        VENTA PROCESADA CORRECTAMENTE
                     </h4>
+                    <a href="{% url 'ventaPila_list' %}" class="btn save mt-3">VOLVER</a>
                 </div>
             </div>
         </div>
@@ -226,7 +223,7 @@
     <div class="table-container">
         <form method="post" action="{% url 'ventaPila_create' %}" id="venta-form">
             {% csrf_token %}
-            <table class="table table-hover align-middle custom-table venta-table">
+            <table class="table align-middle custom-table venta-table">
                 <thead>
                     <tr>
                         <th>Código</th>
@@ -243,12 +240,11 @@
                         <td class="text-start">
                             <div class="form-group">
                                 <input type="number" name="precio_{{ pila.id }}" id="precio_{{ pila.id }}"
-                                    class="form-control precio-input" placeholder="0" min="0" max="{{ pila.precio }}"
-                                    data-max-stock="{{ pila.cantidad }}">
+                                    class="form-control precio-input" placeholder="0" min="0">
                                 <div class="error-message pila" id="error_precio_{{ pila.id }}"></div>
                             </div>
                         </td>
-                        <td class="{% if pila.cantidad|add:" 0" < 7 %}text-danger{% endif %} fw-bold">
+                        <td class="{% if pila.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">
                             {{ pila.cantidad }}
                         </td>
                         <td class="text-start">
@@ -338,11 +334,12 @@
             });
 
             if (haySeleccion) {
-                // Verificar stock antes de enviar
+                // Verificar stock antes de enviar (solo para campos de cantidad)
                 let stockValido = true;
-                inputs.forEach(function (input) {
+                const cantidadInputs = document.querySelectorAll('.cantidad-input');
+                cantidadInputs.forEach(function (input) {
                     if (input.value && parseInt(input.value) > 0) {
-                        const maxStock = input.getAttribute('max');
+                        const maxStock = input.getAttribute('data-max-stock');
                         if (parseInt(input.value) > parseInt(maxStock)) {
                             stockValido = false;
                             markInputError(input, `Excede el stock disponible (${maxStock})`);
@@ -351,8 +348,8 @@
                 });
 
                 if (stockValido) {
-                    // Marcar que se está procesando una venta
-                    localStorage.setItem('procesando_venta', 'true');
+                    // Enviar el formulario directamente (sin localStorage)
+                    // El modal se mostrará después del procesamiento exitoso
                     document.getElementById('venta-form').submit();
                 }
             } else {
@@ -368,21 +365,22 @@
             }
         });
 
-        // Verificar si venimos de procesar una venta
-        if (localStorage.getItem('procesando_venta') === 'true') {
-            // Eliminar la marca para no mostrar el modal en futuras cargas
-            localStorage.removeItem('procesando_venta');
-
-            // Mostrar modal de confirmación
+        // Verificar si hay un parámetro de éxito en la URL (igual que reparación)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("success") === "true") {
+            console.log("Parámetro success detectado, mostrando modal...");
+            
+            // Mostrar modal de confirmación con el mismo comportamiento que reparación
             setTimeout(function () {
                 try {
-                    var confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                    var confirmationModal = new bootstrap.Modal(
+                        document.getElementById('confirmationModal'),
+                        {
+                            backdrop: "static", // Evita que el modal se cierre al hacer clic fuera
+                            keyboard: false,    // Evita que el modal se cierre con la tecla ESC
+                        }
+                    );
                     confirmationModal.show();
-
-                    // Cerrar el modal después de 3 segundos
-                    setTimeout(function () {
-                        confirmationModal.hide();
-                    }, 3000);
                 } catch (error) {
                     console.error("Error al mostrar el modal:", error);
                     alert("Venta procesada correctamente");

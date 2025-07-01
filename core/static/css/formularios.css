@@ -131,6 +131,13 @@ body {
   padding-left: 0px;
 }
 
+.titulo-ventana {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  font-size: 50px;
+  padding-left: 0px;
+}
+
 h4{
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
@@ -223,16 +230,6 @@ form.repair-form.custom-form {
   flex-direction: column;
 }
 
-/* Para pantallas pequeñas */
-
-  
-  form.repair-form.custom-form {
-    flex-direction: column;
-  }
-
-
-/* Añadir al final de formularios.css */
-
 /* Clase específica para formulario de egreso */
 .egreso-form {
   display: flex;
@@ -259,6 +256,22 @@ form.egreso-form.custom-form {
 
 /* Anula los estilos de custom-form cuando se usa con ingreso-form*/
 form.ingreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+
+/* Clase específica para formulario de ganancia */
+.ganancia-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con ganancia-form*/
+form.ganancia-form.custom-form {
   flex-direction: row;
   max-width: 800px;
 }

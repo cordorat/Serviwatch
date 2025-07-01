@@ -16,7 +16,7 @@ def get_pilas_paginated(page_number=1, items_per_page=6):
     paginator = Paginator(pilas_list, items_per_page)
     return paginator.get_page(page_number)
 
-def create_pila(form_data):
+def create_pila(form):
     """
     Create a new pila.
     
@@ -26,7 +26,13 @@ def create_pila(form_data):
     Returns:
         Newly created pila object
     """
-    return form_data.save()
+    try:
+        # Si el formulario tiene una instancia, es una edición
+        pila = form.save()
+        return pila
+    except Exception as e:
+        raise Exception(f"Error al guardar la pila: {str(e)}")
+    
 
 def update_pila_stock_venta(pila_id, cantidad_venta):
     """

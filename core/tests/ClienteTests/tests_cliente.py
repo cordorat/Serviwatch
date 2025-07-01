@@ -8,6 +8,15 @@ import json
 from unittest.mock import patch, MagicMock
 from django.test import TestCase, RequestFactory
 from django.contrib.messages import get_messages
+from core.services.cliente_service import (
+    get_all_clientes, 
+    crear_cliente,
+    _initialize_cliente,
+    _handle_ajax_response,
+    _add_success_message,
+    _render_cliente_form
+)
+from django.http import JsonResponse
 
 class ClienteModelTest(TestCase):
 
@@ -385,3 +394,118 @@ class ClienteCreateViewTest(TestCase):
         # Should redirect to login page
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
+
+class ClienteServiceTest(TestCase):
+    """Tests específicos para el servicio de clientes"""
+    
+    def setUp(self):
+        """Configuración inicial para las pruebas del servicio"""
+        self.cliente1 = Cliente.objects.create(
+            nombre='Juan',
+            apellido='Pérez',
+            telefono='3001234567'
+        )
+        
+        self.cliente2 = Cliente.objects.create(
+            nombre='Ana',
+            apellido='García',
+            telefono='3007654321'
+        )
+        
+        self.factory = RequestFactory()
+    
+    def test_get_all_clientes(self):
+        """Prueba obtener todos los clientes"""
+        clientes = get_all_clientes()
+        self.assertEqual(clientes.count(), 2)
+        self.assertIn(self.cliente1, clientes)
+        self.assertIn(self.cliente2, clientes)
+    
+    def test_crear_cliente_exitoso(self):
+        """Prueba crear cliente usando formulario válido"""
+        form_data = {
+            'nombre': 'Pedro',
+            'apellido': 'Martínez',
+            'telefono': '3009876543'
+        }
+        form = ClienteForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        
+        cliente = crear_cliente(form)
+        self.assertEqual(cliente.nombre, 'Pedro')
+        self.assertEqual(cliente.apellido, 'Martínez')
+        self.assertEqual(Cliente.objects.count(), 3)
+    
+    def test_initialize_cliente_existente(self):
+        """Prueba inicializar cliente existente"""
+        cliente, modo = _initialize_cliente(self.cliente1.id)
+        self.assertEqual(cliente.id, self.cliente1.id)
+        self.assertEqual(modo, 'editar')
+    
+    def test_initialize_cliente_nuevo(self):
+        """Prueba inicializar cliente nuevo"""
+        cliente, modo = _initialize_cliente(None)
+        self.assertIsNone(cliente)
+        self.assertEqual(modo, 'agregar')
+    
+    def test_handle_ajax_response_success_agregar(self):
+        """Prueba respuesta AJAX exitosa para agregar"""
+        response = _handle_ajax_response(modo='agregar', success=True)
+        self.assertIsInstance(response, JsonResponse)
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+        self.assertIn('creado exitosamente', data['message'])
+    
+    def test_handle_ajax_response_success_editar(self):
+        """Prueba respuesta AJAX exitosa para editar"""
+        response = _handle_ajax_response(modo='editar', success=True)
+        self.assertIsInstance(response, JsonResponse)
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+        self.assertIn('editado exitosamente', data['message'])
+    
+    def test_handle_ajax_response_error(self):
+        """Prueba respuesta AJAX con errores"""
+        form_data = {'nombre': ''}  # Nombre vacío para generar error
+        form = ClienteForm(data=form_data)
+        form.is_valid()  # Esto genera los errores
+        
+        response = _handle_ajax_response(form=form, success=False)
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['success'])
+        self.assertIn('errors', data)
+    
+    @patch('core.services.cliente_service.messages')
+    def test_add_success_message_agregar(self, mock_messages):
+        """Prueba agregar mensaje de éxito para nuevo cliente"""
+        request = self.factory.get('/')
+        _add_success_message(request, 'agregar')
+        mock_messages.success.assert_called_once()
+        call_args = mock_messages.success.call_args[0]
+        self.assertIn('creado exitosamente', call_args[1])
+    
+    @patch('core.services.cliente_service.messages')
+    def test_add_success_message_editar(self, mock_messages):
+        """Prueba agregar mensaje de éxito para editar cliente"""
+        request = self.factory.get('/')
+        _add_success_message(request, 'editar')
+        mock_messages.success.assert_called_once()
+        call_args = mock_messages.success.call_args[0]
+        self.assertIn('editado exitosamente', call_args[1])
+    
+    @patch('core.services.cliente_service.render')
+    def test_render_cliente_form(self, mock_render):
+        """Prueba renderizar formulario de cliente"""
+        request = self.factory.get('/')
+        form = ClienteForm()
+        
+        _render_cliente_form(request, form, 'agregar')
+        
+        mock_render.assert_called_once()
+        call_args = mock_render.call_args
+        self.assertEqual(call_args[0][1], 'cliente/cliente_form.html')
+        context = call_args[0][2]
+        self.assertEqual(context['modo'], 'agregar')
+        self.assertEqual(context['form'], form)

@@ -2,3 +2,8 @@ from .cliente import Cliente
 from .reparacion import Reparacion
 from .empleado import Empleado
 from .cambiar_contraseña import PasswordResetToken
+from .ingreso import Ingreso
+from .egreso import Egreso
+from .reloj import Reloj
+from .abono import Abono
+from .pilas import Pilas

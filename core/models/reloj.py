@@ -1,7 +1,8 @@
 from django.db import models
 from django.core.validators import MaxLengthValidator, RegexValidator
 from core.models.cliente import Cliente
-from core.models.abono import Abono
+
+FORMATO_REGEX = r'^\d+$'
 
 class Reloj(models.Model):
 
@@ -34,7 +35,7 @@ class Reloj(models.Model):
     precio = models.CharField(
         max_length=20,
         validators=[
-            RegexValidator(regex=r'^\d+$', message="El precio debe ser un número válido"),
+            RegexValidator(regex=FORMATO_REGEX, message="El precio debe ser un número válido"),
             MaxLengthValidator(20, "El precio no puede exceder los 20 caracteres")],
     )
 
@@ -46,7 +47,7 @@ class Reloj(models.Model):
     comision = models.CharField(
         max_length=20,
         validators=[
-            RegexValidator(regex=r'^\d+$', message="La comision debe ser un número válido"),
+            RegexValidator(regex=FORMATO_REGEX, message="La comision debe ser un número válido"),
             MaxLengthValidator(20, "La comision no puede exceder los 20 caracteres"),
         ]
     )
@@ -95,7 +96,7 @@ class Reloj(models.Model):
     saldo_pendiente = models.CharField(
         max_length=20,
         validators=[
-            RegexValidator(regex=r'^\d+$', message="El saldo pendiente debe ser un número válido"),
+            RegexValidator(regex=FORMATO_REGEX, message="El saldo pendiente debe ser un número válido"),
             MaxLengthValidator(20, "El saldo pendiente no puede exceder los 20 caracteres")
         ]
     )
