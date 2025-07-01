@@ -52,6 +52,11 @@
   .custom-table-botoncito a {
     display: inline-block;
   }
+
+  .text-center.empty-class {
+    font-size: 17px;
+    margin: 6px;
+  }
   
 </style>
 
@@ -210,6 +215,10 @@
             </a>
             {% endif %}
           </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center empty-class">No hay relojes registrados</td>
         </tr>
         {% endfor %}
       </tbody>
