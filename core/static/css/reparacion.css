@@ -9,8 +9,7 @@
   font-size: 14px;
   padding: 10px;
   border: 1px solid #626E15;
-  border-left: none;
-  border-radius: 0 4px 4px 0;
+  border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
   min-height: 42px;
@@ -131,6 +130,11 @@
   display: flex;
   padding: 0 12px;
   font-size: 14;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+  border-left: none;
+  border-radius: 0 4px 4px 0;
 }
 
 .input-group .btn {

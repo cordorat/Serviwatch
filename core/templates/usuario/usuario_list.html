@@ -45,6 +45,10 @@
               <i class="bi bi-trash fs-4"></i>
             </a>
         </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center empty-class">No hay usuarios registrados</td>
+        </tr>
         {% endfor %}
       </tbody>
 

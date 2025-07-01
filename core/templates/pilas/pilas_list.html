@@ -33,7 +33,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="4" class="text-center">No hay pilas registradas</td>
+          <td colspan="4" class="text-center empty-class">No hay pilas registradas</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -144,6 +144,11 @@
   .pagination-arrow {
     font-weight: bold;
     color: #8a9a5b;
+  }
+
+  .text-center.empty-class {
+    font-size: 17px;
+    margin: 6px;
   }
 </style>
 
