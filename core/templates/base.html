@@ -110,7 +110,74 @@
       margin-top: 5px;
     }
 
+    /* Estandarizar disposición de elementos de la barra lateral */
+    .main-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .main-nav ul li {
+      margin: 8px 0; /* Espaciado consistente entre elementos */
+      padding: 0;
+      display: block;
+    }
+
+    .main-nav ul li a {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px; /* Padding consistente para todos los enlaces */
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      min-height: 48px; /* Altura mínima consistente */
+      box-sizing: border-box;
+    }
+
+    .main-nav ul li a span {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+      width: 24px; /* Ancho fijo para los iconos */
+      height: 24px; /* Alto fijo para los iconos */
+      justify-content: center;
+    }
+
+    .main-nav ul li a .icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    /* Asegurar que los estados active y menu-link sean consistentes */
+    .main-nav ul li.active {
+      background-color: transparent;
+    }
+
+    .main-nav ul li.active a {
+      background-color: #C9DC4E !important;
+      border: 2px solid #00000093 !important;
+      color: #000000 !important;
+      font-weight: bold !important;
+    }
+
+    .main-nav ul li a.menu-link {
+      background-color: #c7c7c7;
+      color: #000000;
+    }
+
+    .main-nav ul li a.menu-link:hover {
+      background-color: #b8b8b8;
+    }
+
+    /* Asegurar que user-info tenga el mismo tratamiento */
+    .user-info {
+      margin: 8px 0;
+      border-radius: 5px;
+    }
+
   </style>
+
   <link rel="stylesheet" href="{% static 'css/paginacion.css' %}">
   <link rel="stylesheet" href="{% static 'css/tabla.css' %}">
 </head>
@@ -172,9 +239,9 @@
       <nav class="main-nav">
         <ul>
           {% if user.is_superuser %}
-          <li class="{% if '/productos-admin/' in request.path or request.path == '/productos-admin' %} active {% endif %}">
+          <li class="{% if '/productos-admin/' in request.path or request.path == '/productos-admin' or '/servicios/' in request.path or '/productos/' in request.path %} active {% endif %}">
             <a href="{% url 'productos_administrador' %}"
-              class="{% if not '/productos-admin/' in request.path or request.path == '/productos-admin' %} menu-link {% endif %}">
+              class="{% if not '/productos-admin/' in request.path and not '/servicios/' in request.path and not '/productos/' in request.path %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reloj 1.png' %}" alt="Productos" class="icon">
               </span>
@@ -201,8 +268,8 @@
               Gestión de usuarios
             </a>
           </li>
-          <li class="{% if '/contable-admin/' in request.path or request.path == '/contable-admin' %} active {% endif %}">
-            <a href="{% url 'contabilidad_administrador'%}" class="{% if not '/contable-admin/' in request.path or request.path == '/contable-admin' %} menu-link {% endif %}">
+          <li class="{% if '/contable-admin/' in request.path or request.path == '/contable-admin' or '/contable/' in request.path %} active {% endif %}">
+            <a href="{% url 'contabilidad_administrador' %}" class="{% if '/contable-admin/' not in request.path and '/contable/' not in request.path %} menu-link {% endif %}">
               <span>
                 <img src="{% static 'images/reportes.png' %}" alt="Reportes" class="icon">
               </span>

@@ -1,4 +1,3 @@
-
 from core.models.egreso import Egreso
 from django.db.models import Sum
 from datetime import date
@@ -7,17 +6,7 @@ from django.db.utils import DatabaseError
 from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import redirect
-from io import BytesIO
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from django.utils import timezone
 from datetime import datetime
-
-formato_fecha = '%d/%m/%Y'
-
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -27,7 +16,7 @@ from reportlab.lib.units import inch
 from django.utils import timezone
 from reportlab.lib.pagesizes import landscape
 
-
+FORMATO_FECHA = '%d/%m/%Y'
 
 def crear_egreso(datos):
     try:
@@ -70,7 +59,7 @@ def _parsear_fecha(fecha_str):
     """
     Intenta analizar una fecha en diferentes formatos.
     """
-    formatos = ['%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y']
+    formatos = ['%Y-%m-%d', '%d-%m-%Y', FORMATO_FECHA]
     for formato in formatos:
         try:
             return datetime.strptime(fecha_str, formato).date()
@@ -152,13 +141,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     
     # Configurar estilos
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Heading1'],
-        alignment=1,  # Centrado
-        spaceAfter=12,
-        textColor=colors.black
-    )
+    
     subtitle_style = ParagraphStyle(
         'SubtitleStyle',
         parent=styles['Heading2'],
@@ -184,12 +167,12 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     
     # Encabezado con datos de la empresa
-    #elements.append(Paragraph("ServiWatch", title_style))
+    
     elements.append(Paragraph("Calle 25 Norte # 5 an -17", normal_style))
     elements.append(Paragraph("Tel: 555-1234", normal_style))
     elements.append(Spacer(1, 0.5*inch))
@@ -199,7 +182,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     
     # Período del reporte
     elements.append(Paragraph(
-        f"Período: {fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')}", 
+        f"Período: {fecha_inicio.strftime(FORMATO_FECHA)} - {fecha_fin.strftime(FORMATO_FECHA)}", 
         date_style
     ))
     elements.append(Spacer(1, 0.25*inch))
@@ -212,7 +195,7 @@ def generar_pdf_egresos(egresos, fecha_inicio, fecha_fin, total, request=None):
     # Agregar cada egreso a la tabla
     for egreso in egresos:
         table_data.append([
-            egreso.fecha.strftime('%d/%m/%Y'),
+            egreso.fecha.strftime(FORMATO_FECHA),
             egreso.descripcion,
             f"${egreso.valor:,.2f}"
         ])

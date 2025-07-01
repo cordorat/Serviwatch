@@ -21,7 +21,7 @@ def ganancia_view(request):
     # Obtener la ganancia del día actual para mostrar en la página
     try:
         ganancia_hoy = obtener_ganancia_hoy()
-    except Exception as e:
+    except Exception:
         ganancia_hoy = {
             'ganancia_neta': 0,
             'total_ingresos': 0,

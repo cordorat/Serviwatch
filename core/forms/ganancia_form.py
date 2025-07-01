@@ -2,10 +2,11 @@ from django import forms
 from core.models.egreso import Egreso
 from core.models.ingreso import Ingreso
 from django.utils import timezone
-from datetime import timedelta
-from datetime import date
+
 
 clase_formulario = 'form-control text-secondary'
+INVALID_FECHA_ERROR = 'Ingrese una fecha válida.'
+PLACEHOLDER_FECHA = 'dd/mm/aaaa'    
 
 #--------------------REPORTE DE GANANCIAS--------------------#   
 
@@ -29,14 +30,14 @@ class ReporteGananciaForm(forms.Form):
         required=True,
         error_messages={
             'required': 'La fecha inicial es obligatoria.',
-            'invalid': 'Ingrese una fecha válida.'
+            'invalid': INVALID_FECHA_ERROR
         },
         widget=forms.DateInput(
             attrs={
                 'type': 'date',
                 'id': 'id_fecha_inicio',
                 'class': clase_formulario,
-                'placeholder': 'dd/mm/aaaa',
+                'placeholder': PLACEHOLDER_FECHA,
                 'novalidate': True, 
             }
         )
@@ -46,14 +47,14 @@ class ReporteGananciaForm(forms.Form):
         required=True,
         error_messages={
             'required': 'La fecha final es obligatoria.',
-            'invalid': 'Ingrese una fecha válida.'
+            'invalid': INVALID_FECHA_ERROR
         },
         widget=forms.DateInput(
             attrs={
                 'type': 'date',
                 'id': 'id_fecha_fin',
                 'class': clase_formulario,
-                'placeholder': 'dd/mm/aaaa',
+                'placeholder': PLACEHOLDER_FECHA,
                 'novalidate': True,  # Desactiva la validación HTML5
             }
         )
@@ -87,14 +88,14 @@ class ReporteEgresoForm(forms.Form):
         required=True,
         error_messages={
             'required': 'La fecha inicial es obligatoria.',
-            'invalid': 'Ingrese una fecha válida.'
+            'invalid': INVALID_FECHA_ERROR
         },
         widget=forms.DateInput(
             attrs={
                 'type': 'date',
                 'id': 'id_fecha_inicio',
                 'class': clase_formulario,
-                'placeholder': 'dd/mm/aaaa',
+                'placeholder': PLACEHOLDER_FECHA,
                 'novalidate': True, 
             }
         )
@@ -104,14 +105,14 @@ class ReporteEgresoForm(forms.Form):
         required=True,
         error_messages={
             'required': 'La fecha final es obligatoria.',
-            'invalid': 'Ingrese una fecha válida.'
+            'invalid': INVALID_FECHA_ERROR
         },
         widget=forms.DateInput(
             attrs={
                 'type': 'date',
                 'id': 'id_fecha_fin',
                 'class': clase_formulario,
-                'placeholder': 'dd/mm/aaaa',
+                'placeholder': PLACEHOLDER_FECHA,
                 'novalidate': True,  # Desactiva la validación HTML5
             }
         )

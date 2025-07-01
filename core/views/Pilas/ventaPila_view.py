@@ -105,8 +105,7 @@ def ventaPila_view(request):
 
             messages.success(request, "Venta agregada correctamente.")
             # Redirigir a la lista de ventas
-            return redirect('ventaPila_list')
-
+            return redirect(f'{reverse("ventaPila_list")}?success=true')
         except Exception as e:
             messages.error(request, f"Error al procesar la venta: {str(e)}")
             return redirect('ventaPila_list')

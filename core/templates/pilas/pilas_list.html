@@ -2,18 +2,13 @@
 <div class="main-content">
   <div class="header-icons">
     <h2 class="titulo">PILAS</h2>
-  </div>
-  <br />
-  <!-- Header with Add button -->
-  <div class="header-icons">
     <a href="{% url 'pilas_form' %}" class="btn btn-add me-3">Agregar Pila</a>
   </div>
-
   <br />
 
   <!-- Lista de pilas -->
   <div class="table-container">
-    <table class="table table-hover align-middle custom-table">
+    <table class="table align-middle custom-table">
       <thead class="table-header">
         <tr>
           <th>Código</th>
@@ -25,7 +20,7 @@
         {% for pila in pilas %}
         <tr>
           <td>{{ pila.codigo }}</td>
-          <td>{{ pila.cantidad }}</td>
+          <td class="{% if pila.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">{{ pila.cantidad }}</td>
           <td>
             <a
               href="{% url 'pila_editar' id=pila.id %}"

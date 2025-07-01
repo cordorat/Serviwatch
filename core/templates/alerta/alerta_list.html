@@ -119,7 +119,9 @@
                     </td>
                     {% elif tipo_actual == 'stock_bajo' %}
                     <td>{{ item.codigo }}</td>
-                    <td>{{ item.cantidad }}</td>
+                    <td class="{% if item.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">
+                        {{ item.cantidad }}
+                    </td>
                     <td>
                         <a href="#" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-eye"></i> Ver

@@ -131,6 +131,13 @@ body {
   padding-left: 0px;
 }
 
+.titulo-ventana {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  font-size: 50px;
+  padding-left: 0px;
+}
+
 h4{
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
@@ -222,16 +229,6 @@ form.repair-form.custom-form {
   flex: 0 0 50%;
   flex-direction: column;
 }
-
-/* Para pantallas pequeñas */
-
-  
-  form.repair-form.custom-form {
-    flex-direction: column;
-  }
-
-
-/* Añadir al final de formularios.css */
 
 /* Clase específica para formulario de egreso */
 .egreso-form {

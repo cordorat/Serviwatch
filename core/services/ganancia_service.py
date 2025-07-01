@@ -73,13 +73,7 @@ def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia, request):
         
         # Configurar estilos
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'TitleStyle',
-            parent=styles['Heading1'],
-            alignment=1,  # Centrado
-            spaceAfter=12,
-            textColor=colors.black
-        )
+        
         subtitle_style = ParagraphStyle(
             'SubtitleStyle',
             parent=styles['Heading2'],

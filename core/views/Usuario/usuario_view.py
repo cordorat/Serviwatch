@@ -8,8 +8,10 @@ from core.services.usuario_service import crear_usuario, get_all_usuarios
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from django.shortcuts import get_object_or_404
+
+
+USUARIO_RENDER = 'usuario/usuario_form.html'
+NO_EXISTE = 'El usuario no existe.'
 
 @login_required
 @require_http_methods(["GET"])
@@ -47,7 +49,7 @@ def _handle_ajax_response(success, data=None, errors=None, status=200):
 
 def _render_usuario_form(request, form, modo='crear', success=False):
     """Función auxiliar para renderizar el formulario de usuario."""
-    return render(request, 'usuario/usuario_form.html', {
+    return render(request, USUARIO_RENDER, {
         'form': form,
         'modo': modo,
         'success': success
@@ -63,7 +65,7 @@ def usuario_create_view(request):
     # Si es success=true, mostrar un formulario completamente nuevo sin validación
     if success:
         form = FormularioRegistroUsuario()  # Formulario vacío sin validación
-        return render(request, 'usuario/usuario_form.html', {
+        return render(request, USUARIO_RENDER, {
             'form': form,
             'modo': 'crear',
             'success': True
@@ -115,7 +117,7 @@ def usuario_create_view(request):
     else:
         form = FormularioRegistroUsuario()
     
-    return render(request, 'usuario/usuario_form.html', {
+    return render(request, USUARIO_RENDER, {
         'form': form,
         'modo': 'crear',
         'success': False
@@ -127,7 +129,7 @@ def usuario_update_view(request, pk):
     try:
         usuario = User.objects.get(pk=pk)
     except User.DoesNotExist:
-        messages.error(request, 'El usuario no existe.')
+        messages.error(request, NO_EXISTE)
         return redirect('usuario_list')
     
     if request.method == 'POST':
@@ -160,7 +162,7 @@ def usuario_update_view(request, pk):
     # Verificar si hay parámetro de éxito
     success = request.GET.get('success') == 'true'
     
-    return render(request, 'usuario/usuario_form.html', {
+    return render(request, USUARIO_RENDER, {
         'form': form,
         'modo': 'editar',
         'success': success
@@ -173,8 +175,8 @@ def usuario_delete_view(request, pk):
         usuario = User.objects.get(pk=pk)
     except User.DoesNotExist:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': False, 'message': 'El usuario no existe.'}, status=404)
-        messages.error(request, 'El usuario no existe.')
+            return JsonResponse({'success': False, 'message': NO_EXISTE}, status=404)
+        messages.error(request, NO_EXISTE)
         return redirect('usuario_list')
 
     if request.method == 'POST':

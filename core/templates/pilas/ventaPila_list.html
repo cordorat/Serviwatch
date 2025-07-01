@@ -64,6 +64,12 @@
         min-height: 100%;
         overflow-y: auto;
         padding-bottom: 30px;
+        width: 100%;
+        padding-right: 0;
+        padding-left: 0;
+        margin-right: 0;
+        margin-left: 0;
+        max-width: none;
     }
 
     .cantidad-input {
@@ -100,15 +106,6 @@
         /* Texto más pequeño */
     }
 
-    /* Estilos para hacer que la tabla ocupe más espacio */
-    .main-content {
-        width: 100%;
-        padding-right: 0;
-        padding-left: 0;
-        margin-right: 0;
-        margin-left: 0;
-        max-width: none;
-    }
 
     .table-container {
         width: 100%;
@@ -196,23 +193,18 @@
 <div class="main-content">
     <div class="header-icons">
         <h2 class="titulo">VENTA DE PILAS</h2>
+        <button type="button" id="btn-procesar" class="btn btn-add me-3">Procesar venta</button>
     </div>
 
     <!-- Botón para procesar venta -->
     <div class="header-icons header-icons-venta">
-        <button type="button" id="btn-procesar" class="btn btn-add me-3">Procesar venta</button>
     </div>
     <div class="error-banner" id="error-banner">
         <span id="error-message">Error en la validación</span>
     </div>
 
     <!-- Modal de confirmación -->
-    <div class="modal fade" id="confirmationModal" 
-         data-bs-backdrop="static" 
-         data-bs-keyboard="false" 
-         tabindex="-1" 
-         aria-labelledby="confirmationModalLabel"
-         aria-hidden="true">
+    <div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center" style="background-color: #f1f1f1;">
                 <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
@@ -231,7 +223,7 @@
     <div class="table-container">
         <form method="post" action="{% url 'ventaPila_create' %}" id="venta-form">
             {% csrf_token %}
-            <table class="table table-hover align-middle custom-table venta-table">
+            <table class="table align-middle custom-table venta-table">
                 <thead>
                     <tr>
                         <th>Código</th>
@@ -252,7 +244,7 @@
                                 <div class="error-message pila" id="error_precio_{{ pila.id }}"></div>
                             </div>
                         </td>
-                        <td class="{% if pila.cantidad|add:" 0" < 7 %}text-danger{% endif %} fw-bold">
+                        <td class="{% if pila.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">
                             {{ pila.cantidad }}
                         </td>
                         <td class="text-start">

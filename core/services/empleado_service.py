@@ -98,13 +98,7 @@ def generar_pdf_empleados(empleados, filtro_estado, request=None):
     
     # Estilos de texto
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        alignment=1,  # Centrado
-        spaceAfter=5
-    )
+    
     subtitle_style = ParagraphStyle(
         'CustomSubtitle',
         parent=styles['Heading2'],
@@ -130,7 +124,7 @@ def generar_pdf_empleados(empleados, filtro_estado, request=None):
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     

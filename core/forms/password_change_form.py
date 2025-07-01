@@ -3,9 +3,9 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 
-mensaje_campo_requerido = 'Este campo es obligatorio'
-mensaje_tamaño_minimo = 'La contraseña debe tener al menos 8 caracteres'
-mensaje_tamaño_maximo = 'La contraseña no puede tener más de 16 caracteres'
+MENSAJE_CAMPO_REQUERIDO = 'Este campo es obligatorio'
+MENSAJE_TAMAÑO_MINIMO = 'La contraseña debe tener al menos 8 caracteres'
+MENSAJE_TAMAÑO_MAXIMO = 'La contraseña no puede tener más de 16 caracteres'
 
 class PasswordChangeForm(forms.Form):
     """
@@ -33,9 +33,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'current-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': MENSAJE_CAMPO_REQUERIDO,
+            'min_length': MENSAJE_TAMAÑO_MINIMO,
+            'max_length': MENSAJE_TAMAÑO_MAXIMO,
         }
     )
     
@@ -50,9 +50,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': MENSAJE_CAMPO_REQUERIDO,
+            'min_length': MENSAJE_TAMAÑO_MINIMO,
+            'max_length': MENSAJE_TAMAÑO_MAXIMO,
         }
     )
     
@@ -67,9 +67,9 @@ class PasswordChangeForm(forms.Form):
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': MENSAJE_CAMPO_REQUERIDO,
+            'min_length': MENSAJE_TAMAÑO_MINIMO,
+            'max_length': MENSAJE_TAMAÑO_MAXIMO,
         }
     )
 
