@@ -40,9 +40,8 @@ def calcular_ganancia_rango(fecha_inicio, fecha_fin):
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin
         }
-    except (ValidationError, DatabaseError) as e:
-        # Capturar excepciones específicas de Django
-        raise ValidationError(f"Error al calcular ganancia: {str(e)}")
+    except Exception as e:
+        raise Exception(f"Error al calcular ganancia: {str(e)}")
 
 
 def obtener_ganancia_hoy():
@@ -196,6 +195,5 @@ def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia, request):
         
         return pdf
         
-    except (OSError, IOError) as e:
-        # Errores de archivo/buffer al generar PDF
-        raise ValidationError(f"Error al crear el archivo PDF: {str(e)}")
+    except Exception as e:
+        raise Exception(f"Error al generar PDF: {str(e)}")
