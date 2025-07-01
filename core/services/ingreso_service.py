@@ -1,8 +1,6 @@
 from core.models.ingreso import Ingreso
 from django.db.models import Sum
 from datetime import date
-from django.core.exceptions import ValidationError
-from django.db.utils import DatabaseError
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -15,7 +13,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import redirect
 
-formato_fecha = '%d/%m/%Y'
+FORMATO_FECHA = '%d/%m/%Y'
 
 def crear_ingreso(datos):
     """
@@ -29,7 +27,7 @@ def crear_ingreso(datos):
             valor = 0        
         # Validar la fecha
         try:
-            fecha = datetime.strptime(datos['fecha'], '%d/%m/%Y').date()
+            fecha = datetime.strptime(datos['fecha'], FORMATO_FECHA).date()
         except ValueError:
             fecha = datetime.now().date()
                     
@@ -41,7 +39,7 @@ def crear_ingreso(datos):
         )
         ingreso.save()
         return ingreso
-    except Exception as e:
+    except Exception:
         return None
     
     
@@ -109,13 +107,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
     
     # Configurar estilos
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Heading1'],
-        alignment=1,  # Centrado
-        spaceAfter=12,
-        textColor=colors.black
-    )
+    
     subtitle_style = ParagraphStyle(
         'SubtitleStyle',
         parent=styles['Heading2'],
@@ -156,7 +148,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
     
     # Período del reporte
     elements.append(Paragraph(
-        f"Período: {fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')}", 
+        f"Período: {fecha_inicio.strftime(FORMATO_FECHA)} - {fecha_fin.strftime(FORMATO_FECHA)}", 
         date_style
     ))
     elements.append(Spacer(1, 0.25*inch))
@@ -169,7 +161,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
     # Agregar cada ingreso a la tabla
     for ingreso in ingresos:
         table_data.append([
-            ingreso.fecha.strftime('%d/%m/%Y'),
+            ingreso.fecha.strftime(FORMATO_FECHA),
             ingreso.descripcion,
             f"${ingreso.valor:,.2f}"
         ])
@@ -237,7 +229,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
 
 def _parsear_fecha(fecha_str):
     """Función auxiliar para parsear la fecha en diferentes formatos."""
-    formatos = ['%Y-%m-%d', '%d-%m-%Y', formato_fecha]
+    formatos = ['%Y-%m-%d', '%d-%m-%Y', FORMATO_FECHA]
     
     for formato in formatos:
         try:
@@ -251,7 +243,7 @@ def _parsear_fecha(fecha_str):
 def _formatear_datos_ingreso(ingreso_data):
     """Función auxiliar para formatear los datos del ingreso para la plantilla."""
     fecha_obj = _parsear_fecha(ingreso_data['fecha'])
-    fecha_formateada = fecha_obj.strftime(formato_fecha)
+    fecha_formateada = fecha_obj.strftime(FORMATO_FECHA)
     
     return {
         'fecha': fecha_formateada,

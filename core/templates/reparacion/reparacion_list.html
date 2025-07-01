@@ -24,11 +24,6 @@
         justify-content: start;
     }
 
-    .filtro-container-reparacion {
-        display: inline-block;
-        vertical-align: middle;
-    }
-
     .filtro-container-reparacion .form-select {
         min-width: 120px;
         border-radius: 4px;
@@ -81,8 +76,9 @@
 
     .filtro-container-reparacion {
         display: flex;
-        align-items: flex-end; /* Alinear con la parte inferior */
+        align-items: flex-end;
         gap: 10px;
+        vertical-align: middle;
     }
 
 </style>
@@ -93,7 +89,6 @@
     </div>
     <!-- Botón Agregar reparación -->
     <div class="header-icons header-icons-reparacion">
-        <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
         <form method="get" action="{% url 'reparacion_list' %}" class="search-form">
             <div class="input-group input-group-reparacion" style="gap: 10px;" data-bs-toggle="tooltip"
             data-bs-placement="top" title="Buscar reparacion por codigo, cliente o tecnico">
@@ -126,6 +121,9 @@
             </form>
         </div>
         <div class="report-button-container">
+            {% if not user.is_authenticated or not user.is_staff or not user.is_superuser %}
+            <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
+            {% endif %}
             <a href="{% url 'reporte_reparaciones_pdf' %}?estado={{ filtro_estado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
             target="_blank"> 
                 Generar reporte
@@ -138,7 +136,7 @@
 
     <!-- Lista de reparaciones -->
     <div class="table-container">
-        <table class="table table-hover align-middle custom-table custom-table-reparacion reparaciones-table">
+        <table class="table align-middle custom-table custom-table-reparacion reparaciones-table">
             <thead class="table-header">
                 <tr>
                     <th>Código</th>

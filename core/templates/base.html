@@ -110,7 +110,74 @@
       margin-top: 5px;
     }
 
+    /* Estandarizar disposición de elementos de la barra lateral */
+    .main-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .main-nav ul li {
+      margin: 8px 0; /* Espaciado consistente entre elementos */
+      padding: 0;
+      display: block;
+    }
+
+    .main-nav ul li a {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px; /* Padding consistente para todos los enlaces */
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      min-height: 48px; /* Altura mínima consistente */
+      box-sizing: border-box;
+    }
+
+    .main-nav ul li a span {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+      width: 24px; /* Ancho fijo para los iconos */
+      height: 24px; /* Alto fijo para los iconos */
+      justify-content: center;
+    }
+
+    .main-nav ul li a .icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    /* Asegurar que los estados active y menu-link sean consistentes */
+    .main-nav ul li.active {
+      background-color: transparent;
+    }
+
+    .main-nav ul li.active a {
+      background-color: #C9DC4E !important;
+      border: 2px solid #00000093 !important;
+      color: #000000 !important;
+      font-weight: bold !important;
+    }
+
+    .main-nav ul li a.menu-link {
+      background-color: #c7c7c7;
+      color: #000000;
+    }
+
+    .main-nav ul li a.menu-link:hover {
+      background-color: #b8b8b8;
+    }
+
+    /* Asegurar que user-info tenga el mismo tratamiento */
+    .user-info {
+      margin: 8px 0;
+      border-radius: 5px;
+    }
+
   </style>
+
   <link rel="stylesheet" href="{% static 'css/paginacion.css' %}">
   <link rel="stylesheet" href="{% static 'css/tabla.css' %}">
 </head>

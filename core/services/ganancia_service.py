@@ -40,8 +40,9 @@ def calcular_ganancia_rango(fecha_inicio, fecha_fin):
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin
         }
-    except Exception as e:
-        raise Exception(f"Error al calcular ganancia: {str(e)}")
+    except (ValidationError, DatabaseError) as e:
+        # Capturar excepciones específicas de Django
+        raise ValidationError(f"Error al calcular ganancia: {str(e)}")
 
 
 def obtener_ganancia_hoy():
@@ -53,7 +54,7 @@ def obtener_ganancia_hoy():
     return calcular_ganancia_rango(hoy, hoy)
 
 
-def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia, request):
+def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia):
 
 
     try:
@@ -73,13 +74,7 @@ def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia, request):
         
         # Configurar estilos
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'TitleStyle',
-            parent=styles['Heading1'],
-            alignment=1,  # Centrado
-            spaceAfter=12,
-            textColor=colors.black
-        )
+        
         subtitle_style = ParagraphStyle(
             'SubtitleStyle',
             parent=styles['Heading2'],
@@ -201,5 +196,6 @@ def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia, request):
         
         return pdf
         
-    except Exception as e:
-        raise Exception(f"Error al generar PDF: {str(e)}")
+    except (OSError, IOError) as e:
+        # Errores de archivo/buffer al generar PDF
+        raise ValidationError(f"Error al crear el archivo PDF: {str(e)}")

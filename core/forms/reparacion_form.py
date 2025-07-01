@@ -260,7 +260,7 @@ class ReparacionForm(forms.ModelForm):
             try:
                 fecha_obj = self.clean_fecha_entrega_estimada()
                 instance.fecha_entrega_estimada = fecha_obj
-            except:
+            except (ValueError, ValidationError) as e:
                 # Si falla, usar el valor tal como viene
                 instance.fecha_entrega_estimada = fecha_str
         elif fecha_str:

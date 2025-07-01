@@ -1,12 +1,11 @@
 from core.models.reloj import Reloj
 from io import BytesIO
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.units import inch
 from django.utils import timezone
-from datetime import datetime
 
 def get_all_relojes():
     return Reloj.objects.all()
@@ -18,7 +17,7 @@ def create_reloj(form):
 
     try:
         comision = int(precio) * 0.2 if tiene_comision else 0
-    except Exception as e:
+    except Exception:
         comision = 0
     reloj.comision = str(int(comision))
 
@@ -27,6 +26,8 @@ def create_reloj(form):
 
     reloj.save()
     return reloj
+
+DATOS_CONST = 'Sin datos'
 
 def generar_pdf_relojes(relojes, filtro_estado, filtro_tipo, request=None):
     """
@@ -58,13 +59,7 @@ def generar_pdf_relojes(relojes, filtro_estado, filtro_tipo, request=None):
     
     # Configurar estilos
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Heading1'],
-        alignment=1,  # Centrado
-        spaceAfter=5,
-        textColor=colors.black
-    )
+    
     subtitle_style = ParagraphStyle(
         'SubtitleStyle',
         parent=styles['Heading2'],
@@ -73,24 +68,7 @@ def generar_pdf_relojes(relojes, filtro_estado, filtro_tipo, request=None):
         textColor=colors.black
     )
     normal_style = styles['Normal']
-    date_style = ParagraphStyle(
-        'DateStyle',
-        parent=normal_style,
-        alignment=2,  # Derecha
-        fontSize=10,
-        spaceAfter=10
-    )
-
-    # Estilo para texto en celdas
-    cell_style = ParagraphStyle(
-        'CellStyle',
-        parent=normal_style,
-        fontSize=8,
-        leading=10,  # Espacio entre líneas
-        spaceBefore=2,
-        spaceAfter=2
-    )
-
+    
     # Intentar incluir el logo si está disponible
     try:
         from django.contrib.staticfiles import finders
@@ -100,7 +78,7 @@ def generar_pdf_relojes(relojes, filtro_estado, filtro_tipo, request=None):
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     
@@ -157,7 +135,7 @@ def generar_pdf_relojes(relojes, filtro_estado, filtro_tipo, request=None):
     
     # Si no hay datos, mostrar mensaje
     if len(data) == 1:  # Solo encabezados
-        data.append(['Sin datos', 'Sin datos', 'Sin datos', 'Sin datos', 'Sin datos'])
+        data.append([DATOS_CONST, DATOS_CONST, DATOS_CONST, DATOS_CONST, DATOS_CONST])
     
     # Crear la tabla
     table = Table(data, colWidths=[1.5*inch, 1.8*inch, 1.2*inch, 1.2*inch, 2*inch])

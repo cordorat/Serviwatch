@@ -67,7 +67,6 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
     doc = SimpleDocTemplate(
         buffer,
         pagesize=landscape(letter),
-        #pagesize=letter,
         rightMargin=30,
         leftMargin=30,
         topMargin=30,
@@ -80,13 +79,7 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
     
     # Configurar estilos
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Heading1'],
-        alignment=1,  # Centrado
-        spaceAfter=5,
-        textColor=colors.black
-    )
+    
     subtitle_style = ParagraphStyle(
         'SubtitleStyle',
         parent=styles['Heading2'],
@@ -95,15 +88,8 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
         textColor=colors.black
     )
     normal_style = styles['Normal']
-    date_style = ParagraphStyle(
-        'DateStyle',
-        parent=normal_style,
-        alignment=1,  # Centrado
-        fontStyle='italic',
-        textColor=colors.gray
-    )
 
-       # Estilo para texto en celdas
+    # Estilo para texto en celdas
     cell_style = ParagraphStyle(
         'CellStyle',
         parent=normal_style,
@@ -122,7 +108,7 @@ def generar_pdf_reparaciones(reparaciones, filtro_estado, request=None):
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     

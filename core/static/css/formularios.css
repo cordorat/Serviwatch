@@ -230,16 +230,6 @@ form.repair-form.custom-form {
   flex-direction: column;
 }
 
-/* Para pantallas pequeñas */
-
-  
-  form.repair-form.custom-form {
-    flex-direction: column;
-  }
-
-
-/* Añadir al final de formularios.css */
-
 /* Clase específica para formulario de egreso */
 .egreso-form {
   display: flex;

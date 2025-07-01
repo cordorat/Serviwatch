@@ -9,6 +9,7 @@ class ClienteChoiceField(forms.ModelChoiceField):
         return f"{obj.nombre} - {obj.apellido} - {obj.telefono}"
 
 clase_formulario = 'form-control'
+TEXT_CLASS = 'form-span form-control text-secondary'
 
 class RelojForm(forms.ModelForm):
     marca = forms.CharField(
@@ -94,7 +95,7 @@ class RelojForm(forms.ModelForm):
         required=True,
         choices=[('NUEVO', 'Nuevo'), ('USADO', 'Usado'), ('SEMI', 'Seminuevo')],
         widget=forms.Select(attrs={
-            'class': 'form-span form-control text-secondary',
+            'class': TEXT_CLASS,
             'placeholder': 'Tipo'
         }),
         error_messages={
@@ -106,7 +107,7 @@ class RelojForm(forms.ModelForm):
         required=False,
         choices=[('VENDIDO', 'Vendido'), ('DISPONIBLE', 'Disponible')],
         widget=forms.Select(attrs={
-            'class': 'form-span form-control text-secondary',
+            'class': TEXT_CLASS,
             'placeholder': 'Estado'
         }),
         error_messages={
@@ -147,7 +148,7 @@ class RelojForm(forms.ModelForm):
         choices=Reloj.METODO_PAGO_CHOICES,
         required=False,
         widget=forms.Select(attrs={
-            'class': 'form-span form-control text-secondary',
+            'class': TEXT_CLASS,
             'placeholder': 'Método de pago'
         })
     )

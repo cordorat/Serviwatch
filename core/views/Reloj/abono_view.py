@@ -20,7 +20,7 @@ def abono_create_view(request, reloj_id):
         if not monto:
             raise ValueError("El monto es requerido")
         
-        abono, reloj_actualizado = registrar_abono(
+        _, reloj_actualizado = registrar_abono(
             reloj_id=reloj_id,
             monto=monto,
             descripcion=descripcion

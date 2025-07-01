@@ -11,7 +11,7 @@
 
   .filtro-container-reparacion {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 10px;
   }
 
@@ -29,6 +29,7 @@
       margin-left: auto;
       display: flex;
       align-items: center;
+      gap: 20px;
   }
 
   .form-reloj {
@@ -48,12 +49,6 @@
     min-width: 120px;
   }
 
-  .filtro-container-reparacion {
-    display: flex;
-    align-items: flex-end; /* Alinear con la parte inferior */
-    gap: 10px;
-  }
-
   .custom-table-botoncito a {
     display: inline-block;
   }
@@ -70,9 +65,8 @@
       RELOJES
       {% endif %}
     </h2>
-    {% if 'productos' in request.path %}
-    <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
-    {% endif %}
+    
+    
   </div>
 
   <!-- Campo de búsqueda -->
@@ -133,7 +127,11 @@
       </div>
       {% endif %}
       </form>
-    </div>    <div class="report-button-container">
+    </div>    
+    <div class="report-button-container">
+      {% if '/productos/' in request.path %}
+      <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+      {% endif %}
       <a href="{% if 'servicios' in request.path %}{% url 'reporte_relojes_venta_pdf' %}{% else %}{% url 'reporte_relojes_pdf' %}{% endif %}?estado={{ filtro_estado }}&tipo={{ filtro_tipo }}&pagado={{ filtro_pagado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
       target="_blank"> 
           Generar reporte
@@ -144,7 +142,7 @@
   <br>
   <!-- Lista de relojes -->
   <div class="table-container">
-    <table class="table table-hover align-middle custom-table">
+    <table class="table align-middle custom-table">
       <thead class="table-header">
         <tr>
           <th>Marca</th>

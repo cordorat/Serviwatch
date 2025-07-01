@@ -1,5 +1,7 @@
 from django.core.paginator import Paginator
 from core.models.pilas import Pilas
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, DatabaseError
 
 def get_pilas_paginated(page_number=1, items_per_page=6):
     """
@@ -30,8 +32,15 @@ def create_pila(form):
         # Si el formulario tiene una instancia, es una edición
         pila = form.save()
         return pila
-    except Exception as e:
-        raise Exception(f"Error al guardar la pila: {str(e)}")
+    except IntegrityError as e:
+        # Errores de integridad (código duplicado, restricciones FK)
+        raise ValidationError(f"Error de integridad al guardar la pila: {str(e)}")
+    except DatabaseError as e:
+        # Errores generales de base de datos
+        raise ValidationError(f"Error de base de datos al guardar la pila: {str(e)}")
+    except (ValueError, TypeError) as e:
+        # Errores de validación de datos
+        raise ValidationError(f"Error en los datos de la pila: {str(e)}")
     
 
 def update_pila_stock_venta(pila_id, cantidad_venta):

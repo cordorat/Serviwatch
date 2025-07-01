@@ -24,7 +24,7 @@ def _initialize_empleado(id):
         return get_object_or_404(Empleado, id=id), 'editar'
     return None, 'agregar'
 
-def _handle_form_success(request, empleado, modo):
+def _handle_form_success(request, modo):
     """Maneja la respuesta exitosa después de guardar un empleado."""
     success_message = f'Empleado {"editado" if modo == "editar" else "creado"} exitosamente.'
     messages.success(request, success_message)
@@ -68,7 +68,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-def generar_pdf_empleados(empleados, filtro_estado, request=None):
+def generar_pdf_empleados(empleados, filtro_estado):
     """
     Genera un reporte PDF de empleados basado en los filtros aplicados.
     
@@ -98,13 +98,7 @@ def generar_pdf_empleados(empleados, filtro_estado, request=None):
     
     # Estilos de texto
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        alignment=1,  # Centrado
-        spaceAfter=5
-    )
+    
     subtitle_style = ParagraphStyle(
         'CustomSubtitle',
         parent=styles['Heading2'],
@@ -130,7 +124,7 @@ def generar_pdf_empleados(empleados, filtro_estado, request=None):
             logo = Image(logo_path, width=2.5*inch, height=1*inch, hAlign='LEFT')
             elements.append(logo)
             elements.append(Spacer(1, 0.1*inch))
-    except Exception as e:
+    except Exception:
         # Si hay algún error con el logo, simplemente continuamos sin él
         pass
     
