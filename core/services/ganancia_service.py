@@ -54,7 +54,7 @@ def obtener_ganancia_hoy():
     return calcular_ganancia_rango(hoy, hoy)
 
 
-def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia):
+def generar_pdf_ganancias(fecha_inicio, fecha_fin, datos_ganancia, request):
 
 
     try:

@@ -24,7 +24,7 @@ def _initialize_empleado(id):
         return get_object_or_404(Empleado, id=id), 'editar'
     return None, 'agregar'
 
-def _handle_form_success(request, modo):
+def _handle_form_success(request, empleado, modo):
     """Maneja la respuesta exitosa después de guardar un empleado."""
     success_message = f'Empleado {"editado" if modo == "editar" else "creado"} exitosamente.'
     messages.success(request, success_message)
@@ -68,7 +68,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-def generar_pdf_empleados(empleados, filtro_estado):
+def generar_pdf_empleados(empleados, filtro_estado, request=None):
     """
     Genera un reporte PDF de empleados basado en los filtros aplicados.
     

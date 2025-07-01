@@ -86,8 +86,9 @@ class TestVentaPilaView(TestCase):
         # Hacer POST request
         response = self.client.post(reverse('ventaPila_create'), post_data)
         
-        # Verificar redirección
-        self.assertRedirects(response, reverse('ventaPila_list'))
+        # Verificar redirección CON el parámetro success=true
+        expected_url = f"{reverse('ventaPila_list')}?success=true"
+        self.assertRedirects(response, expected_url)
         
         # Verificar mensaje de éxito
         messages = list(get_messages(response.wsgi_request))
