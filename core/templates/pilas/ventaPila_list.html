@@ -73,7 +73,7 @@
     }
 
     .cantidad-input {
-        width: 80px !important;
+        width: 100px !important;
         /* Reducir ancho */
         text-align: center;
         padding-right: 5px;
@@ -92,7 +92,7 @@
     .form-group {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         width: 100%;
         position: relative;
     }
@@ -115,9 +115,9 @@
     }
 
     .venta-table {
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
+        width: 70%;
+        max-width: none;
+        margin: 0 auto;        
     }
 
     /* Asegurar que las celdas de la tabla tengan un tamaño adecuado */
@@ -125,6 +125,7 @@
     .venta-table td {
         padding: 12px 8px;
         min-width: 100px;
+        text-align: center;
     }
 
     /* Ajustar el ancho del contenedor del formulario */
@@ -174,7 +175,7 @@
     }
 
     .precio-input {
-        width: 80px !important;
+        width: 120px !important;
         /* Reducir ancho */
         text-align: center;
         padding-right: 5px;
@@ -188,6 +189,11 @@
     .precio-input::-webkit-outer-spin-button {
         margin-left: 0;
     }
+
+    .form-control-ventapila {
+        border: 2px solid #626E15;
+    }
+    
 </style>
 
 <div class="main-content">
@@ -196,9 +202,6 @@
         <button type="button" id="btn-procesar" class="btn btn-add me-3">Procesar venta</button>
     </div>
 
-    <!-- Botón para procesar venta -->
-    <div class="header-icons header-icons-venta">
-    </div>
     <div class="error-banner" id="error-banner">
         <span id="error-message">Error en la validación</span>
     </div>
@@ -240,7 +243,7 @@
                         <td class="text-start">
                             <div class="form-group">
                                 <input type="number" name="precio_{{ pila.id }}" id="precio_{{ pila.id }}"
-                                    class="form-control precio-input" placeholder="0" min="0">
+                                    class="form-control form-control-ventapila precio-input" placeholder="0" min="0">
                                 <div class="error-message pila" id="error_precio_{{ pila.id }}"></div>
                             </div>
                         </td>
@@ -250,7 +253,7 @@
                         <td class="text-start">
                             <div class="form-group">
                                 <input type="number" name="cantidad_{{ pila.id }}" id="cantidad_{{ pila.id }}"
-                                    class="form-control cantidad-input" placeholder="0" min="0"
+                                    class="form-control form-control-ventapila cantidad-input" placeholder="0" min="0"
                                     max="{{ pila.cantidad }}" data-max-stock="{{ pila.cantidad }}">
                                 <div class="error-message pila" id="error_cantidad_{{ pila.id }}"></div>
                             </div>

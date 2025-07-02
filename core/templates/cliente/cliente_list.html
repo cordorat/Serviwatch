@@ -15,7 +15,12 @@
   .content {
     overflow: scroll;
   }
-  
+
+  .text-center.empty-class {
+    font-size: 17px;
+    margin: 6px;
+  }
+
 </style>
 
 <div class="main-content">
@@ -31,8 +36,7 @@
       <div class="search-container">
         <div class="input-group gap-2" data-bs-toggle="tooltip" data-bs-placement="top"
           title="Buscar cliente por nombre, apellido o teléfono">
-          <input type="text" id="search-cliente-cliente" name="term" class="form-control" 
-                 placeholder="Buscar cliente" value="{{ search_term }}">
+          <input type="text" id="search-cliente-cliente" name="term" class="form-control" placeholder="Buscar cliente" value="{{ search_term }}">
           <button id="btn-search" class="btn btn-search" type="submit">
             <i class="bi bi-search text-secondary"></i>
           </button>
@@ -74,6 +78,9 @@
           </td>
         </tr>
         {% empty %}
+        <tr>
+          <td colspan="4" class="text-center empty-class">No hay clientes registrados</td>
+        </tr>
         {% if search_term %}
         <!-- No mostramos nada aquí porque ya tenemos el mensaje de alerta arriba -->
         {% endif %}
