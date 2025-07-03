@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-content">
+    <div class="header-icons">
+        <h2 class="titulo">ALERTAS DEL SISTEMA</h2>
+    </div>
+
+    <!-- Tres recuadros para las categorías -->
+    <div class="row mb-4">
+        <!-- Recuadro Stock Bajo -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'alertas' %}?tipo=stock_bajo" class="text-decoration-none">
+                <div class="card categoria-alerta {% if tipo_actual == 'stock_bajo' %}categoria-activa{% endif %}">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-box-seam fs-1 mb-2"></i>
+                        <h4 class="card-title">Stock Bajo</h4>
+                        {% if contador_stock > 0 %}
+                        <span class="badge bg-danger">{{ contador_stock }}</span>
+                        {% else %}
+                        <span class="badge bg-success">Sin alertas</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Recuadro Próximas Entregas -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'alertas' %}?tipo=proxima_entrega" class="text-decoration-none">
+                <div class="card categoria-alerta {% if tipo_actual == 'proxima_entrega' %}categoria-activa{% endif %}">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-calendar-check fs-1 mb-2"></i>
+                        <h4 class="card-title">Próximas Entregas</h4>
+                        {% if contador_entregas > 0 %}
+                        <span class="badge bg-danger">{{ contador_entregas }}</span>
+                        {% else %}
+                        <span class="badge bg-success">Sin alertas</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Recuadro Próximas Revisiones -->
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'alertas' %}?tipo=proxima_revision" class="text-decoration-none">
+                <div
+                    class="card categoria-alerta {% if tipo_actual == 'proxima_revision' %}categoria-activa{% endif %}">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-tools fs-1 mb-2"></i>
+                        <h4 class="card-title">Próximas Revisiones</h4>
+                        {% if contador_revision > 0 %}
+                        <span class="badge bg-danger">{{ contador_revision }}</span>
+                        {% else %}
+                        <span class="badge bg-success">Sin alertas</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Título de la categoría actual -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h3 class="subtitulo">
+                {% if tipo_actual == 'stock_bajo' %}
+                Stock Bajo
+                {% elif tipo_actual == 'proxima_entrega' %}
+                Próximas Entregas
+                {% elif tipo_actual == 'proxima_revision' %}
+                Próximas Revisiones
+                {% endif %}
+            </h3>
+        </div>
+    </div>
+
+    <!-- Lista de alertas con los estilos de tus tablas existentes -->
+    <div class="table-container">
+        <table class="custom-table">
+            <thead class="table-header">
+                <tr>
+                    {% if tipo_actual == 'proxima_entrega' %}
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Fecha Entrega</th>
+                    <th>Técnico</th>
+                    <th>Acciones</th>
+                    {% elif tipo_actual == 'stock_bajo' %}
+                    <th>Referencia</th>
+                    <th>Cantidad</th>
+                    <th>Acciones</th>
+                    {% elif tipo_actual == 'proxima_revision' %}
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Técnico</th>
+                    <th>Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                {% for item in items %}
+                <tr>
+                    {% if tipo_actual == 'proxima_entrega' %}
+                    <td>{{ item.codigo_orden }}</td>
+                    <td>{{ item.cliente.nombre }} {{ item.cliente.apellido }}</td>
+                    <td>{{ item.estado }}</td>
+                    <td>{{ item.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+                    <td>{{ item.tecnico.nombre }} {{ item.tecnico.apellidos }}</td>
+                    <td>
+                        <a href="{% url 'reparacion_edit' item.id %}?return_to=alertas&tipo={{ tipo_actual }}&page={{ page_obj.number|default:1 }}"
+                            class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                    </td>
+                    {% elif tipo_actual == 'stock_bajo' %}
+                    <td>{{ item.codigo }}</td>
+                    <td class="{% if item.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">
+                        {{ item.cantidad }}
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                    </td>
+                    {% elif tipo_actual == 'proxima_revision' %}
+                    <td>{{ item.codigo_orden }}</td>
+                    <td>{{ item.cliente.nombre }} {{ item.cliente.apellido }}</td>
+                    <td>{{ item.tecnico.nombre }} {{ item.tecnico.apellidos }}</td>
+                    <td>
+                        <a href="{% url 'reparacion_edit' item.id %}?return_to=alertas&tipo={{ tipo_actual }}&page={{ page_obj.number|default:1 }}"
+                            class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="{% if tipo_actual == 'stock_bajo' %}4{% else %}6{% endif %}" class="text-center py-3">
+                        No hay alertas pendientes en esta categoría
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?tipo={{ tipo_actual }}&page=1">&laquo; Primera</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link"
+                    href="?tipo={{ tipo_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item">
+                <a class="page-link" href="?tipo={{ tipo_actual }}&page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?tipo={{ tipo_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?tipo={{ tipo_actual }}&page={{ page_obj.paginator.num_pages }}">Última
+                        &raquo;</a>
+                </li>
+                {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Estilos adicionales para los recuadros de categorías -->
+<style>
+    .categoria-alerta {
+        transition: all 0.3s ease;
+        border: 2px solid #f0f0f0;
+        height: 100%;
+    }
+
+    .categoria-alerta:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .categoria-activa {
+        border-color: #626E15;
+        background-color: #f8f9ea;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .categoria-alerta .bi {
+        color: #626E15;
+    }
+
+    .categoria-alerta .card-title {
+        color: #333;
+        margin-bottom: 0.75rem;
+    }
+
+    .subtitulo {
+        font-family: "Montserrat", sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* Estilos para la campanita de notificación */
+    .notification-bell-link {
+        position: relative;
+        color: #626E15;
+        text-decoration: none;
+    }
+
+    .notification-bell-link:hover {
+        color: #4a5611;
+    }
+
+    .notification-indicator {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        background-color: #dc3545;
+        border-radius: 50%;
+        display: block;
+    }
+</style>
+{% endblock %}

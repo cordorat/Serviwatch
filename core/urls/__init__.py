@@ -11,4 +11,6 @@ urlpatterns = [
     path('', include('core.urls.egreso_urls')),
     path('', include('core.urls.reloj_urls')),
     path('', include('core.urls.ingreso_urls')),
+    path('', include('core.urls.alerta_urls')),
+    path('', include('core.urls.ganancia_urls')),
 ]

@@ -20,7 +20,7 @@ def confirmar_egreso_view(request):
                 'descripcion': egreso_data['descripcion']
             }
             return _crear_egreso_y_responder(request, datos)
-            
+        
         elif 'editar' in request.POST:
             # Mantiene los datos en sesión y regresa al formulario
             return redirect('egreso')

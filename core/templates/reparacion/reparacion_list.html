@@ -24,11 +24,6 @@
         justify-content: start;
     }
 
-    .filtro-container-reparacion {
-        display: inline-block;
-        vertical-align: middle;
-    }
-
     .filtro-container-reparacion .form-select {
         min-width: 120px;
         border-radius: 4px;
@@ -67,6 +62,25 @@
         padding-bottom: 30px; /* Espacio para la paginación */
     }
 
+    .form-label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+        min-width: 120px;
+    }
+
+    .filtro-container-reparacion {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        vertical-align: middle;
+    }
+
 </style>
 
 <div class="main-content">
@@ -75,10 +89,9 @@
     </div>
     <!-- Botón Agregar reparación -->
     <div class="header-icons header-icons-reparacion">
-        <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
         <form method="get" action="{% url 'reparacion_list' %}" class="search-form">
             <div class="input-group input-group-reparacion" style="gap: 10px;" data-bs-toggle="tooltip"
-          data-bs-placement="top" title="Buscar reparacion por codigo, cliente o tecnico">
+            data-bs-placement="top" title="Buscar reparacion por codigo, cliente o tecnico">
                 <input type="text" name="search" class="form-control form-control-reparacion"
                     placeholder="Buscar reparación" value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
@@ -93,7 +106,10 @@
                 <input type="hidden" name="search" value="{{ search }}">
                 {% endif %}
 
-                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+            <div class="form-group">
+                <label for="estado-select" class="form-label fw-bold">Estado:</label>
+                <select id="estado-select"
+                name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
                     data-bs-placement="top" title="Filtrar reparacion por estado">
                     {% for valor, texto in estados %}
                     <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
@@ -101,10 +117,17 @@
                     </option>
                     {% endfor %}
                 </select>
+            </div>
             </form>
         </div>
         <div class="report-button-container">
-            <a href="#" class="btn btn-add btn-add-empleado me-3"> Generar reporte</a>
+            {% if not user.is_authenticated or not user.is_staff or not user.is_superuser %}
+            <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
+            {% endif %}
+            <a href="{% url 'reporte_reparaciones_pdf' %}?estado={{ filtro_estado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
+            target="_blank"> 
+                Generar reporte
+            </a>
         </div>
     </div>
 
@@ -113,7 +136,7 @@
 
     <!-- Lista de reparaciones -->
     <div class="table-container">
-        <table class="table table-hover align-middle custom-table custom-table-reparacion reparaciones-table">
+        <table class="table align-middle custom-table custom-table-reparacion reparaciones-table">
             <thead class="table-header">
                 <tr>
                     <th>Código</th>

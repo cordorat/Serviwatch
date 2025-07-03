@@ -66,7 +66,7 @@
     background-color: #D4E484;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    height: 42px; /* Altura ligeramente mayor */
+    height: auto; /* Altura ligeramente mayor */
     margin-bottom: 12px;
     box-sizing: border-box;
     align-items: center;
@@ -74,7 +74,7 @@
 }
 
 .custom-table tbody tr:hover {
-    background-color: #C9DC4E;
+    background-color: #c2d931;
 }
 
 .custom-table tbody tr td {
@@ -84,7 +84,7 @@
     padding: 6px 10px;
     font-family: "Montserrat", sans-serif;
     font-weight: bold;
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 14px;

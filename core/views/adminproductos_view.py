@@ -1,0 +1,14 @@
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET"])
+@login_required
+def admin_productos_view(request):
+    return render(request, 'admin-productos.html')
+
+@require_http_methods(["GET"])
+@login_required
+def admin_inventario_view(request):
+    return render(request, 'usuario-productos.html')
+

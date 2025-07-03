@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MaxLengthValidator, RegexValidator
 from core.models.cliente import Cliente
 
+FORMATO_REGEX = r'^\d+$'
 
 class Reloj(models.Model):
 
@@ -14,6 +15,11 @@ class Reloj(models.Model):
     ESTADO_CHOICES = [
         ('VENDIDO', 'Vendido'),
         ('DISPONIBLE', 'Disponible'),
+    ]
+
+    METODO_PAGO_CHOICES = [
+        ('CONTADO', 'Contado'),
+        ('ABONO', 'Abono'),
     ]
 
     marca = models.CharField(
@@ -29,14 +35,19 @@ class Reloj(models.Model):
     precio = models.CharField(
         max_length=20,
         validators=[
-            RegexValidator(regex=r'^\d+$', message="El precio debe ser un número válido"),
+            RegexValidator(regex=FORMATO_REGEX, message="El precio debe ser un número válido"),
             MaxLengthValidator(20, "El precio no puede exceder los 20 caracteres")],
     )
+
+    tiene_comision = models.BooleanField(
+        default=False,
+        verbose_name="¿Tiene comisión?"
+        )
 
     comision = models.CharField(
         max_length=20,
         validators=[
-            RegexValidator(regex=r'^\d+$', message="La comision debe ser un número válido"),
+            RegexValidator(regex=FORMATO_REGEX, message="La comision debe ser un número válido"),
             MaxLengthValidator(20, "La comision no puede exceder los 20 caracteres"),
         ]
     )
@@ -76,5 +87,36 @@ class Reloj(models.Model):
         null=True
     )
 
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODO_PAGO_CHOICES,
+        default='ABONO'
+    )
+
+    saldo_pendiente = models.CharField(
+        max_length=20,
+        validators=[
+            RegexValidator(regex=FORMATO_REGEX, message="El saldo pendiente debe ser un número válido"),
+            MaxLengthValidator(20, "El saldo pendiente no puede exceder los 20 caracteres")
+        ]
+    )
+
     def __str__(self):
         return f"{self.marca} - {self.referencia} - ${self.precio} - {self.get_tipo_display()}"
+    
+    def save(self, *args, **kwargs):
+        # Si es nuevo o no tiene saldo_pendiente, inicializarlo con el precio
+        if not self.pk or not self.saldo_pendiente:
+            self.saldo_pendiente = str(self.precio) if self.precio else '0'
+            print(f"Reloj {self.id}: Inicializando saldo_pendiente={self.saldo_pendiente}")
+        
+        # Si tiene_comision está marcado, calcular la comisión
+        if self.tiene_comision and self.precio:
+            try:
+                precio = int(self.precio)
+                self.comision = str(int(precio * 0.2))  # 20% del precio
+            except (ValueError, TypeError):
+                self.comision = '0'
+        
+        super().save(*args, **kwargs)
+    

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block content %}
 
@@ -10,13 +11,12 @@
 
   .filtro-container-reparacion {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 10px;
   }
 
   .form-select-sm {
     min-width: 120px;
-    /* o el ancho que prefieras */
   }
 
   .header-icons-reparacion {
@@ -25,10 +25,39 @@
     align-items: center;
   }
 
+  .report-button-container {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+  }
+
   .form-reloj {
     display: flex;
     flex-direction: row;
   }
+
+  .form-label {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 14px;
+  font-weight: bold;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+    min-width: 120px;
+  }
+
+  .custom-table-botoncito a {
+    display: inline-block;
+  }
+
+  .text-center.empty-class {
+    font-size: 17px;
+    margin: 6px;
+  }
+  
 </style>
 
 <div class="main-content">
@@ -40,8 +69,9 @@
       {% else %}
       RELOJES
       {% endif %}
-  </h2>
-    <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+    </h2>
+    
+    
   </div>
 
   <!-- Campo de búsqueda -->
@@ -58,45 +88,76 @@
       </div>
     </form>
     <div class="filtro-container-reparacion ms-3 d-flex gap-2">
-      <form method="get" action="{% url 'reloj_list' %}" id="filtroForm" class="d-flex gap-2 form-reloj">
+      <form method="get" action="{%if 'servicios' in request.path%}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}" id="filtroForm" class="d-flex gap-2 form-reloj">
         <!-- Mantener la búsqueda actual si existe -->
-        {% if search %}
-        <input type="hidden" name="search" value="{{ search }}">
-        {% endif %}
+      {% if search %}
+      <input type="hidden" name="search" value="{{ search }}">
+      {% endif %}
 
-        {% if 'productos' in request.path %}
-        <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
-          data-bs-placement="top" title="Filtrar relojes por estado">
+      {% if 'productos' in request.path %}
+      <div class="form-group">
+        <label for="estado-select" class="form-label fw-bold">Estado:</label>
+        <select id="estado-select" name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar relojes por estado">
           {% for valor, texto in estados %}
           <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
             {{ texto }}
           </option>
           {% endfor %}
         </select>
+      </div>
+      {% endif %}
 
-        <select name="tipo" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
-          data-bs-placement="top" title="Filtrar relojes por tipo">
+      <div class="form-group">
+        <label for="tipo-select" class="form-label fw-bold">Tipo:</label>
+        <select id="tipo-select" name="tipo" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar relojes por tipo">
           {% for valor, texto in tipos %}
           <option value="{{ valor }}" {% if filtro_tipo == valor %}selected{% endif %}>
             {{ texto }}
           </option>
           {% endfor %}
         </select>
-        {% endif %}
+      </div>
+
+      
+      {% if 'productos' in request.path %}
+      <div class="form-group">
+        <label for="pagado-select" class="form-label fw-bold">Pago:</label>
+        <select id="pagado-select" name="pagado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar relojes por estado de pago">
+          {% for valor, texto in pagado_options %}
+          <option value="{{ valor }}" {% if filtro_pagado == valor %}selected{% endif %}>
+            {{ texto }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
       </form>
+    </div>    
+    <div class="report-button-container">
+      {% if '/productos/' in request.path %}
+      <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
+      {% endif %}
+      <a href="{% if 'servicios' in request.path %}{% url 'reporte_relojes_venta_pdf' %}{% else %}{% url 'reporte_relojes_pdf' %}{% endif %}?estado={{ filtro_estado }}&tipo={{ filtro_tipo }}&pagado={{ filtro_pagado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
+      target="_blank"> 
+          Generar reporte
+      </a>
     </div>
   </div>
 
   <br>
   <!-- Lista de relojes -->
   <div class="table-container">
-    <table class="table table-hover align-middle custom-table">
+    <table class="table align-middle custom-table">
       <thead class="table-header">
         <tr>
           <th>Marca</th>
           <th>Referencia </th>
           <th>Precio </th>
           <th>Tipo</th>
+          <th>Dueño</th>
+          <th>Cliente</th>
+          <th>Estado</th>
+          <th>Pagado</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -110,10 +171,38 @@
             {{ reloj.referencia }}
           </td>
           <td>
-            {{ reloj.precio }}
+            ${{ reloj.precio|intcomma }}
           </td>
           <td>
             {{ reloj.tipo }}
+          </td>
+          <td>
+            {% if reloj.dueno %}
+              {{ reloj.dueno }}
+            {% else %}
+              Sin dueño
+            {% endif %}
+          </td>
+          <td>
+            {% if reloj.cliente %}
+              {{ reloj.cliente }}
+            {% else %}
+              Sin cliente
+            {% endif %}
+          </td>
+          <td>
+            {% if reloj.estado == 'DISPONIBLE' %}
+            <span class="badge bg-success">{{ reloj.estado }}</span>
+            {% else %}
+            <span class="badge bg-danger">{{ reloj.estado }}</span>
+            {% endif %}	
+          </td>
+          <td>
+            {% if reloj.pagado %}
+            <span class="badge bg-success">PAGADO</span>
+            {% else %}
+            <span class="badge bg-danger">PENDIENTE</span>
+            {% endif %}
           </td>
           <td>
             {% if 'servicios' in request.path %}
@@ -127,6 +216,10 @@
             {% endif %}
           </td>
         </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center empty-class">No hay relojes registrados</td>
+        </tr>
         {% endfor %}
       </tbody>
 
@@ -139,7 +232,7 @@
 
         <li class="page-item">
           <a class="page-link"
-            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }} {% endif %}">
+            href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}{% endif %}">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
@@ -147,12 +240,14 @@
 
         {% for num in page_obj.paginator.page_range %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          <a class="page-link"
+            href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}">{{ num }}</a>
         </li>
         {% endfor %}
 
         <li class="page-item">
-          <a class="page-link" href="{% if page_obj.has_next %} ?page={{ page_obj.next_page_number }} {% endif %}"
+          <a class="page-link"
+            href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}{% if filtro_tipo %}&tipo={{ filtro_tipo }}{% endif %}{% if filtro_pagado %}&pagado={{ filtro_pagado }}{% endif %}{% endif %}"
             aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
           </a>

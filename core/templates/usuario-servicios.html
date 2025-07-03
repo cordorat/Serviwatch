@@ -5,9 +5,9 @@
 
 {% block content %}
 <div class="servicios-container mt-5">
-    <h2 class="titulo text-center mb-4">SERVICIOS</h2>
+    <h2 class="titulo-ventana text-center mb-4">SERVICIOS</h2>
     <div class="row justify-content-center mt-5">
-        <div class="col-12 d-flex flex-wrap gap-4 justify-content-center">
+        <div class="col-12 d-flex gap-4 justify-content-center">
 
             <a href="{% url 'reparacion_list' %}" class="text-decoration-none text-dark">  
                 <div class="service-card text-center">
@@ -32,7 +32,7 @@
                             <line x1="15" y1="12" x2="17" y2="12" stroke="black" stroke-width="2" />
                         </svg>
                     </div>
-                    <div class="service-title">Venta Pilas</div>
+                    <div class="service-title">Venta de Pilas</div>
                 </div>
             </a>
 
@@ -44,7 +44,7 @@
                         <path d="M12 7V12L15 15" stroke="black" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </div>
-                <div class="service-title">Venta Reloj</div>
+                <div class="service-title">Venta de Relojes</div>
             </div>
             </a>
 
@@ -54,8 +54,8 @@
 
 <style>
     .service-card {
-        width: 270px;
-        height: 295px;
+        width: 340px;
+        height: 375px;
         background-color: #D4E484;
         border-radius: 30px;
         display: flex;
@@ -64,24 +64,25 @@
         justify-content: center;
         text-align: center;
         padding: 15px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-    }
+        transition: all 0.3s ease;
+        }
 
     .service-card:hover {
         transform: translateY(-5px);
         cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .service-icon {
-        width: 150px;
-        height: 150px;
+        width: 200px;
+        height: 200px;
     }
 
     .service-title {
-        font-size: 30px;
-        font-weight: bold;
+        font-size: 2.60rem;
+        font-weight: 600;
         text-transform: uppercase;
+        font-family: 'inter', sans-serif;
     }
 
     .servicios-container {

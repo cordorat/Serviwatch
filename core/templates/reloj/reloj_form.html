@@ -20,6 +20,33 @@
         background-color: white;
         transform: translateX(1.5rem);
     }
+
+    .btn-circle {
+        width: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        border: 1px solid #626E15;
+        color: #626E15;
+        transition: all 0.3s ease;
+    }
+
+    .btn-circle:hover {
+        background-color: #626E15;
+        border-color: black !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-circle i {
+        font-size: 1.2rem;
+    }
+
+    .form-check-input {
+        width: 40px !important;
+    }
+
 </style>
 
 <div class="container">
@@ -115,6 +142,8 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+
+                    <!-- Fecha de venta -->
                     {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <div class="input-group mt-3" id="basic-addon1">
                         <span class="input-group-text form-span" id="basic-addon1">
@@ -129,8 +158,19 @@
                         {% endfor %}
                         {% endif %}
                     </div>
-
                     {% endif %}
+
+                    <!--Saber si se va a tener una comisión o no-->
+                    {% if modo == 'crear' %}
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input custom-switch" type="checkbox" id="tiene_comision"
+                            name="tiene_comision" {% if form.tiene_comision.value %}checked{% endif %}>
+                        <label class="form-check-label ms-2" for="tiene_comision">
+                            ¿Tiene comisión?
+                        </label>
+                    </div>
+                    {% endif %}
+
                     <!-- Comision -->
 
                     <div class="input-group mt-3">
@@ -159,15 +199,14 @@
                     </div>
                     <div class="error-message">
                         {% if form.dueno.errors %}
-                        {% for error in form.dueno.errors %}
-                        <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            {% for error in form.dueno.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                         {% endif %}
                     </div>
 
                     <!-- Descripción -->
-
-                    <div class="input-group  mt-3">
+                    <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                         </span>
@@ -197,9 +236,8 @@
                         {% endif %}
                     </div>
 
-
-                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <!-- Estado -->
+                    {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
                     <div class="input-group mt-3">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-smartwatch fs-4 text-secondary"></i>
@@ -208,16 +246,30 @@
                     </div>
                     <div class="error-message">
                         {% if form.estado.errors %}
-                        {% for error in form.estado.errors %}
-                        <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
+                            {% for error in form.estado.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Método de pago -->
+                    <div class="input-group mt-3">
+                        <span class="input-group-text form-span">
+                            <i class="bi bi-credit-card fs-4 text-secondary"></i>
+                        </span>
+                        {{ form.metodo_pago }}
+                        {% if modo == 'vender' %}
+                        <button type="button" id="btnAgregarAbono" class="btn btn-circle" data-bs-toggle="modal"
+                            data-bs-target="#abonoModal" style="display: none;">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
                         {% endif %}
                     </div>
 
                     <!-- Checkbox alineado -->
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" {% if form.pagado.value %}checked{% endif %}>
-                        <label class="form-check-label ms-2" for="pagado">Pagado</label>
+                        <label class="form-check-label ms-2 mt-1" for="pagado">Pagado</label>
                     </div>
 
                     {% endif %}
@@ -242,25 +294,78 @@
 </div>
 
 <!-- Modal de confirmación -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmationModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
-            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
-                <h4 class="titulo m-0">
+            <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
+                <h4 class="titulo m-0" id="modalMessage">
                     {% if modo == 'editar' %}
-                    RELOJ ACTUALIZADO CORRECTAMENTE
+                        RELOJ ACTUALIZADO CORRECTAMENTE
                     {% elif modo == 'crear' %}
-                    RELOJ AGREGADO CORRECTAMENTE
+                        RELOJ AGREGADO CORRECTAMENTE
                     {% elif modo == 'vender' %}
-                    RELOJ VENDIDO CORRECTAMENTE
+                        RELOJ VENDIDO CORRECTAMENTE
                     {% endif %}
                 </h4>
+                <button id="modalVolverBtn" class="btn save mt-3" onclick="redirectToCorrectPage()">VOLVER</button>
             </div>
         </div>
     </div>
 </div>
 
+<div class="modal fade" id="abonoModal" tabindex="-1" aria-labelledby="abonoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="abonoModalLabel">Registrar Abono</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Información del saldo -->
+                <div class="info-saldo mb-4">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <div>
+                            <h6 class="mb-1">Precio Total:</h6>
+                            <span class="fs-5">${{ reloj.precio }}</span>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="mb-1">Saldo Pendiente:</h6>
+                            <span class="fs-5 text-danger">${{ reloj.saldo_pendiente }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario de abono -->
+                <form method="post" {% if reloj.id %}action="{% url 'reloj_abono_create' reloj.id %}" {% endif %}
+                    id="abonoForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto del Abono</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input class="form-control" id="monto" name="monto" required min="1"
+                                max="{{ reloj.saldo_pendiente|default:'0' }}" placeholder="Ingrese el monto">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción (opcional)</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"
+                            placeholder="Agregue una descripción del abono"></textarea>
+                    </div>
+
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn cancel" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn save">Guardar Abono</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascript %}
@@ -324,26 +429,128 @@
         const estadoInput = form.querySelector('[name="estado"]');
         const fechaVentaInput = form.querySelector('[name="fecha_venta"]');
         const clienteInput = form.querySelector('[name="cliente"]');
+        const metodoPagoInput = form.querySelector('[name="metodo_pago"]');
+        const abonoForm = document.getElementById('abonoForm');
+
+
+        
+
+        if (abonoForm) {
+            abonoForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const montoInput = document.querySelector('#monto');
+                const descripcionInput = document.querySelector('#descripcion');
+                const monto = parseInt(montoInput.value) || 0;
+                const precioInput = document.querySelector('[name="precio"]');
+                const precioValue = parseInt(precioInput.value) || 0;
+
+                if (!monto) {
+                    alert('El monto es requerido');
+                    return false;
+                }
+
+                if (monto > precioValue) {
+                    alert('El monto del abono no puede ser mayor al precio total');
+                    return false;
+                }
+
+                // Almacenar los datos del abono en el formulario principal
+                let abonoMontoInput = form.querySelector('[name="abono_inicial_monto"]');
+                if (!abonoMontoInput) {
+                    abonoMontoInput = document.createElement('input');
+                    abonoMontoInput.type = 'hidden';
+                    abonoMontoInput.name = 'abono_inicial_monto';
+                    form.appendChild(abonoMontoInput);
+                }
+                abonoMontoInput.value = monto;
+
+                let abonoDescInput = form.querySelector('[name="abono_inicial_descripcion"]');
+                if (!abonoDescInput) {
+                    abonoDescInput = document.createElement('input');
+                    abonoDescInput.type = 'hidden';
+                    abonoDescInput.name = 'abono_inicial_descripcion';
+                    form.appendChild(abonoDescInput);
+                }
+                abonoDescInput.value = descripcionInput.value || '';
+
+                // Mostrar un feedback visual al usuario
+                alert(`Abono de $${monto} registrado. Se aplicará al guardar el reloj.`);
+
+                // Cerrar el modal
+                const abonoModal = bootstrap.Modal.getInstance(document.getElementById('abonoModal'));
+                abonoModal.hide();
+            });
+        }
+
+        if (metodoPagoInput) {
+            const btnAgregarAbono = document.getElementById('btnAgregarAbono');
+
+            function actualizarBotonAbono() {
+                const modoEditar = '{{ modo }}' === 'editar' || '{{ modo }}' === 'vender';
+                const esVendido = estadoInput.value === 'VENDIDO' || estadoInput.value === 'DISPONIBLE';
+                const esAbono = metodoPagoInput.value === 'ABONO';
+
+                if (modoEditar && esVendido && esAbono) {
+                    btnAgregarAbono.style.display = 'block';
+                } else {
+                    btnAgregarAbono.style.display = 'none';
+                }
+            }
+
+            // Verificar estado inicial
+            actualizarBotonAbono();
+
+            // Escuchar cambios en método de pago
+            metodoPagoInput.addEventListener('change', actualizarBotonAbono);
+
+            // Escuchar cambios en estado
+            estadoInput.addEventListener('change', actualizarBotonAbono);
+        }
 
         // Manejar la validación de fecha cuando el estado es VENDIDO
         if (estadoInput) {
             estadoInput.addEventListener('change', function () {
+                const metodoPagoInput = document.querySelector('[name="metodo_pago"]');
+
                 if (this.value === 'VENDIDO') {
                     fechaVentaInput.required = true;
                     clienteInput.required = true;
-                    // Validate both fields immediately
+                    metodoPagoInput.required = true;
+
+                    // Asegurar que tenga un valor válido
+                    if (!metodoPagoInput.value || metodoPagoInput.value === '') {
+                        metodoPagoInput.value = 'CONTADO';
+                    }
+
+                    // Validar campos
                     validateField(fechaVentaInput);
                     validateField(clienteInput);
+                    validateField(metodoPagoInput);
                 } else {
                     fechaVentaInput.required = false;
                     clienteInput.required = false;
+                    metodoPagoInput.required = false;
                     fechaVentaInput.value = '';
-                    // Clear validation errors
-                    validateField(fechaVentaInput);
-                    validateField(clienteInput);
+                    metodoPagoInput.value = 'CONTADO';
+
+                    // Limpiar validaciones
+                    clearError(fechaVentaInput);
+                    clearError(clienteInput);
+                    clearError(metodoPagoInput);
                 }
             });
         }
+
+        $('#id_cliente').on('select2:select', function (e) {
+            // Limpiar error cuando se selecciona un cliente
+            $(this).removeClass('is-invalid');
+            $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
+            const errorDiv = $(this).parent().next('.error-message');
+            if (errorDiv) {
+                errorDiv.html('');
+            }
+        });
 
         function fixDescriptionContainer() {
             const descripcionContainer = document.querySelector('.description-container');
@@ -388,16 +595,36 @@
                 this.value = value;
             }
 
-            if (value) {
-                const precioNumerico = parseInt(value);
-                if (!isNaN(precioNumerico)) {
-                    const comision = Math.floor(precioNumerico * 0.20);
-                    comisionInput.value = comision.toString();
+            // Solo calcular comisión si tiene_comision está marcado
+            const tieneComisionCheckbox = document.getElementById('tiene_comision');
+            if (tieneComisionCheckbox && tieneComisionCheckbox.checked) {
+                if (value) {
+                    const precioNumerico = parseInt(value);
+                    if (!isNaN(precioNumerico)) {
+                        const comision = Math.floor(precioNumerico * 0.20);
+                        comisionInput.value = comision.toString();
+                    }
                 }
             } else {
-                comisionInput.value = '';
+                comisionInput.value = '0';
             }
         });
+
+        // Agregar el evento change para el checkbox tiene_comision
+        const tieneComisionCheckbox = document.getElementById('tiene_comision');
+        if (tieneComisionCheckbox) {
+            tieneComisionCheckbox.addEventListener('change', function () {
+                if (!this.checked) {
+                    comisionInput.value = '0';
+                } else if (precioInput.value) {
+                    const precioNumerico = parseInt(precioInput.value);
+                    if (!isNaN(precioNumerico)) {
+                        const comision = Math.floor(precioNumerico * 0.20);
+                        comisionInput.value = comision.toString();
+                    }
+                }
+            });
+        }
 
         // Función para obtener o crear el div de mensaje de error
         function getErrorDiv(field) {
@@ -428,56 +655,85 @@
 
         // Validadores específicos por campo
         const fieldValidators = {
-            marca: function(value) {
+            marca: function (value) {
                 if (!value) return { isValid: false, message: 'La marca es obligatoria' };
                 if (value.length > 30) return { isValid: false, message: 'La marca debe tener máximo 30 caracteres' };
                 return { isValid: true };
             },
-            
-            referencia: function(value) {
+
+            referencia: function (value) {
                 if (!value) return { isValid: false, message: 'La referencia es obligatoria' };
                 return { isValid: true };
             },
-            
-            precio: function(value) {
+
+            precio: function (value) {
                 if (!value) return { isValid: false, message: 'El precio es obligatorio' };
                 if (!/^\d+$/.test(value)) return { isValid: false, message: 'El precio debe contener solo números' };
                 if (value.length > 20) return { isValid: false, message: 'El precio no puede exceder los 20 caracteres' };
                 return { isValid: true };
             },
-            
-            dueno: function(value) {
+
+            dueno: function (value) {
                 if (!value) return { isValid: false, message: 'El dueño es obligatorio' };
                 if (value.length > 30) return { isValid: false, message: 'El dueño debe tener máximo 30 caracteres' };
                 return { isValid: true };
             },
-            
-            descripcion: function(value) {
+
+            descripcion: function (value) {
                 if (!value) return { isValid: false, message: 'La descripción es obligatoria' };
                 if (value.length > 150) return { isValid: false, message: 'La descripción debe tener máximo 150 caracteres' };
                 return { isValid: true };
             },
-            
-            tipo: function(value) {
+
+            tipo: function (value) {
                 if (!value) return { isValid: false, message: 'El tipo es obligatorio' };
                 return { isValid: true };
             },
-            
-            cliente: function(value, estadoValue) {
-                if (estadoValue === 'VENDIDO' && !value) {
-                    return { isValid: false, message: 'El cliente es obligatorio cuando el estado es Vendido' };
+
+            cliente: function (value, estadoValue) {
+                // Validación de cliente para venta
+                const modoActual = '{{ modo }}';
+                if ((estadoValue === 'VENDIDO' || modoActual === 'vender') && !value) {
+                    return { 
+                        isValid: false, 
+                        message: 'El cliente es obligatorio para relojes en venta' 
+                    };
+                }
+                // Limpiar error explícitamente
+                const clienteInput = document.querySelector('[name="cliente"]');
+                if (clienteInput) {
+                    clearError(clienteInput);
+                    $(clienteInput).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
                 }
                 return { isValid: true };
             },
-            
-            estado: function(value) {
+
+            estado: function (value) {
                 if (!value) return { isValid: false, message: 'El estado es obligatorio' };
                 return { isValid: true };
             },
-            
-            fecha_venta: function(value, estadoValue) {
+
+            fecha_venta: function (value, estadoValue) {
                 if (estadoValue === 'VENDIDO' && !value) {
                     return { isValid: false, message: 'La fecha de venta es obligatoria cuando el estado es Vendido' };
+                }
+                return { isValid: true };
+            },
+
+            metodo_pago: function (value, estadoValue) {
+                if (estadoValue === 'VENDIDO') {
+                    if (!value || value === '') {
+                        return {
+                            isValid: false,
+                            message: 'El método de pago es obligatorio cuando el estado es Vendido'
+                        };
+                    }
+                    if (!['CONTADO', 'ABONO'].includes(value)) {
+                        return {
+                            isValid: false,
+                            message: 'Seleccione un método de pago válido'
+                        };
+                    }
                 }
                 return { isValid: true };
             }
@@ -487,20 +743,19 @@
         function validateField(field) {
             // Limpiar mensaje de error anterior
             clearError(field);
-            
+
             const value = field.value.trim();
             const estadoInput = document.querySelector('[name="estado"]');
             const estadoValue = estadoInput ? estadoInput.value : '';
-            
+
             // Usar el validador específico para este campo
             if (fieldValidators[field.name]) {
                 const result = fieldValidators[field.name](value, estadoValue);
-                
+
                 if (!result.isValid) {
                     return showError(field, result.message);
                 }
             }
-            
             return true;
         }
 
@@ -508,34 +763,45 @@
             e.preventDefault();
             let isValid = true;
 
+            // Debug logs mejorados
+            const formData = new FormData(form);
+            console.log('Datos del formulario:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+
             comisionInput.disabled = false;
 
-            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta'].forEach(fieldName => {
+            ['marca', 'referencia', 'precio', 'dueno', 'descripcion', 'tipo', 'estado', 'fecha_venta', 'metodo_pago', 'cliente'].forEach(fieldName => {
                 const field = form.querySelector(`[name="${fieldName}"]`);
                 if (field && !validateField(field)) {
                     isValid = false;
                 }
-            });
-
-            if (isValid) {
+            });            if (isValid) {
                 try {
                     const formData = new FormData(form);
                     const response = await fetch(form.action, {
                         method: 'POST',
                         body: formData,
-                        credentials: 'same-origin'  // Esto es importante para el CSRF token
+                        credentials: 'same-origin'
                     });
 
                     if (response.ok) {
-                        modal.show();
-                        setTimeout(() => {
-                            window.location.href = "{% if modo == 'vender' %}{% url 'reloj_venta_list' %}{% else %}{% url 'reloj_list' %}{% endif %}";
-                        }, 1000);
+                        // Verificar si la respuesta es una redirección (indica éxito)
+                        if (response.redirected || response.status === 200) {
+                            modal.show();
+                        } else {
+                            console.error('Error: La operación no se completó correctamente');
+                            alert('Error al guardar el reloj. Por favor, inténtalo de nuevo.');
+                        }
                     } else {
-                        console.error('Error al enviar el formulario');
+                        console.error('Error al enviar el formulario:', response.status);
+                        alert('Error al guardar el reloj. Por favor, inténtalo de nuevo.');
                     }
                 } catch (error) {
                     console.error('Error:', error);
+                    alert('Error de conexión. Por favor, inténtalo de nuevo.');
                 }
             } else {
                 const firstError = form.querySelector('.is-invalid');
@@ -570,9 +836,36 @@
         flatpickr(fechaVentaInput, {
             dateFormat: "d/m/Y",
             allowInput: false,
-            locale: "es"
+            locale: "es",
+            onReady: function(selectedDates, dateStr, instance) {
+                // Convertir cualquier formato ISO a formato d/m/Y para mostrar
+                const input = instance.input;
+                if (input.value && input.value.includes("-")) {
+                    // Si es formato YYYY-MM-DD, convertirlo
+                    const [year, month, day] = input.value.split("-");
+                    if (year && month && day) {
+                        const newDate = `${day}/${month}/${year}`;
+                        console.log("Convirtiendo fecha de ISO a d/m/Y:", input.value, "->", newDate);
+                        input.value = newDate;
+                        // Reinicializar el datepicker con el nuevo valor
+                        instance.setDate(newDate, true);
+                    }
+                }
+            }
         });
     });
+
+    // Función para redirigir a la página correcta según el modo
+    function redirectToCorrectPage() {
+        const modo = '{{ modo }}';
+        const modalMessage = document.getElementById('modalMessage').textContent.trim();
+        
+        if (modo === 'vender' || modalMessage === 'RELOJ VENDIDO CORRECTAMENTE') {
+            window.location.href = "{% url 'reloj_venta_list' %}";
+        } else {
+            window.location.href = "{% url 'reloj_list' %}";
+        }
+    }
 </script>
 
 {% endblock %}

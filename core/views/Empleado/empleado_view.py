@@ -5,6 +5,10 @@ from core.services.empleado_service import _initialize_empleado, _handle_form_su
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from core.models.empleado import Empleado
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+
 
 @require_http_methods(["GET"])
 def empleado_list_view(request,):
@@ -48,31 +52,51 @@ def empleado_create_view(request, id=None):
     # Para solicitudes GET
     if request.method == 'GET':
         form = EmpleadoForm(instance=empleado)
-        success = request.GET.get('success') == 'true'
-        return render(request, 'empleado/empleado_form.html', {
-            'form': form, 'modo': modo, 'empleado': empleado, 'success': success
-        })
+
+    # Verificar si estamos mostrando el modal de éxito
+    success = request.GET.get('success') == 'true'
+
+    return render(request, 'empleado/empleado_form.html', {
+        'form': form,
+        'modo': modo,
+        'empleado': empleado,
+        'success': success
+    })
+
+
+
+
+
+@require_http_methods(["GET"])
+def reporte_empleados_pdf(request):
+    """
+    Vista para generar un reporte PDF de empleados con los mismos filtros
+    que se están usando en la vista de lista.
+    """
+    filtro_estado = request.GET.get('estado', '')
+    search_query = request.GET.get('search', '')
+
+    # Usar la misma lógica de filtrado que en empleado_list_view
+    empleados_qs = Empleado.objects.all()
+
+    if filtro_estado and filtro_estado != 'todos':
+        empleados_qs = empleados_qs.filter(estado=filtro_estado)
+
+    if search_query:
+        empleados_qs = empleados_qs.filter(
+            Q(cedula__icontains=search_query) |
+            Q(nombre__icontains=search_query) |
+            Q(apellidos__icontains=search_query)
+        )
+
+    empleados_qs = empleados_qs.order_by('estado')
     
-    # Para solicitudes POST
-    form = EmpleadoForm(request.POST, instance=empleado)
+    # Generar el PDF
+    from core.services.empleado_service import generar_pdf_empleados
+    pdf = generar_pdf_empleados(empleados_qs, filtro_estado, request)
     
-    # Si el formulario no es válido
-    if not form.is_valid():
-        error_response = _handle_form_error(request, "Formulario inválido", form)
-        if error_response:
-            return error_response
-        return render(request, 'empleado/empleado_form.html', {
-            'form': form, 'modo': modo, 'empleado': empleado
-        })
-    
-    # Si el formulario es válido
-    try:
-        empleado = form.save()
-        return _handle_form_success(request, empleado, modo)
-    except Exception as e:
-        error_response = _handle_form_error(request, str(e))
-        if error_response:
-            return error_response
-        return render(request, 'empleado/empleado_form.html', {
-            'form': form, 'modo': modo, 'empleado': empleado
-        })
+    # Devolver el PDF como respuesta HTTP
+    estado_texto = filtro_estado if filtro_estado and filtro_estado != 'todos' else 'todos'
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="reporte_empleados_{estado_texto}.pdf"'
+    return response
