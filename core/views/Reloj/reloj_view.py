@@ -68,12 +68,6 @@ def reloj_list_view(request):
                 query |= (Q(cliente__nombre__icontains=first_term) &
                         Q(cliente__nombre__icontains=second_term))
                 
-                query |= (Q(tecnico__nombre__icontains=first_term) &
-                        Q(tecnico__apellidos__icontains=second_term))
-
-                # También buscar posibles segundos nombres
-                query |= (Q(tecnico__nombre__icontains=first_term) &
-                        Q(tecnico__nombre__icontains=second_term))
 
         relojes = relojes.filter(query).distinct()
 
