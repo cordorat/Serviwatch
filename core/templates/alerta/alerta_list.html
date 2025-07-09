@@ -123,7 +123,7 @@
                         {{ item.cantidad }}
                     </td>
                     <td>
-                        <a href="#" class="btn btn-outline-primary btn-sm">
+                        <a href="{% url 'pila_editar' item.id %}?return_to=alertas&tipo={{ tipo_actual }}&page={{ page_obj.number|default:1 }}" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-eye"></i> Ver
                         </a>
                     </td>

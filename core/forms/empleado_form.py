@@ -80,7 +80,8 @@ class EmpleadoForm(forms.ModelForm):
         required=False,
         widget=forms.Select(attrs={
             'class': clase_formulario_control_span,
-            'placeholder': 'Cargo'
+            'placeholder': 'Cargo',
+            'style': 'cursor: pointer;'
         })
     )
 
@@ -107,7 +108,7 @@ class EmpleadoForm(forms.ModelForm):
             'fecha_ingreso': forms.DateInput(attrs={'type': 'date', 'class': clase_formulario_control, 'placeholder': 'Fecha de ingreso'}),
             'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'class': clase_formulario_control}),
             'cargo': forms.Select(attrs={'class': clase_formulario_control_span}),
-            'estado': forms.Select(attrs={'class': clase_formulario_control_span}),
+            'estado': forms.Select(attrs={'class': clase_formulario_control_span, 'style': 'cursor: pointer;'}),
         }
 
     def clean_nombre(self):

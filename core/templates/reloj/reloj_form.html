@@ -47,10 +47,49 @@
         width: 40px !important;
     }
 
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: flex-start;
+        width: 100%;
+        padding: 20px;
+        background-color: #f7f7f7;
+    }
+
+    .reloj-container {
+        max-width: 900px;
+        margin: 0 auto !important;
+        padding: 20px;
+    }
+
+    div.error-message {
+        padding-left: unset;
+    }
+
+    .btn-success {
+        background-color: #D4E484;
+        border: 2px solid #626E15;
+        font-family: "Montserrat", sans-serif;
+    }
+
+    .btn:hover.btn-success {
+        background-color: #C9DC4E !important; 
+        color: inherit !important; 
+        border-color: #626E15 !important; 
+    }
+
+    /* Responsive personalizado */
+    @media (max-width: 768px) {
+        .reloj-container {
+            padding: 0 15px;
+        }
+    }
+
 </style>
 
-<div class="container">
-    <div class="form-header">
+<div class="reloj-container">
+
+    <div class="form-header text-center">
         <h2 class="titulo">
             {% if modo == 'crear' %}
             AGREGAR RELOJ
@@ -60,7 +99,7 @@
             VENDER RELOJ
             {% endif %}
         </h2>
-        <h4>DATOS RELOJ</h4>
+        <h4>DATOS DEL RELOJ</h4>
     </div>
 
     <br>
@@ -70,8 +109,8 @@
             {% csrf_token %}
 
             {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
-            <div class="form-field">
-                <div class="input-group repair-form">
+            <div class="mb-3">
+                <div class="input-group repair-form" data-bs-toggle="tooltip" data-bs-placement="top" title="Cliente del reloj">
                     <div class="input-group flex-grow-1 repair-form">
                         <span class="input-group-text form-span">
                             <i class="bi bi-person fs-4 text-secondary"></i>
@@ -99,7 +138,7 @@
             <div class="row g-4">
                 <div class="repair-form-column">
                     <!-- Marca -->
-                    <div class="input-group">
+                    <div class="input-group" data-bs-toggle="tooltip" data-bs-placement="top" title="Marca del reloj">
                         <span class="input-group-text form-span">
                             <i class="bi bi-watch fs-4 text-secondary"></i>
                         </span>
@@ -114,7 +153,7 @@
                     </div>
 
                     <!-- Referencia -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Referencia del reloj"> 
                         <span class="input-group-text form-span">
                             <i class="bi bi-hash fs-4 text-secondary"></i>
                         </span>
@@ -129,7 +168,7 @@
                     </div>
 
                     <!-- Precio -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Precio del reloj">
                         <span class="input-group-text form-span">
                             <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                         </span>
@@ -145,7 +184,7 @@
 
                     <!-- Fecha de venta -->
                     {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
-                    <div class="input-group mt-3" id="basic-addon1">
+                    <div class="input-group mt-3" id="basic-addon1" data-bs-placement="top" title="Fecha de venta del reloj">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                         </span>
@@ -162,7 +201,7 @@
 
                     <!--Saber si se va a tener una comisión o no-->
                     {% if modo == 'crear' %}
-                    <div class="form-check form-switch mt-3">
+                    <div class="form-check form-switch mt-3" data-bs-placement="top" title="Comisión del reloj">
                         <input class="form-check-input custom-switch" type="checkbox" id="tiene_comision"
                             name="tiene_comision" {% if form.tiene_comision.value %}checked{% endif %}>
                         <label class="form-check-label ms-2" for="tiene_comision">
@@ -173,7 +212,7 @@
 
                     <!-- Comision -->
 
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Valor de la comisión del reloj">
                         <span class="input-group-text form-span">
                             <i class="bi bi-coin fs-4 text-secondary"></i>
                         </span>
@@ -191,7 +230,7 @@
                 <div class="repair-form-column">
 
                     <!-- Dueño -->
-                    <div class="input-group">
+                    <div class="input-group" data-bs-placement="top" title="Dueño del reloj">
                         <span class="input-group-text form-span">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
@@ -206,7 +245,7 @@
                     </div>
 
                     <!-- Descripción -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Descripción del reloj">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                         </span>
@@ -222,7 +261,7 @@
 
 
                     <!-- Tipo -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Tipo de reloj">
                         <span class="input-group-text form-span">
                             <i class="bi bi-tags fs-4 text-secondary"></i>
                         </span>
@@ -238,7 +277,7 @@
 
                     <!-- Estado -->
                     {% if modo == 'vender' or reloj.estado == 'VENDIDO' %}
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Estado del reloj">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-smartwatch fs-4 text-secondary"></i>
                         </span>
@@ -253,7 +292,7 @@
                     </div>
 
                     <!-- Método de pago -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-placement="top" title="Metodo de pago del reloj">
                         <span class="input-group-text form-span">
                             <i class="bi bi-credit-card fs-4 text-secondary"></i>
                         </span>
@@ -267,7 +306,7 @@
                     </div>
 
                     <!-- Checkbox alineado -->
-                    <div class="form-check form-switch mt-3">
+                    <div class="form-check form-switch mt-3" data-bs-placement="top" title="Estado de pago del reloj">
                         <input class="form-check-input custom-switch" type="checkbox" id="pagado" name="pagado" {% if form.pagado.value %}checked{% endif %}>
                         <label class="form-check-label ms-2 mt-1" for="pagado">Pagado</label>
                     </div>
@@ -277,8 +316,8 @@
 
             </div>
 
-            <div class="form-buttons">
-                <button type="submit" class="btn save" id="btnGuardar">GUARDAR</button>
+            <div class="text-center mt-5">
+                <button type="submit" class="btn save me-3" id="btnGuardar">GUARDAR</button>
                 {% if 'productos' in request.path %}
                 <a href="{% url 'reloj_list' %}">
                     <button type="button" class="btn cancel">CANCELAR</button>

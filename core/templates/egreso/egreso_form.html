@@ -32,7 +32,7 @@
 
 <div class="egreso-container p-4">
     <div class="text-center mb-4">
-        <div style="background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
+        <div style="border: 2px solid #626E15; background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
             <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">EGRESOS DEL DÍA</h2>
             <div
                 style="background-color: #e2eec1; padding: 0.5rem 2rem; border-radius: 10px; border: 2px solid #a0b34c; display: inline-block; margin-top: 0.5rem;">
@@ -48,7 +48,7 @@
         {% csrf_token %}
 
         <div class="mb-3">
-            <div class="input-group egreso-form custom-form">
+            <div class="input-group egreso-form custom-form" data-bs-toggle="tooltip" data-bs-placement="top" title="Valor del egreso">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                 </span>
@@ -64,7 +64,7 @@
         </div>
 
         <div class="mb-3">
-            <div class="input-group egreso-form custom-form">
+            <div class="input-group egreso-form custom-form" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha del egreso">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                 </span>
@@ -80,7 +80,7 @@
         </div>
 
         <div class="mb-3">
-            <div class="input-group egreso-form custom-form">
+            <div class="input-group egreso-form custom-form" data-bs-toggle="tooltip" data-bs-placement="top" title="Descripción del egreso">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-pencil-square fs-4 text-secondary"></i>
                 </span>

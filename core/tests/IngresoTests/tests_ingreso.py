@@ -2,6 +2,8 @@ from django.test import TestCase
 from core.models.ingreso import Ingreso
 from datetime import date, timedelta
 from django.core.exceptions import ValidationError
+from django.urls import reverse
+import json
 
 class IngresoModelTestCase(TestCase):
     """Tests para el modelo Ingreso"""
@@ -176,79 +178,156 @@ class IngresoServiceTestCase(TestCase):
         self.ayer = self.hoy - timedelta(days=1)
         self.manana = self.hoy + timedelta(days=1)
         
+        # Crear datos de prueba realistas
+        self.datos_validos = {
+            'fecha': self.ayer.strftime('%d/%m/%Y'),
+            'valor': 50000,
+            'descripcion': 'Ingreso por servicio de reparación'
+        }
+        
         # Crear algunos ingresos de prueba
-        Ingreso.objects.create(
+        self.ingreso1 = Ingreso.objects.create(
             fecha=self.hoy,
             valor=100000,
-            descripcion='Ingreso 1 hoy'
+            descripcion='Venta de reloj Rolex'
         )
         
-        Ingreso.objects.create(
+        self.ingreso2 = Ingreso.objects.create(
             fecha=self.hoy,
             valor=50000,
-            descripcion='Ingreso 2 hoy'        )
+            descripcion='Reparación de reloj Casio'
+        )
         
-        Ingreso.objects.create(
+        self.ingreso3 = Ingreso.objects.create(
             fecha=self.ayer,
             valor=75000,
-            descripcion='Ingreso ayer'
+            descripcion='Servicio de mantenimiento'
         )
     
     def test_crear_ingreso_exitoso(self):
         """Prueba la creación exitosa de un ingreso con datos válidos"""
         datos = {
-            'fecha': self.ayer.strftime('%d/%m/%Y'),  # Convertir a string como espera el servicio
+            'fecha': self.ayer.strftime('%d/%m/%Y'),
             'valor': 30000,
             'descripcion': 'Nuevo ingreso de prueba'
         }
         
         ingreso = crear_ingreso(datos)
-        self.assertIsNotNone(ingreso)  # Verificar que no devuelva None
+        
+        # Verificar que se creó correctamente
+        self.assertIsNotNone(ingreso)
         self.assertEqual(ingreso.fecha, self.ayer)
         self.assertEqual(ingreso.valor, datos['valor'])
         self.assertEqual(ingreso.descripcion, datos['descripcion'])
-          # Verificar que se guardó en la base de datos
+        
+        # Verificar que se guardó en la base de datos
         self.assertTrue(Ingreso.objects.filter(descripcion='Nuevo ingreso de prueba').exists())
     
-    def test_crear_ingreso_datos_faltantes(self):
-        """Prueba que se valida la presencia de todos los datos requeridos"""
-        datos_incompletos = {
-            'fecha': self.hoy.strftime('%d/%m/%Y'),
-            # Falta el valor - el servicio lo convertirá a 0
-            'descripcion': 'Ingreso incompleto'
+    def test_crear_ingreso_con_fecha_objeto_date(self):
+        """Prueba crear ingreso cuando la fecha ya es un objeto date"""
+        datos = {
+            'fecha': self.ayer,  # Pasar directamente el objeto date
+            'valor': 45000,
+            'descripcion': 'Ingreso con fecha como objeto'
         }
         
-        # El servicio actual maneja datos faltantes devolviendo None o un ingreso con valores por defecto
-        ingreso = crear_ingreso(datos_incompletos)
-        # Como el servicio no lanza ValidationError, verificamos el comportamiento actual
-        if ingreso is not None:
-            # Si se crea, el valor debería ser 0 según la lógica del servicio
-            self.assertEqual(ingreso.valor, 0)
-        else:
-            # Si devuelve None, es porque hubo un error interno
-            self.assertIsNone(ingreso)
+        ingreso = crear_ingreso(datos)
+        
+        self.assertIsNotNone(ingreso)
+        self.assertEqual(ingreso.fecha, self.ayer)
+        self.assertEqual(ingreso.valor, datos['valor'])
     
-    def test_obtener_total_ingresos_dia(self):
-        """Prueba que se obtiene correctamente el total de ingresos para un día"""
+    def test_crear_ingreso_con_fecha_iso(self):
+        """Prueba crear ingreso con fecha en formato ISO"""
+        datos = {
+            'fecha': self.ayer.strftime('%Y-%m-%d'),  # Formato ISO
+            'valor': 35000,
+            'descripcion': 'Ingreso con fecha ISO'
+        }
+        
+        ingreso = crear_ingreso(datos)
+        
+        self.assertIsNotNone(ingreso)
+        self.assertEqual(ingreso.fecha, self.ayer)
+    
+    def test_crear_ingreso_valor_string(self):
+        """Prueba crear ingreso con valor como string"""
+        datos = {
+            'fecha': self.hoy.strftime('%d/%m/%Y'),
+            'valor': '25000',  # String que puede convertirse a int
+            'descripcion': 'Ingreso con valor string'
+        }
+        
+        ingreso = crear_ingreso(datos)
+        
+        self.assertIsNotNone(ingreso)
+        self.assertEqual(ingreso.valor, 25000)
+    
+    def test_crear_ingreso_valor_invalido(self):
+        """Prueba crear ingreso con valor que no se puede convertir"""
+        datos = {
+            'fecha': self.hoy.strftime('%d/%m/%Y'),
+            'valor': 'abc',  # No se puede convertir a int
+            'descripcion': 'Ingreso con valor inválido'
+        }
+        
+        ingreso = crear_ingreso(datos)
+        
+        # Según la lógica del servicio, debería crear con valor 0
+        self.assertIsNotNone(ingreso)
+        self.assertEqual(ingreso.valor, 0)
+    
+    def test_crear_ingreso_datos_faltantes(self):
+        """Prueba crear ingreso cuando falta el campo valor"""
+        datos_incompletos = {
+            'fecha': self.hoy.strftime('%d/%m/%Y'),
+            'descripcion': 'Ingreso incompleto'
+            # Falta el campo 'valor'
+        }
+        
+        ingreso = crear_ingreso(datos_incompletos)
+        
+        # El servicio debería devolver None debido al error
+        self.assertIsNone(ingreso)
+    
+    def test_crear_ingreso_fecha_invalida(self):
+        """Prueba crear ingreso con fecha inválida"""
+        datos = {
+            'fecha': 'fecha-invalida',
+            'valor': 20000,
+            'descripcion': 'Ingreso con fecha inválida'
+        }
+        
+        ingreso = crear_ingreso(datos)
+        
+        # El servicio debería usar la fecha actual como fallback
+        self.assertIsNotNone(ingreso)
+        self.assertEqual(ingreso.fecha, date.today())
+    
+    def test_obtener_total_ingresos_dia_con_datos(self):
+        """Prueba obtener total de ingresos para un día específico"""
         total_hoy = obtener_total_ingresos_dia(self.hoy)
         self.assertEqual(total_hoy, 150000)  # 100000 + 50000
         
         total_ayer = obtener_total_ingresos_dia(self.ayer)
         self.assertEqual(total_ayer, 75000)
-        
-        # Día sin ingresos
+    
+    def test_obtener_total_ingresos_dia_sin_datos(self):
+        """Prueba obtener total de ingresos para día sin ingresos"""
         total_manana = obtener_total_ingresos_dia(self.manana)
         self.assertEqual(total_manana, 0)
-        
-        # Sin especificar fecha (debe usar la fecha actual)
-        total_default = obtener_total_ingresos_dia()
-        self.assertEqual(total_default, 150000)  # Asumiendo que hoy es self.hoy
     
-    def test_obtener_ingresos_rango(self):
-        """Prueba que se obtienen los ingresos en un rango de fechas"""
+    def test_obtener_total_ingresos_dia_sin_fecha(self):
+        """Prueba obtener total sin especificar fecha (usa fecha actual)"""
+        total_default = obtener_total_ingresos_dia()
+        # Debería usar la fecha actual, que en nuestro caso es self.hoy
+        self.assertEqual(total_default, 150000)
+    
+    def test_obtener_ingresos_rango_completo(self):
+        """Prueba obtener ingresos en un rango de fechas"""
         hace_dos_dias = self.hoy - timedelta(days=2)
         
-        # Crear ingreso adicional hace dos días
+        # Crear ingreso adicional
         Ingreso.objects.create(
             fecha=hace_dos_dias,
             valor=25000,
@@ -259,53 +338,105 @@ class IngresoServiceTestCase(TestCase):
         ingresos = obtener_ingresos_rango(hace_dos_dias, self.hoy)
         self.assertEqual(ingresos.count(), 4)
         
-        # Rango que solo incluye ingresos de hoy
+        # Verificar que están ordenados por fecha
+        fechas = [ing.fecha for ing in ingresos]
+        self.assertEqual(fechas, sorted(fechas))
+    
+    def test_obtener_ingresos_rango_dia_especifico(self):
+        """Prueba obtener ingresos de un solo día"""
         ingresos_hoy = obtener_ingresos_rango(self.hoy, self.hoy)
         self.assertEqual(ingresos_hoy.count(), 2)
         
-        # Rango sin ingresos
+        for ingreso in ingresos_hoy:
+            self.assertEqual(ingreso.fecha, self.hoy)
+    
+    def test_obtener_ingresos_rango_vacio(self):
+        """Prueba obtener ingresos en rango sin datos"""
         rango_futuro = obtener_ingresos_rango(self.manana, self.manana + timedelta(days=1))
         self.assertEqual(rango_futuro.count(), 0)
     
-    def test_obtener_total_ingresos_rango(self):
-        """Prueba que se obtiene el total de ingresos en un rango de fechas"""
-        # Total de ayer y hoy
+    def test_obtener_total_ingresos_rango_multiple_dias(self):
+        """Prueba obtener total de ingresos en rango de múltiples días"""
         total = obtener_total_ingresos_rango(self.ayer, self.hoy)
         self.assertEqual(total, 225000)  # 100000 + 50000 + 75000
-        
-        # Solo ayer
+    
+    def test_obtener_total_ingresos_rango_dia_unico(self):
+        """Prueba obtener total de ingresos para un solo día"""
         total_ayer = obtener_total_ingresos_rango(self.ayer, self.ayer)
         self.assertEqual(total_ayer, 75000)
-        
-        # Rango futuro (sin ingresos)
+    
+    def test_obtener_total_ingresos_rango_sin_datos(self):
+        """Prueba obtener total en rango sin ingresos"""
         total_futuro = obtener_total_ingresos_rango(self.manana, self.manana + timedelta(days=1))
         self.assertEqual(total_futuro, 0)
     
-    def test_generar_pdf_ingresos(self):
-        """Prueba que se genera un PDF con los ingresos del rango especificado"""
+    def test_generar_pdf_ingresos_con_datos(self):
+        """Prueba generación de PDF con datos de ingresos"""
         ingresos = obtener_ingresos_rango(self.ayer, self.hoy)
         total = obtener_total_ingresos_rango(self.ayer, self.hoy)
         
         pdf = generar_pdf_ingresos(ingresos, self.ayer, self.hoy, total)
         
-        # Comprobar que el resultado es un BytesIO con contenido
+        # Verificar que se generó un PDF válido
         self.assertIsInstance(pdf, bytes)
-        self.assertTrue(len(pdf) > 0)
-        
-        # Comprobar que tiene la firma de un PDF
+        self.assertGreater(len(pdf), 0)
         self.assertTrue(pdf.startswith(b'%PDF'))
     
-    @patch('core.services.ingreso_service.SimpleDocTemplate')
-    def test_generar_pdf_sin_ingresos(self, mock_doc):
-        """Prueba que se genera un PDF incluso cuando no hay ingresos"""
-        mock_doc.return_value.build = MagicMock()
-        
-        # Rango sin ingresos
+    def test_generar_pdf_ingresos_sin_datos(self):
+        """Prueba generación de PDF sin ingresos"""
         ingresos = Ingreso.objects.none()
         pdf = generar_pdf_ingresos(ingresos, self.manana, self.manana, 0)
         
-        # Verificar que se llamó a build
-        self.assertTrue(mock_doc.return_value.build.called)
+        # Debería generar un PDF válido aunque no haya datos
+        self.assertIsInstance(pdf, bytes)
+        self.assertGreater(len(pdf), 0)
+        self.assertTrue(pdf.startswith(b'%PDF'))
+    
+    def test_generar_pdf_ingresos_con_request(self):
+        """Prueba generación de PDF pasando un objeto request"""
+        from django.test import RequestFactory
+        
+        factory = RequestFactory()
+        request = factory.get('/reporte/')
+        
+        ingresos = obtener_ingresos_rango(self.ayer, self.hoy)
+        total = obtener_total_ingresos_rango(self.ayer, self.hoy)
+        
+        pdf = generar_pdf_ingresos(ingresos, self.ayer, self.hoy, total, request)
+        
+        # Verificar que funciona con request
+        self.assertIsInstance(pdf, bytes)
+        self.assertGreater(len(pdf), 0)
+        self.assertTrue(pdf.startswith(b'%PDF'))
+    
+    @patch('django.contrib.staticfiles.finders.find')
+    def test_generar_pdf_sin_logo(self, mock_find):
+        """Prueba generación de PDF cuando no se encuentra el logo"""
+        mock_find.return_value = None  # Simular que no se encuentra el logo
+        
+        ingresos = obtener_ingresos_rango(self.ayer, self.hoy)
+        total = obtener_total_ingresos_rango(self.ayer, self.hoy)
+        
+        pdf = generar_pdf_ingresos(ingresos, self.ayer, self.hoy, total)
+        
+        # Debería generar PDF exitosamente sin logo
+        self.assertIsInstance(pdf, bytes)
+        self.assertGreater(len(pdf), 0)
+        self.assertTrue(pdf.startswith(b'%PDF'))
+    
+    def test_crear_ingreso_manejo_excepciones(self):
+        """Prueba que el servicio maneja excepciones correctamente"""
+        # Datos que podrían causar errores
+        datos_problematicos = {
+            'fecha': None,
+            'valor': None,
+            'descripcion': None
+        }
+        
+        ingreso = crear_ingreso(datos_problematicos)
+        
+        # El servicio debería devolver None en caso de error
+        self.assertIsNone(ingreso)
 
 from django.contrib.auth.models import User
 

@@ -32,7 +32,7 @@
 
 <div class="ganancia-container p-4">
     <div class="text-center mb-4">
-        <div style="background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
+        <div style="border: 2px solid #626E15; background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
             <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">GANANCIA DEL DÍA</h2>
             <div
                 style="background-color: {% if total_ingresos >= 0 %}#e2eec1{% else %}#f8d7da{% endif %}; padding: 0.5rem 2rem; border-radius: 10px; border: 2px solid {% if total_ingresos >= 0 %}#a0b34c{% else %}#dc3545{% endif %}; display: inline-block; margin-top: 0.5rem;">
@@ -57,7 +57,7 @@
     <form id="reporteGananciaForm" method="GET" action="{% url 'reporte_ganancias_pdf' %}" target="_blank" class="reporte-form-ganancia" novalidate>
         <div class="mt-3 mb-3">
             <label for="{{ form.inicio.id_for_label }}" class="text-secondary">Desde</label>
-            <div class="input-group ganancia-form custom-form">
+            <div class="input-group ganancia-form custom-form" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de inicio del reporte">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                 </span>
@@ -75,7 +75,7 @@
 
         <div class="mb-3">
             <label for="{{ form.fin.id_for_label }}" class="text-secondary">Hasta</label>
-            <div class="input-group ganancia-form custom-form">
+            <div class="input-group ganancia-form custom-form" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de fin del reporte">
                 <span class="input-group-text form-span" id="basic-addon1">
                     <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                 </span>

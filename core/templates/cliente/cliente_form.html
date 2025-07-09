@@ -10,7 +10,7 @@
   .content {
     display: flex;
     justify-content: normal;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
     padding: 20px;
     background-color: #f7f7f7;
@@ -45,21 +45,24 @@
   }
 </style>
 
-<h2 class="titulo">
-  {% if modo == 'editar' %}
-  EDITAR CLIENTE
-  {% else %}
-  AGREGAR CLIENTE
-  {% endif %}
-</h2>
 
-<div>
-  <div class="left-column">
+
+  <div class="form-header text-center">
+    <h2 class="titulo mb-3 mt-4">
+      {% if modo == 'editar' %}
+      EDITAR CLIENTE
+      {% else %}
+      AGREGAR CLIENTE
+      {% endif %}
+    </h2>
+    <h4 class="mb-3">DATOS DEL CLIENTE</h4>
+  </div>
+
     <form method="POST" class="custom-form" id="clienteForm" novalidate>
       {% csrf_token %}
 
       <div class="form-group">
-        <div class="input-group mb-3">
+        <div class="input-group mb-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del cliente">
           <span class="input-group-text form-span" id="basic-addon1">
             <i class="bi bi-person-fill fs-4 text-secondary"></i>
           </span>
@@ -71,7 +74,7 @@
       </div>
 
       <div class="form-group">
-        <div class="input-group mb-3">
+        <div class="input-group mb-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Apellido del cliente">
           <span class="input-group-text form-span" id="basic-addon1">
             <i class="bi bi-person-fill fs-4 text-secondary"></i>
           </span>
@@ -84,7 +87,7 @@
       </div>
 
       <div class="form-group">
-        <div class="input-group mb-3">
+        <div class="input-group mb-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Teléfono del cliente">
           <span class="input-group-text form-span" id="basic-addon1">
             <i class="bi bi-telephone-fill fs-4 text-secondary"></i>
           </span>
@@ -94,29 +97,28 @@
         {% if form.telefono.errors %}
         <div class="form-error">{{ form.telefono.errors.0 }}</div>
         {% endif %}
-
       </div>
 
-      <div class="form-buttons">
-        <button class="btn save" id="btnGuardarcliente">GUARDAR</button>
-        <a href="{% url 'cliente_list' %}">
-          <button type="button" class="btn cancel">CANCELAR</button>
-        </a>
-
+      <div class="form-group text-center mt-3 ms-2">
+        <button class="btn save me-3" id="btnGuardarcliente">GUARDAR</button>
+        <!-- Modificar el botón CANCELAR para usar la misma lógica de redirección -->
+        {% if request.GET.next %}
+          <a href="{{ request.GET.next }}">
+            <button type="button" class="btn cancel">CANCELAR</button>
+          </a>
+        {% else %}
+          <a href="{% url 'cliente_list' %}">
+            <button type="button" class="btn cancel">CANCELAR</button>
+          </a>
+        {% endif %}
       </div>
-
+        
     </form>
-  </div>
+  
 
-  <div class="right-column">
-    <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
-  </div>
-
-</div>
 
 <!-- Modal de confirmación simplificado -->
-<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" 
-     tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center" style="background-color: #f1f1f1;">
       <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
@@ -125,8 +127,12 @@
         {% else %}
         <h4 class="titulo m-0" id="modalMessage">CLIENTE AGREGADO CORRECTAMENTE</h4>
         {% endif %}
-        <!-- Botón VOLVER -->
-        <a href="{% url 'cliente_list' %}" class="btn save mt-3">VOLVER</a>
+        <!-- Botón VOLVER que respeta tanto 'next' como 'return_to' -->
+        {% if request.GET.next %}
+            <a href="{{ request.GET.next }}" class="btn save mt-3">VOLVER</a>
+        {% else %}
+            <a href="{% url 'cliente_list' %}" class="btn save mt-3">VOLVER</a>
+        {% endif %}
       </div>
     </div>
   </div>
