@@ -11,7 +11,7 @@
     }
 
     .custom-form-empleados {
-        max-width: 800px !important;
+        max-width: none !important;
     }
 
     /* Estilos específicos para selects con error */
@@ -28,11 +28,25 @@
     .input-group select.is-invalid {
         padding-right: 2.5rem !important;
     }
+
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        background-color: #f7f7f7;
+    }
+
+    .form-content {
+        width: 50%
+    }
 </style>
 
-<div class="container">
-    <div class="form-header">
-        <h2 class="titulo">{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Empleado</h2>
+
+    <div class="form-header text-center">
+        <h2 class="titulo mb-3 mt-4">{% if form.instance.id %}EDITAR{% else %}NUEVO{% endif %} EMPLEADO</h2>
+        <h4>DATOS</h4>
     </div>
 
     <div class="form-content">
@@ -42,7 +56,7 @@
             <div class="row g-6">
                 <div class="col-md-6">
                     <!-- Cedula -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Cédula del empleado">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-person-vcard fs-4 text-secondary"></i>
                         </span>
@@ -56,7 +70,7 @@
                         {% endif %}
                     </div>
                     <!-- Nombre -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del empleado">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
@@ -71,7 +85,7 @@
                     </div>
 
                     <!-- Apellidos -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Apellidos del empleado">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
@@ -86,7 +100,7 @@
                     </div>
 
                     <!-- Telefono -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Celular del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-telephone fs-4 text-secondary"></i>
                         </span>
@@ -102,7 +116,7 @@
 
 
                     <!-- Fecha Ingreso -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de ingreso del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                         </span>
@@ -119,7 +133,7 @@
 
                 <div class="col-md-6">
                     <!-- Fecha Nacimiento -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de nacimiento del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-calendar-check fs-4 text-secondary"></i>
                         </span>
@@ -135,7 +149,7 @@
 
 
                     <!-- Cargo -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Cargo del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-briefcase fs-4 text-secondary"></i>
                         </span>
@@ -153,7 +167,7 @@
 
 
                     <!-- Salario -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Salario del empleado">
                         <span class="input-group-text form-span" id="basic-addon4">
                             <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                         </span>
@@ -168,7 +182,7 @@
                     </div>
 
                     <!-- Estado -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Estado del empleado">
                         <span class="input-group-text form-span" id="basic-addon5">
                             <i class="bi bi-building-check fs-4 text-secondary"></i>
                         </span>
@@ -184,15 +198,15 @@
                 </div>
             </div>
 
-            <div class="form-buttons mt-4">
-                <button class="btn save" id="btnGuardarEmpleado">GUARDAR</button>
+            <div class="form-group text-center mt-5">
+                <button class="btn save me-3" id="btnGuardarEmpleado">GUARDAR</button>
                 <a href="{% url 'empleado_list' %}">
                     <button type="button" class="btn cancel">CANCELAR</button>
                 </a>
             </div>
         </form>
     </div>
-</div>
+
 
 <!-- Modal de confirmación simplificado -->
 <div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"

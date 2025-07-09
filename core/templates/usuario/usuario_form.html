@@ -51,28 +51,36 @@
         color: #cce064;
     }
 
-    .left-column-usuario{
-        padding-left: 0px;
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        background-color: #f7f7f7;
     }
+
 
 </style>
 
-<h2 class="titulo">
-    {% if modo == 'editar' %}
-    EDITAR USUARIO
-    {% else %}
-    AGREGAR USUARIO
-    {% endif %}
-</h2>
-<h4>DATOS</h4>
 
-<div>
-    <div class="left-column left-column-usuario">
+<div class="form-header text-center">
+    <h2 class="titulo mb-3 mt-4">
+        {% if modo == 'editar' %}
+        EDITAR USUARIO
+        {% else %}
+        AGREGAR USUARIO
+        {% endif %}
+    </h2>
+    <h4 class="mb-3">DATOS</h4>
+</div>
+
+
         <form method="POST" class="custom-form" novalidate>
             {% csrf_token %}
 
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Nombre de usuario">
                     <div class="input-group mb-3 flex-grow-1">
                         <span class="input-group-text form-span">
                             <i class="bi bi-person-fill fs-4 text-secondary"></i>
@@ -93,7 +101,7 @@
             </div>
 
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Correo electrónico de usuario">
                     <div class="input-group mb-3 flex-grow-1">
                         <span class="input-group-text form-span">
                             <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
@@ -111,7 +119,7 @@
 
             {% if not modo == 'editar' %}
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Contraseña de usuario">
                     <div class="input-group mb-3 password-container flex-grow-1">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-lock-fill fs-4 text-secondary"></i>
@@ -133,7 +141,7 @@
             </div>
 
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Confirmar contraseña de usuario">
                     <div class="input-group mb-3 password-container flex-grow-1">
                         <span class="input-group-text form-span">
                             <i class="bi bi-lock-fill fs-4 text-secondary"></i>
@@ -160,20 +168,15 @@
             {% endfor %}
             {% endif %}
 
-            <div class="form-buttons">
-                <button class="btn save" type="submit">GUARDAR</button>
+            <div class="form-group text-center mt-3">
+                <button class="btn save me-3" type="submit">GUARDAR</button>
                 <a href="{% url 'usuario_list' %}">
-                    <button type="button" class="btn cancel">CANCELAR</button>
+                    <button type="button" class="btn cancel me-2">CANCELAR</button>
                 </a>
             </div>
         </form>
+    
 
-    </div>
-
-    <div class="right-column">
-        <img src="{% static 'images/reloj-pagina.png' %}" alt="reloj" class="reloj-img">
-    </div>
-</div>
 
 
 

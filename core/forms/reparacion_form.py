@@ -45,12 +45,11 @@ class ReparacionForm(forms.ModelForm):
         empty_label="Seleccione un técnico",
         required=False,
         widget=forms.Select(attrs={
-            'class': 'form-control form-span text-secondary'
+            'class': 'form-control form-span text-secondary',
+            'style': 'cursor: pointer;'
         })
     )
-    
-    
-    
+
     fecha_entrega_estimada = forms.CharField(
         max_length=10,
         widget=forms.TextInput(attrs={
@@ -119,8 +118,8 @@ class ReparacionForm(forms.ModelForm):
             'marca_reloj': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Marca del reloj'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),            'codigo_orden': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código de orden'}),
             'precio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Precio'}),'espacio_fisico': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Espacio físico'}),
-            'estado': forms.Select(attrs={'class': 'form-span form-control text-secondary', 'placeholder': 'Estado'}),
-            'tecnico': forms.Select(attrs={'class': 'form-control form-span text-secondary'}),
+            'estado': forms.Select(attrs={'class': 'form-span form-control text-secondary', 'placeholder': 'Estado', 'style': 'cursor: pointer;'}),
+            'tecnico': forms.Select(attrs={'class': 'form-control form-span text-secondary', 'style': 'cursor: pointer;'}),
             'mantenimiento': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
     def clean_cliente(self):

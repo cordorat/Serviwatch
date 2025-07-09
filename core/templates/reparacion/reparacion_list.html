@@ -109,7 +109,7 @@
             <div class="form-group">
                 <label for="estado-select" class="form-label fw-bold">Estado:</label>
                 <select id="estado-select"
-                name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+                name="estado" class="form-select form-select-sm" style="cursor: pointer;" onchange="this.form.submit()" data-bs-toggle="tooltip"
                     data-bs-placement="top" title="Filtrar reparacion por estado">
                     {% for valor, texto in estados %}
                     <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>

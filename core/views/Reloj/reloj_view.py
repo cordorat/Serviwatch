@@ -41,17 +41,43 @@ def reloj_list_view(request):
         filter_params['pagado'] = filtro_pagado
 
     if search_query:
-        search_query.split()
+        search_terms = search_query.split()
         query = Q()
         base_query = (
-            Q(referencia__icontains=search_query) 
+            Q(marca__icontains=search_query)|
+            Q(referencia__icontains=search_query)| 
+            Q(cliente__nombre__icontains=search_query) |
+            Q(cliente__apellido__icontains=search_query) |
+            Q(cliente__telefono__icontains=search_query) |
+            Q(dueno__icontains=search_query) 
         )
         query |= base_query
+        
+        # Si hay múltiples términos, buscar coincidencias de nombre+apellido
+        if len(search_terms) > 1:
+            for i in range(len(search_terms) - 1):
+                # Buscar coincidencias donde términos consecutivos aparezcan en nombre+apellido
+                first_term = search_terms[i]
+                second_term = search_terms[i+1]
+
+                # Buscar "nombre apellido"
+                query |= (Q(cliente__nombre__icontains=first_term) &
+                        Q(cliente__apellido__icontains=second_term))
+
+                # También buscar posibles segundos nombres
+                query |= (Q(cliente__nombre__icontains=first_term) &
+                        Q(cliente__nombre__icontains=second_term))
+                
+                query |= (Q(tecnico__nombre__icontains=first_term) &
+                        Q(tecnico__apellidos__icontains=second_term))
+
+                # También buscar posibles segundos nombres
+                query |= (Q(tecnico__nombre__icontains=first_term) &
+                        Q(tecnico__nombre__icontains=second_term))
 
         relojes = relojes.filter(query).distinct()
 
     relojes = relojes.order_by('referencia')
-
     paginator = Paginator(relojes, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
