@@ -26,7 +26,7 @@
     /* Ajusta el icono para que no rompa el radio */
     .toggle-password {
         position: absolute;
-        right: 10px;
+        right: 33px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 10;
@@ -76,20 +76,17 @@
 </div>
 
 
-        <form method="POST" class="custom-form" novalidate>
+<form method="POST" class="custom-form" novalidate>
             {% csrf_token %}
 
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Nombre de usuario">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="El nombre de usuario puede contener letras, números y @/./+/-/_.">
                     <div class="input-group mb-3 flex-grow-1">
                         <span class="input-group-text form-span">
                             <i class="bi bi-person-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.username }}
                     </div>
-                    <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.username.help_text }}">
-                        <i class="bi bi-question-circle-fill"></i>
-                    </span>
                 </div>
 
 
@@ -101,16 +98,13 @@
             </div>
 
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Correo electrónico de usuario">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="El correo debe tener un @ y terminar en .com, .net, .org, etc.">
                     <div class="input-group mb-3 flex-grow-1">
                         <span class="input-group-text form-span">
                             <i class="bi bi-envelope-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.email }}
                     </div>
-                    <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.email.help_text }}">
-                        <i class="bi bi-question-circle-fill"></i>
-                    </span>
                 </div>
                 {% if form.username.errors and not success %}
                 <div class="form-error">{{ form.email.errors.0 }}</div>
@@ -119,7 +113,7 @@
 
             {% if not modo == 'editar' %}
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Contraseña de usuario">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="La contraseña debe tener una longitud de 8 a 16 caracteres e incluir al menos un número, una letra mayúscula, una letra minúscula y un carácter especial.">
                     <div class="input-group mb-3 password-container flex-grow-1">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-lock-fill fs-4 text-secondary"></i>
@@ -129,10 +123,6 @@
                             <i class="fa-solid fa-eye toggle-password" data-target="id_confirmacion_contraseña"></i>
                         </span>
                     </div>
-
-                    <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password1.help_text }}">
-                        <i class="bi bi-question-circle-fill"></i>
-                    </span>
                 </div>
 
                 {% if form.username.errors and not success %}
@@ -141,7 +131,7 @@
             </div>
 
             <div class="form-group">
-                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Confirmar contraseña de usuario">
+                <div class="d-flex align-items-center gap-2" data-bs-placement="top" title="Confirmar contraseña.">
                     <div class="input-group mb-3 password-container flex-grow-1">
                         <span class="input-group-text form-span">
                             <i class="bi bi-lock-fill fs-4 text-secondary"></i>
@@ -151,9 +141,6 @@
                             <i class="fa-solid fa-eye toggle-password" data-target="id_confirmacion_contraseña"></i>
                         </span>
                     </div>
-                    <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.password2.help_text }}">
-                        <i class="bi bi-question-circle-fill"></i>
-                    </span>
                 </div>
 
                 {% if form.username.errors and not success %}
@@ -174,8 +161,7 @@
                     <button type="button" class="btn cancel me-2">CANCELAR</button>
                 </a>
             </div>
-        </form>
-    
+        </form>
 
 
 

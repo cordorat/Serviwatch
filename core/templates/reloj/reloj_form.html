@@ -200,7 +200,6 @@
                     {% endif %}
 
                     <!--Saber si se va a tener una comisión o no-->
-                    {% if modo == 'crear' %}
                     <div class="form-check form-switch mt-3" data-bs-placement="top" title="Comisión del reloj">
                         <input class="form-check-input custom-switch" type="checkbox" id="tiene_comision"
                             name="tiene_comision" {% if form.tiene_comision.value %}checked{% endif %}>
@@ -208,7 +207,6 @@
                             ¿Tiene comisión?
                         </label>
                     </div>
-                    {% endif %}
 
                     <!-- Comision -->
 

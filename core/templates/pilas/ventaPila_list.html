@@ -271,41 +271,26 @@
 
     <!-- Paginación -->
     {% if pilas.has_other_pages %}
-    <nav aria-label="Paginación" class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if pilas.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="Primera">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ pilas.previous_page_number }}" aria-label="Anterior">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            {% endif %}
-
-            {% for i in pilas.paginator.page_range %}
-            <li class="page-item {% if pilas.number == i %}active{% endif %}">
-                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-            </li>
-            {% endfor %}
-
-            {% if pilas.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ pilas.next_page_number }}" aria-label="Siguiente">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ pilas.paginator.num_pages }}" aria-label="Última">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
+    <nav aria-label="Page navigation" style="margin-top: 20px;">
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link" href="{% if pilas.has_previous %}?page={{ pilas.previous_page_number }}{% endif %}">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      {% for num in pilas.paginator.page_range %}
+      <li class="page-item {% if pilas.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+      <li class="page-item">
+        <a class="page-link" href="{% if pilas.has_next %}?page={{ pilas.next_page_number }}{% endif %}"
+          aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
     {% endif %}
 </div>
 

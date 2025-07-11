@@ -175,7 +175,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
     # Agregar cada ingreso a la tabla
     for ingreso in ingresos:
         table_data.append([
-            ingreso.fecha.strftime(FORMATO_FECHA),
+            ingreso.fecha.strftime(FORMATO_FECHA),  
             ingreso.descripcion,
             f"${ingreso.valor:,.2f}"
         ])

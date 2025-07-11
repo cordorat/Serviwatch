@@ -148,7 +148,7 @@
       </form>
     </div>    
     <div class="report-button-container">
-      {% if '/productos/' in request.path %}
+      {% if user.is_authenticated and not user.is_superuser and 'productos' in request.path %}
       <a href="{% url 'reloj_create' %}" class="btn btn-add me-3s">Agregar Reloj</a>
       {% endif %}
       <a href="{% if 'servicios' in request.path %}{% url 'reporte_relojes_venta_pdf' %}{% else %}{% url 'reporte_relojes_pdf' %}{% endif %}?estado={{ filtro_estado }}&tipo={{ filtro_tipo }}&pagado={{ filtro_pagado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"
