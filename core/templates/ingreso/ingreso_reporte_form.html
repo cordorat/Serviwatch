@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Estilos más específicos con !important para forzar la aplicación */
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: flex-start;
+        width: 100%;
+        padding: 20px;
+        background-color: #f7f7f7;
+    }
+
+    .reporte-ingreso-container{
+        max-width: 900px;
+        margin: 0 auto !important;
+        padding: 20px;
+    }
+
+    .reporte-form-ingreso {
+        max-width: 900px;
+    }
+
+    @media (max-width: 768px) {
+        .content {
+            padding-left: 0 !important;
+        }
+    }
+</style>
+
+<div class="reporte-ingreso-container p-4">
+    <div class="text-center mb-4">
+        <div style="background-color: #C8DA53; padding: 1rem; border-radius: 25px; display: inline-block;">
+            <h2 class="titulo" style="margin: 0; font-family: Montserrat, sans-serif;">Reporte de Ingresos</h2>
+        </div>
+    </div>
+
+    <h4 class="text-center fw-bold mt-3 mb-3">Ingrese el rango de fechas</h4>
+
+    <!-- Mostrar errores no asociados a campos específicos -->
+    {% if form.non_field_errors %}
+    <div class="text-danger small">
+        {% for error in form.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form id="reporteIngresoForm" method="GET" action="{% url 'reporte_ingresos_pdf' %}" target="_blank" class="reporte-form-ingreso" novalidate>
+      
+        <div class="mt-3 mb-3">
+            <label for="{{ form.inicio.id_for_label }}" class="text-secondary">Desde</label>
+            <div class="input-group ingreso-form custom-form">
+                <span class="input-group-text form-span" id="basic-addon1">
+                    <i class="bi bi-calendar-date fs-4 text-secondary"></i>
+                </span>
+                    
+                    {{ form.inicio }}
+            </div>
+            <div class="error-container mt-1">
+                {% if form.inicio.errors %}
+                {% for error in form.inicio.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.inicio.id_for_label }}" class="text-secondary">Hasta</label>
+            <div class="input-group ingreso-form custom-form">
+                <span class="input-group-text form-span" id="basic-addon1">
+                    <i class="bi bi-calendar-date fs-4 text-secondary"></i>
+                </span>
+                {{ form.fin }}
+            </div>
+            <div class="error-container mt-1">
+                {% if form.fin.errors %}
+                {% for error in form.fin.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn save">
+                Generar Reporte PDF
+            </button>
+            <a href="{% url 'ingreso' %}" class="btn cancel">VOLVER</a>
+        </div>
+    </form>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Agregar validación del lado del cliente -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reporteIngresoForm');
+    
+    // Obtenemos los inputs por su nombre (más confiable)
+    const inicioInput = document.querySelector('input[name="inicio"]');
+    const finInput = document.querySelector('input[name="fin"]');
+    
+    // Validación en tiempo real - remover errores al cambiar valores
+    inicioInput.addEventListener('change', function() {
+        const errorContainer = this.closest('.mb-3').querySelector('.error-container');
+        errorContainer.innerHTML = ''; // Limpiar mensajes de error
+        this.classList.remove('is-invalid');
+    });
+    
+    finInput.addEventListener('change', function() {
+        const errorContainer = this.closest('.mb-3').querySelector('.error-container');
+        errorContainer.innerHTML = ''; // Limpiar mensajes de error
+        this.classList.remove('is-invalid');
+    });
+    
+    form.addEventListener('submit', function(e) {
+        // Limpiar errores previos
+        const errorContainers = document.querySelectorAll('.error-container');
+        errorContainers.forEach(container => container.innerHTML = '');
+        
+        // Remover alertas previas
+        const prevAlerts = document.querySelectorAll('.alert-danger');
+        prevAlerts.forEach(alert => alert.remove());
+        
+        // Obtener valores
+        const fechaInicio = inicioInput.value;
+        const fechaFin = finInput.value;
+        
+        // Resetear clases de error
+        inicioInput.classList.remove('is-invalid');
+        finInput.classList.remove('is-invalid');
+        
+        let hayError = false;
+        
+        // Validar que se proporcionaron fechas
+        if (!fechaInicio) {
+            inicioInput.classList.add('is-invalid');
+            // Agregar mensaje de error en el contenedor
+            const errorContainer = inicioInput.closest('.mb-3').querySelector('.error-container');
+            errorContainer.innerHTML = '<div class="text-danger small">La fecha inicial es obligatoria.</div>';
+            hayError = true;
+        }
+        
+        if (!fechaFin) {
+            finInput.classList.add('is-invalid');
+            // Agregar mensaje de error en el contenedor
+            const errorContainer = finInput.closest('.mb-3').querySelector('.error-container');
+            errorContainer.innerHTML = '<div class="text-danger small">La fecha final es obligatoria.</div>';
+            hayError = true;
+        }
+        
+        // Validar rango de fechas
+        if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
+            inicioInput.classList.add('is-invalid');
+            finInput.classList.add('is-invalid');
+            
+            // Crear mensaje de error general
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.textContent = 'La fecha de inicio no puede ser posterior a la fecha de fin.';
+            
+            // Insertar mensaje antes del formulario
+            form.parentNode.insertBefore(errorDiv, form);
+            
+            hayError = true;
+        }
+        
+        if (hayError) {
+            e.preventDefault();
+            
+            // Eliminar mensaje de error después de 5 segundos
+            setTimeout(function() {
+                const alertMessages = document.querySelectorAll('.alert-danger');
+                alertMessages.forEach(msg => msg.remove());
+            }, 5000);
+        }
+    });
+});
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+        // ===== VARIABLES INICIALES =====
+        const fechaValueFin = "{{ form.fin.value|date:'Y-m-d' }}";
+
+        // ===== CONFIGURACIÓN DE DATEPICKERS =====
+        function setupDatepicker(selector, defaultValue) {
+            return flatpickr(selector, {
+                dateFormat: "Y-m-d",
+                locale: "es",
+                defaultDate: defaultValue || null,
+                onChange: function (selectedDates, dateStr, instance) {
+                    instance.input.value = dateStr;
+                    instance.input.dataset.userModified = 'true';
+                    instance.input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        setupDatepicker("#id_fecha_fin", fechaValueFin);
+
+        if (fechaValueFin) {
+            document.querySelector("#id_fecha_fin").value = fechaValueFin;
+        }
+    });
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+        // ===== VARIABLES INICIALES =====
+        const fechaValueInicio = "{{ form.inicio.value|date:'Y-m-d' }}";
+
+        // ===== CONFIGURACIÓN DE DATEPICKERS =====
+        function setupDatepicker(selector, defaultValue) {
+            return flatpickr(selector, {
+                dateFormat: "Y-m-d",
+                locale: "es",
+                defaultDate: defaultValue || null,
+                onChange: function (selectedDates, dateStr, instance) {
+                    instance.input.value = dateStr;
+                    instance.input.dataset.userModified = 'true';
+                    instance.input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        setupDatepicker("#id_fecha_inicio", fechaValueInicio);
+
+        if (fechaValueInicio) {
+            document.querySelector("#id_fecha_inicio").value = fechaValueInicio;
+        }
+    });
+
+</script>
+{% endblock %}

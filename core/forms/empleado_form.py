@@ -1,6 +1,7 @@
 from django import forms
 from core.models.empleado import Empleado
 from datetime import date
+import re
 
 clase_formulario_validate = "validate form-control"
 clase_formulario_control = 'form-control text-secondary'
@@ -79,7 +80,8 @@ class EmpleadoForm(forms.ModelForm):
         required=False,
         widget=forms.Select(attrs={
             'class': clase_formulario_control_span,
-            'placeholder': 'Cargo'
+            'placeholder': 'Cargo',
+            'style': 'cursor: pointer;'
         })
     )
 
@@ -106,13 +108,21 @@ class EmpleadoForm(forms.ModelForm):
             'fecha_ingreso': forms.DateInput(attrs={'type': 'date', 'class': clase_formulario_control, 'placeholder': 'Fecha de ingreso'}),
             'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'class': clase_formulario_control}),
             'cargo': forms.Select(attrs={'class': clase_formulario_control_span}),
-            'estado': forms.Select(attrs={'class': clase_formulario_control_span}),
+            'estado': forms.Select(attrs={'class': clase_formulario_control_span, 'style': 'cursor: pointer;'}),
         }
 
     def clean_nombre(self):
         nombre = self.cleaned_data.get('nombre')
-        if nombre and len(nombre) < 2:
-            raise forms.ValidationError("El nombre debe tener al menos 2 caracteres.")
+        # Permitir espacios para nombres compuestos
+        if nombre and not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', nombre):
+            raise forms.ValidationError('El nombre solo debe contener letras y espacios.')
+        
+        # Verificar que cada parte del nombre tenga al menos 2 caracteres
+        palabras = nombre.split()
+        for palabra in palabras:
+            if len(palabra) < 2:
+                raise forms.ValidationError('Cada nombre debe tener al menos 2 letras.')
+        
         return nombre
 
     def clean_cedula(self):
@@ -123,9 +133,9 @@ class EmpleadoForm(forms.ModelForm):
         if not cedula.isdigit():
             raise forms.ValidationError("La cédula debe contener solo números.")
 
-        if len(cedula) > 15:
+        if len(cedula) > 10:
             raise forms.ValidationError(
-                "La cédula no puede tener más de 15 dígitos.")
+                "La cédula no puede tener más de 10 dígitos.")
 
         # Comprobar unicidad solo para nuevos empleados, no para ediciones
         if not self.instance.pk:  # Si es un nuevo empleado (no tiene ID)
@@ -155,6 +165,9 @@ class EmpleadoForm(forms.ModelForm):
         salario = self.cleaned_data.get('salario')
         if not salario.isdigit():
             raise forms.ValidationError("El salario debe ser numérico.")
+        
+        salario = salario.lstrip('0')  # Eliminar ceros a la izquierda
+
         if len(salario) > 8:
             raise forms.ValidationError(
                 "El salario no puede tener más de 8 dígitos.")
@@ -162,8 +175,16 @@ class EmpleadoForm(forms.ModelForm):
     
     def clean_apellidos(self):
         apellidos = self.cleaned_data.get('apellidos')
-        if apellidos and len(apellidos) < 2:
-            raise forms.ValidationError("Los apellidos deben tener al menos 2 caracteres.")
+        # Permitir espacios para nombres compuestos
+        if apellidos and not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', apellidos):
+            raise forms.ValidationError('El nombre solo debe contener letras y espacios.')
+        
+        # Verificar que cada parte del nombre tenga al menos 2 caracteres
+        palabras = apellidos.split()
+        for palabra in palabras:
+            if len(palabra) < 2:
+                raise forms.ValidationError('Cada nombre debe tener al menos 2 letras.')
+        
         return apellidos
     
     def clean_fecha_nacimiento(self):

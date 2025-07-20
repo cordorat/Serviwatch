@@ -54,45 +54,92 @@
             </div>
         </form>
     </div>
+</div>
 
-
-    <!-- Modal de confirmación simplificado -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center" style="background-color: #f1f1f1;">
-                <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
-                    <h4 class="titulo m-0">EGRESO AGREGADO CORRECTAMENTE</h4>
-                </div>
+<!-- Modal de confirmación simplificado -->
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center" style="background-color: #f1f1f1;">
+            <div class="modal-body d-flex flex-column align-items-center" style="height: 200px;">
+                <h4 class="titulo m-0">EGRESO AGREGADO CORRECTAMENTE</h4>
+                <a href="{% url 'egreso' %}" class="btn save mt-3">VOLVER</a>
             </div>
         </div>
     </div>
+</div>
 
-    {% endblock %}
+{% endblock %}
 
-    {% block javascript %}
-    <script >
-        document.addEventListener("DOMContentLoaded", function() {
+{% block javascript %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
     const btnConfirmar = document.getElementById('btnConfirmar');
     const egresoForm = document.getElementById('egresoForm');
-    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
+        backdrop: 'static',  // Evita que el modal se cierre al hacer clic fuera
+        keyboard: false      // Evita que el modal se cierre con la tecla ESC
+    });
+      
     btnConfirmar.addEventListener('click', function() {
         // Agregar un campo oculto para indicar la acción "confirmar"
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'confirmar';
-        hiddenInput.value = 'true';
-        egresoForm.appendChild(hiddenInput);
+        if (!document.querySelector('input[name="confirmar"]')) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'confirmar';
+            hiddenInput.value = 'true';
+            egresoForm.appendChild(hiddenInput);
+        }
         
-        // Mostrar el modal
-        modal.show();    
-        // Por seguridad, enviar el formulario después de 3 segundos incluso si la animación falla
-        setTimeout(function() {
+        // Obtener el token CSRF
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // Crear FormData del formulario
+        const formData = new FormData(egresoForm);
+        
+        // Enviar el formulario con Fetch API
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Mostrar el modal
+                modal.show();
+                
+                // Prevenir que el modal se cierre al hacer clic fuera
+                document.querySelector('.modal-backdrop').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            } else {
+                console.error('Error al procesar el formulario:', data.message);
+                alert('Ocurrió un error al procesar el egreso.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Si hay un error, enviamos el formulario de manera tradicional como fallback
             egresoForm.submit();
-        }, 3000);
+        });
+    });
+    
+    // Si se intenta cerrar el modal con Escape o haciendo clic fuera, prevenir
+    document.querySelector('#confirmationModal').addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+        }
     });
 });
-
-    </script>
-    {% endblock %}
+</script>
+{% endblock %}

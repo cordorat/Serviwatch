@@ -1,6 +1,7 @@
 from django import forms
 from core.models import Cliente
 from django.db.models import Q
+import re
 
 clase_form_validate = 'validate form-control'
 
@@ -60,14 +61,30 @@ class ClienteForm(forms.ModelForm):
     
     def clean_nombre(self):
         nombre = self.cleaned_data.get('nombre')
-        if not nombre.isalpha():
-            raise forms.ValidationError("El nombre solo debe contener letras.")
+        # Permitir espacios para nombres compuestos
+        if nombre and not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', nombre):
+            raise forms.ValidationError('El nombre solo debe contener letras y espacios.')
+        
+        # Verificar que cada parte del nombre tenga al menos 2 caracteres
+        palabras = nombre.split()
+        for palabra in palabras:
+            if len(palabra) < 2:
+                raise forms.ValidationError('Cada nombre debe tener al menos 2 letras.')
+        
         return nombre
     
     def clean_apellido(self):
         apellido = self.cleaned_data.get('apellido')
-        if not apellido.isalpha():
-            raise forms.ValidationError("El apellido solo debe contener letras.")
+        # Permitir espacios para nombres compuestos
+        if apellido and not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', apellido):
+            raise forms.ValidationError('El nombre solo debe contener letras y espacios.')
+        
+        # Verificar que cada parte del nombre tenga al menos 2 caracteres
+        palabras = apellido.split()
+        for palabra in palabras:
+            if len(palabra) < 2:
+                raise forms.ValidationError('Cada nombre debe tener al menos 2 letras.')
+        
         return apellido
     
     def clean(self):

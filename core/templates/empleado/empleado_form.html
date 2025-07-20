@@ -11,7 +11,7 @@
     }
 
     .custom-form-empleados {
-        max-width: 800px !important;
+        max-width: none !important;
     }
 
     /* Estilos específicos para selects con error */
@@ -28,11 +28,25 @@
     .input-group select.is-invalid {
         padding-right: 2.5rem !important;
     }
+
+    .content {
+        display: flex;
+        justify-content: normal;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        background-color: #f7f7f7;
+    }
+
+    .form-content {
+        width: 50%
+    }
 </style>
 
-<div class="container">
-    <div class="form-header">
-        <h2 class="titulo">{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Empleado</h2>
+
+    <div class="form-header text-center">
+        <h2 class="titulo mb-3 mt-4">{% if form.instance.id %}EDITAR{% else %}NUEVO{% endif %} EMPLEADO</h2>
+        <h4>DATOS</h4>
     </div>
 
     <div class="form-content">
@@ -42,7 +56,7 @@
             <div class="row g-6">
                 <div class="col-md-6">
                     <!-- Cedula -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Cédula del empleado">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-person-vcard fs-4 text-secondary"></i>
                         </span>
@@ -56,7 +70,7 @@
                         {% endif %}
                     </div>
                     <!-- Nombre -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del empleado">
                         <span class="input-group-text form-span" id="basic-addon1">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
@@ -71,7 +85,7 @@
                     </div>
 
                     <!-- Apellidos -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Apellidos del empleado">
                         <span class="input-group-text form-span" id="basic-addon2">
                             <i class="bi bi-person fs-4 text-secondary"></i>
                         </span>
@@ -86,7 +100,7 @@
                     </div>
 
                     <!-- Telefono -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Celular del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-telephone fs-4 text-secondary"></i>
                         </span>
@@ -102,7 +116,7 @@
 
 
                     <!-- Fecha Ingreso -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de ingreso del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                         </span>
@@ -119,7 +133,7 @@
 
                 <div class="col-md-6">
                     <!-- Fecha Nacimiento -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de nacimiento del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-calendar-check fs-4 text-secondary"></i>
                         </span>
@@ -135,7 +149,7 @@
 
 
                     <!-- Cargo -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Cargo del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
                             <i class="bi bi-briefcase fs-4 text-secondary"></i>
                         </span>
@@ -153,7 +167,7 @@
 
 
                     <!-- Salario -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Salario del empleado">
                         <span class="input-group-text form-span" id="basic-addon4">
                             <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
                         </span>
@@ -168,7 +182,7 @@
                     </div>
 
                     <!-- Estado -->
-                    <div class="input-group mt-3">
+                    <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Estado del empleado">
                         <span class="input-group-text form-span" id="basic-addon5">
                             <i class="bi bi-building-check fs-4 text-secondary"></i>
                         </span>
@@ -184,27 +198,29 @@
                 </div>
             </div>
 
-            <div class="form-buttons mt-4">
-                <button class="btn save" id="btnGuardarEmpleado">GUARDAR</button>
+            <div class="form-group text-center mt-5">
+                <button class="btn save me-3" id="btnGuardarEmpleado">GUARDAR</button>
                 <a href="{% url 'empleado_list' %}">
                     <button type="button" class="btn cancel">CANCELAR</button>
                 </a>
             </div>
         </form>
     </div>
-</div>
+
 
 <!-- Modal de confirmación simplificado -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="confirmationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="confirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center" style="background-color: #f1f1f1;">
-            <div class="modal-body d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="modal-body d-flex justify-content-center align-items-center flex-column" style="height: 200px;">
                 {% if form.instance.id %}
                 <h4 class="titulo m-0" id="modalMessage">EMPLEADO ACTUALIZADO CORRECTAMENTE</h4>
                 {% else %}
                 <h4 class="titulo m-0" id="modalMessage">EMPLEADO AGREGADO CORRECTAMENTE</h4>
                 {% endif %}
+                <!-- Botón VOLVER -->
+                <a href="{% url 'empleado_list' %}" class="btn save mt-3">VOLVER</a>
             </div>
         </div>
     </div>
@@ -221,8 +237,17 @@
         // ===== REFERENCIAS ELEMENTOS DOM =====
         const btnGuardarEmpleado = document.getElementById('btnGuardarEmpleado');
         const empleadoForm = document.getElementById('empleadoForm');
-        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
+            backdrop: 'static',  // Evita que el modal se cierre al hacer clic fuera
+            keyboard: false      // Evita que el modal se cierre con la tecla ESC
+        });
         const hasServerErrors = (hasServerErrorsValue === "true");
+
+        // Verificar si hay un parámetro de éxito en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            modal.show();
+        }
 
         // ===== VALORES INICIALES =====
         const fechaNacimientoValue = "{{ form.fecha_nacimiento.value|date:'d/m/Y' }}";
@@ -310,174 +335,177 @@
         }
 
         // ===== VALIDADORES ESPECÍFICOS POR CAMPO =====
-    const fieldValidators = {
-        cedula: function(value) {
-            if (!value) return { isValid: false, message: 'La cédula es obligatoria' };
-            if (!/^\d+$/.test(value)) return { isValid: false, message: 'La cédula debe contener solo números' };
-            if (value.length > 15) return { isValid: false, message: 'La cédula no puede tener más de 15 dígitos' };
-            return { isValid: true, message: '' };
-        },
-        
-        nombre: function(value) {
-            if (!value) return { isValid: false, message: 'El nombre es obligatorio' };
-            if (value.length < 2) return { isValid: false, message: 'El nombre debe tener al menos 2 caracteres' };
-            return { isValid: true, message: '' };
-        },
-        
-        apellidos: function(value) {
-            if (!value) return { isValid: false, message: 'Los apellidos son obligatorios' };
-            if (value.length < 2) return { isValid: false, message: 'Los apellidos deben tener al menos 2 caracteres' };
-            return { isValid: true, message: '' };
-        },
-        
-        cargo: function(value) {
-            if (!value) return { isValid: false, message: 'Debe seleccionar un cargo' };
-            return { isValid: true, message: '' };
-        },
-        
-        celular: function(value) {
-            if (!value) return { isValid: false, message: 'El teléfono es obligatorio' };
-            if (!/^\d{10}$/.test(value)) return { isValid: false, message: 'El teléfono debe tener exactamente 10 dígitos numéricos' };
-            return { isValid: true, message: '' };
-        },
-        
-        fecha_nacimiento: function(value) {
-            if (!value) return { isValid: false, message: 'La fecha de nacimiento es obligatoria' };
-            
-            try {
-                const {isValid, date} = parseAndValidateDate(value);
-                if (!isValid) return { isValid: false, message: 'Fecha de nacimiento inválida' };
-                
-                // Verificar mayoría de edad
-                const hoy = new Date();
-                let edad = hoy.getFullYear() - date.getFullYear();
-                const mes = hoy.getMonth() - date.getMonth();
-                
-                if (mes < 0 || (mes === 0 && hoy.getDate() < date.getDate())) {
-                    edad--;
+        const fieldValidators = {
+            cedula: function (value) {
+                if (!value) return { isValid: false, message: 'La cédula es obligatoria' };
+                if (!/^\d+$/.test(value)) return { isValid: false, message: 'La cédula debe contener solo números' };
+                if (value.length > 15) return { isValid: false, message: 'La cédula no puede tener más de 15 dígitos' };
+                return { isValid: true, message: '' };
+            },
+
+            nombre: function (value) {
+                if (!value) return { isValid: false, message: 'El nombre es obligatorio' };
+                if (value.length < 2) return { isValid: false, message: 'El nombre debe tener al menos 2 caracteres' };
+                if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$/.test(value)) return { isValid: false, message: 'El nombre solo puede contener letras y espacios' };
+                return { isValid: true, message: '' };
+            },
+
+            apellidos: function (value) {
+                if (!value) return { isValid: false, message: 'Los apellidos son obligatorios' };
+                if (value.length < 2) return { isValid: false, message: 'Los apellidos deben tener al menos 2 caracteres' };
+                if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$/.test(value)) return { isValid: false, message: 'Los apellidos solo pueden contener letras y espacios' };
+                return { isValid: true, message: '' };
+            },
+
+            cargo: function (value) {
+                if (!value) return { isValid: false, message: 'Debe seleccionar un cargo' };
+                return { isValid: true, message: '' };
+            },
+
+            celular: function (value) {
+                if (!value) return { isValid: false, message: 'El teléfono es obligatorio' };
+                if (!/^\d{10}$/.test(value)) return { isValid: false, message: 'El teléfono debe tener exactamente 10 dígitos numéricos' };
+                if (!value.startsWith('3')) return { isValid: false, message: 'El teléfono debe comenzar con el número 3' };
+                return { isValid: true, message: '' };
+            },
+
+            fecha_nacimiento: function (value) {
+                if (!value) return { isValid: false, message: 'La fecha de nacimiento es obligatoria' };
+
+                try {
+                    const { isValid, date } = parseAndValidateDate(value);
+                    if (!isValid) return { isValid: false, message: 'Fecha de nacimiento inválida' };
+
+                    // Verificar mayoría de edad
+                    const hoy = new Date();
+                    let edad = hoy.getFullYear() - date.getFullYear();
+                    const mes = hoy.getMonth() - date.getMonth();
+
+                    if (mes < 0 || (mes === 0 && hoy.getDate() < date.getDate())) {
+                        edad--;
+                    }
+
+                    if (edad < 18) return { isValid: false, message: 'El empleado debe ser mayor de edad (18 años)' };
+                    return { isValid: true, message: '' };
+                } catch (e) {
+                    // Manejo adecuado de la excepción
+                    console.error("Error al validar fecha de nacimiento:", e);
+                    return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de nacimiento inválida'}` };
                 }
-                
-                if (edad < 18) return { isValid: false, message: 'El empleado debe ser mayor de edad (18 años)' };
+            },
+
+            fecha_ingreso: function (value) {
+                if (!value) return { isValid: false, message: 'La fecha de ingreso es obligatoria' };
+
+                try {
+                    const { isValid, date } = parseAndValidateDate(value);
+                    if (!isValid) return { isValid: false, message: 'Fecha de ingreso inválida' };
+
+                    const hoy = new Date();
+
+                    // Verificar que no sea futura
+                    if (date > hoy) return { isValid: false, message: 'La fecha de ingreso no puede ser futura' };
+
+                    // Verificar que no sea muy antigua
+                    const cincuentaAniosAtras = new Date();
+                    cincuentaAniosAtras.setFullYear(hoy.getFullYear() - 50);
+                    if (date < cincuentaAniosAtras) return { isValid: false, message: 'La fecha de ingreso parece demasiado antigua' };
+
+                    return { isValid: true, message: '' };
+                } catch (e) {
+                    // Manejo adecuado de la excepción
+                    console.error("Error al validar fecha de ingreso:", e);
+                    return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de ingreso inválida'}` };
+                }
+            },
+
+            salario: function (value) {
+                if (!value) return { isValid: false, message: 'El salario es obligatorio' };
+                if (!/^\d+$/.test(value)) return { isValid: false, message: 'El salario debe ser numérico' };
+                if (value.length > 8) return { isValid: false, message: 'El salario no puede tener más de 8 dígitos' };
+                if (parseInt(value) < 1000) return { isValid: false, message: 'El salario parece demasiado bajo' };
                 return { isValid: true, message: '' };
-            } catch (e) {
-                // Manejo adecuado de la excepción
-                console.error("Error al validar fecha de nacimiento:", e);
-                return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de nacimiento inválida'}` };
-            }
-        },
-        
-        fecha_ingreso: function(value) {
-            if (!value) return { isValid: false, message: 'La fecha de ingreso es obligatoria' };
-            
-            try {
-                const {isValid, date} = parseAndValidateDate(value);
-                if (!isValid) return { isValid: false, message: 'Fecha de ingreso inválida' };
-                
-                const hoy = new Date();
-                
-                // Verificar que no sea futura
-                if (date > hoy) return { isValid: false, message: 'La fecha de ingreso no puede ser futura' };
-                
-                // Verificar que no sea muy antigua
-                const cincuentaAniosAtras = new Date();
-                cincuentaAniosAtras.setFullYear(hoy.getFullYear() - 50);
-                if (date < cincuentaAniosAtras) return { isValid: false, message: 'La fecha de ingreso parece demasiado antigua' };
-                
+            },
+
+            estado: function (value) {
+                if (!value) return { isValid: false, message: 'Debe seleccionar un estado' };
                 return { isValid: true, message: '' };
-            } catch (e) {
-                // Manejo adecuado de la excepción
-                console.error("Error al validar fecha de ingreso:", e);
-                return { isValid: false, message: `Error de formato: ${e.message || 'Fecha de ingreso inválida'}` };
             }
-        },
-        
-        salario: function(value) {
-            if (!value) return { isValid: false, message: 'El salario es obligatorio' };
-            if (!/^\d+$/.test(value)) return { isValid: false, message: 'El salario debe ser numérico' };
-            if (value.length > 8) return { isValid: false, message: 'El salario no puede tener más de 8 dígitos' };
-            if (parseInt(value) < 1000) return { isValid: false, message: 'El salario parece demasiado bajo' };
-            return { isValid: true, message: '' };
-        },
-        
-        estado: function(value) {
-            if (!value) return { isValid: false, message: 'Debe seleccionar un estado' };
-            return { isValid: true, message: '' };
-        }
-    };
+        };
 
-    // Función auxiliar para parsear y validar fechas
-    function parseAndValidateDate(dateString) {
-        // Parsear la fecha en formato d/m/Y
-        const parts = dateString.split('/');
-        if (parts.length !== 3) return { isValid: false };
-        
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
-        const year = parseInt(parts[2], 10);
-        
-        const date = new Date(year, month, day);
-        
-        // Verificar que sea una fecha válida
-        if (isNaN(date.getTime())) return { isValid: false };
-        
-        return { isValid: true, date };
-    }
+        // Función auxiliar para parsear y validar fechas
+        function parseAndValidateDate(dateString) {
+            // Parsear la fecha en formato d/m/Y
+            const parts = dateString.split('/');
+            if (parts.length !== 3) return { isValid: false };
 
-    // Función para obtener el div de error
-    function getErrorDiv(field) {
-        let errorDiv = field.parentElement.nextElementSibling;
-        
-        if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-            errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            field.parentElement.after(errorDiv);
-        }
-        
-        return errorDiv;
-    }
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-11
+            const year = parseInt(parts[2], 10);
 
-    // Función para verificar si hay un error de servidor
-    function hasServerErrorMessage(errorDiv) {
-        return errorDiv && 
-            errorDiv.querySelector('.text-danger') && 
-            errorDiv.querySelector('.text-danger').dataset.serverError === 'true';
-    }
+            const date = new Date(year, month, day);
 
-    // Función principal refactorizada
-    function validateField(field) {
-        const fieldName = field.id.replace('id_', '');
-        const errorDiv = getErrorDiv(field);
-        const value = field.value.trim();
-        
-        // Verificar si hay un error de servidor que no debemos sobreescribir
-        const hasServerError = hasServerErrorMessage(errorDiv) && !field.dataset.userModified;
-        if (hasServerError) return false;
-        
-        // Limpiar mensajes anteriores si el usuario ha modificado el campo o no hay errores del servidor
-        if (!hasServerError || field.dataset.userModified) {
-            errorDiv.innerHTML = '';
+            // Verificar que sea una fecha válida
+            if (isNaN(date.getTime())) return { isValid: false };
+
+            return { isValid: true, date };
         }
-        
-        // Validar el campo usando el validador específico
-        if (!fieldValidators[fieldName]) {
-            console.warn(`No validator defined for field: ${fieldName}`);
-            return true;
+
+        // Función para obtener el div de error
+        function getErrorDiv(field) {
+            let errorDiv = field.parentElement.nextElementSibling;
+
+            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                field.parentElement.after(errorDiv);
+            }
+
+            return errorDiv;
         }
-        
-        const validationResult = fieldValidators[fieldName](value);
-        
-        // Actualizar UI según el resultado
-        if (!validationResult.isValid) {
-            field.classList.add('is-invalid');
+
+        // Función para verificar si hay un error de servidor
+        function hasServerErrorMessage(errorDiv) {
+            return errorDiv &&
+                errorDiv.querySelector('.text-danger') &&
+                errorDiv.querySelector('.text-danger').dataset.serverError === 'true';
+        }
+
+        // Función principal de validación
+        function validateField(field) {
+            const fieldName = field.id.replace('id_', '');
+            const errorDiv = getErrorDiv(field);
+            const value = field.value.trim();
+
+            // Verificar si hay un error de servidor que no debemos sobreescribir
+            const hasServerError = hasServerErrorMessage(errorDiv) && !field.dataset.userModified;
+            if (hasServerError) return false;
+
+            // Limpiar mensajes anteriores si el usuario ha modificado el campo o no hay errores del servidor
             if (!hasServerError || field.dataset.userModified) {
-                errorDiv.innerHTML = `<span class="text-danger">${validationResult.message}</span>`;
+                errorDiv.innerHTML = '';
             }
-            return false;
-        } else {
-            field.classList.remove('is-invalid');
-            return true;
+
+            // Validar el campo usando el validador específico
+            if (!fieldValidators[fieldName]) {
+                console.warn(`No validator defined for field: ${fieldName}`);
+                return true;
+            }
+
+            const validationResult = fieldValidators[fieldName](value);
+
+            // Actualizar UI según el resultado
+            if (!validationResult.isValid) {
+                field.classList.add('is-invalid');
+                if (!hasServerError || field.dataset.userModified) {
+                    errorDiv.innerHTML = `<span class="text-danger">${validationResult.message}</span>`;
+                }
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                return true;
+            }
         }
-    }
 
         // ===== VALIDACIÓN DE FORMULARIO =====
         function validateForm() {
@@ -519,27 +547,62 @@
 
             // VALIDAR FORMULARIO PRIMERO
             if (validateForm()) {
-                console.log("Formulario válido, mostrando modal...");
+                // Obtener el token CSRF
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-                // Agregar un campo oculto solo si no existe
-                if (!document.querySelector('input[name="confirmar"]')) {
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'confirmar';
-                    hiddenInput.value = 'true';
-                    empleadoForm.appendChild(hiddenInput);
-                }
+                // Preparar formulario para envío
+                const formData = new FormData(empleadoForm);
+                formData.append('confirmar', 'true');
 
-                // Mostrar el modal SOLO si el formulario es válido
-                modal.show();
+                // Enviar con Fetch API
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken,
+                        'X-Show-Modal': 'true'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Redirigir a la misma página con parámetro success=true
+                            window.location.href = `${window.location.pathname}?success=true`;
+                        } else {
+                            // Mostrar errores del servidor
+                            if (data.errors) {
+                                for (const [field, error] of Object.entries(data.errors)) {
+                                    const fieldElement = document.getElementById(`id_${field}`);
+                                    if (fieldElement) {
+                                        fieldElement.classList.add('is-invalid');
+                                        const errorDiv = getErrorDiv(fieldElement);
+                                        errorDiv.innerHTML = `<span class="text-danger">${error}</span>`;
+                                    }
+                                }
 
-                // Enviar el formulario después de 3 segundos
-                setTimeout(function () {
-                    empleadoForm.submit();
-                }, 3000);
+                                // Hacer scroll al primer error
+                                const firstError = document.querySelector('.is-invalid');
+                                if (firstError) {
+                                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    firstError.focus();
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Si hay un error, enviar el formulario de manera tradicional como fallback
+                        empleadoForm.submit();
+                    });
             } else {
                 console.log("Formulario inválido, no se muestra el modal");
-
+                
                 // Hacer scroll al primer campo con error
                 const firstError = document.querySelector('.is-invalid');
                 if (firstError) {

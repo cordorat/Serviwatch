@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperación de Contraseña</title>
+    {% load static %}
     <link rel="stylesheet" href="{% static 'css/recuperar_contraseña.css' %}">
+    <!--Fuentes de tipografia (Google Font)-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -31,9 +36,7 @@
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
                         </span>
-                        <input type="text" id="usuario" name="usuario" placeholder="USUARIO" 
-                               value="" 
-                               class="{% if form.usuario.errors %}error{% endif %}">
+                        <input type="text" id="usuario" name="usuario" placeholder="USUARIO" value="" class="{% if form.usuario.errors %}error{% endif %}">
                     </div>
                     
                 </div>
@@ -46,9 +49,7 @@
                                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                             </svg>
                         </span>
-                        <input type="email" id="email" name="email" placeholder="CORREO ELECTRÓNICO" 
-                               value="{{ form.email.value|default:'' }}" 
-                               class="{% if form.email.errors %}error{% endif %}">
+                        <input type="email" id="email" name="email" placeholder="CORREO ELECTRÓNICO" value="{{ form.email.value|default:'' }}" class="{% if form.email.errors %}error{% endif %}">
                     </div>
 
                 </div>

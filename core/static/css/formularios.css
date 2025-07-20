@@ -37,7 +37,7 @@ form {
   font-weight: bold;
   font-size: 14px;
   padding: 10px;
-  border: 2px solid #626E15;
+  border: 1px solid #626E15;
   border-radius: 4px;
   width: 70%;
   box-sizing: border-box;
@@ -71,12 +71,16 @@ form {
 .save {
   background-color: #D4E484;
   border: 2px solid #626E15;
+  font-family: "Montserrat", sans-serif;
+
 
 }
 
 .cancel {
   background-color: #C7C7C7;
   border: 2px solid #626E15;
+  font-family: "Montserrat", sans-serif;
+
   
 }
 
@@ -128,6 +132,13 @@ body {
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   font-size: 36px;
+  padding-left: 0px;
+}
+
+.titulo-ventana {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  font-size: 50px;
   padding-left: 0px;
 }
 
@@ -213,7 +224,7 @@ input.form-control {
 
 /* Anula los estilos de custom-form cuando se usa con repair-form */
 form.repair-form.custom-form {
-  flex-direction: row;
+  flex-direction: column;
   max-width: 800px;
 }
 
@@ -223,17 +234,7 @@ form.repair-form.custom-form {
   flex-direction: column;
 }
 
-/* Para pantallas pequeñas */
-
-  
-  form.repair-form.custom-form {
-    flex-direction: column;
-  }
-
-
-/* Añadir al final de formularios.css */
-
-/* Clase específica para formulario de reparación */
+/* Clase específica para formulario de egreso */
 .egreso-form {
   display: flex;
   gap: 0px;
@@ -242,8 +243,39 @@ form.repair-form.custom-form {
   max-width: 800px;
 }
 
-/* Anula los estilos de custom-form cuando se usa con repair-form */
+/* Anula los estilos de custom-form cuando se usa con egreso-form*/
 form.egreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+/* Clase específica para formulario de ingreso */
+.ingreso-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con ingreso-form*/
+form.ingreso-form.custom-form {
+  flex-direction: row;
+  max-width: 800px;
+}
+
+
+/* Clase específica para formulario de ganancia */
+.ganancia-form {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+/* Anula los estilos de custom-form cuando se usa con ganancia-form*/
+form.ganancia-form.custom-form {
   flex-direction: row;
   max-width: 800px;
 }

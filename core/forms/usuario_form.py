@@ -6,11 +6,22 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.password_validation import validate_password
 
 class FormularioRegistroUsuario(UserCreationForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Aplicar clases CSS a campos con errores después de la validación
+        if self.errors:
+            for field in self.fields:
+                if field in self.errors:
+                     self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
+                     
     username = forms.CharField(
         label='Username:',
         required=True,
         max_length=50,
         widget=forms.TextInput(attrs={
+            'autocomplete': 'off',
+            'autofocus': 'off',
             'class': 'form-control',
             'placeholder': 'Nombre de usuario'
         }),
@@ -184,12 +195,22 @@ class FormularioRegistroUsuario(UserCreationForm):
 class FormularioEditarUsuario(forms.ModelForm):
     username = forms.CharField(
         label='Nombre de usuario',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Nombre de usuario' 
+        }),
+        help_text='El nombre de usuario puede contener letras, números y @/./+/-/_.',
         error_messages={
             'required': 'Este campo es obligatorio.'
         }
     )
     email = forms.EmailField(
         label='Correo electrónico',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Correo electrónico'
+        }),
+        help_text='El correo debe tener un @ y terminar en .com, .net, .org, etc.',
         error_messages={
             'required': 'Este campo es obligatorio.',
             'invalid': 'Ingrese un correo electrónico válido.'

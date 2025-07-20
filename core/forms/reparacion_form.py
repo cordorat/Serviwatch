@@ -17,6 +17,20 @@ class ReparacionForm(forms.ModelForm):
         for field in self.fields:
             if self[field].errors:
                 self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
+                
+        # Si estamos editando una instancia existente
+        if self.instance and self.instance.pk and self.instance.fecha_entrega_estimada:
+            # Convertir la fecha del modelo (date object) al formato DD/MM/YYYY para mostrar
+            fecha_obj = self.instance.fecha_entrega_estimada
+            if isinstance(fecha_obj, datetime.date):
+                self.fields['fecha_entrega_estimada'].initial = fecha_obj.strftime('%d/%m/%Y')
+        
+        # Configurar atributos de los campos
+        clase_formulario = 'form-control text-secondary'
+        
+        for field_name, field in self.fields.items():
+            if field_name not in ['cliente', 'tecnico', 'pagado', 'mantenimiento', 'estado']:
+                field.widget.attrs.update({'class': clase_formulario})
             
     cliente = ClienteChoiceField(
         queryset=Cliente.objects.all(),
@@ -31,29 +45,34 @@ class ReparacionForm(forms.ModelForm):
         empty_label="Seleccione un técnico",
         required=False,
         widget=forms.Select(attrs={
-            'class': 'form-control form-span text-secondary'
+            'class': 'form-control form-span text-secondary',
+            'style': 'cursor: pointer;'
         })
     )
+
+    fecha_entrega_estimada = forms.CharField(
+        max_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control text-secondary',
+            'placeholder': 'Fecha de entrega estimada',
+        }),
+        help_text="Formato: DD/MM/AAAA"
+    )
     
-    fecha_entrega_estimada = forms.DateField(
-        input_formats=['%d/%m/%Y'],
+    pagado = forms.BooleanField(
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                'class': 'form-control',
-                'id': 'id_fecha_entrega_estimada',
-                'placeholder': 'Fecha estimada entrega dd/mm/aaaa',
-                'autocomplete': 'off'
-            }
-        )
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        })
     )
     
 
     class Meta:
         model = Reparacion
         fields = ['cliente', 'marca_reloj', 'descripcion', 'codigo_orden',
-                 'fecha_entrega_estimada', 'precio', 'espacio_fisico', 
-                 'estado', 'tecnico']
+                'precio', 'espacio_fisico', 
+                'estado', 'tecnico', 'mantenimiento']
         error_messages = {
             'cliente': {
                 'required': 'Por favor seleccione un cliente',
@@ -97,17 +116,11 @@ class ReparacionForm(forms.ModelForm):
         }
         widgets = {
             'marca_reloj': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Marca del reloj'}),
-            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),
-            'codigo_orden': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código de orden'}),
-            'fecha_entrega_estimada': forms.DateInput(attrs={
-                'class': 'form-control text-secondary',
-                'type': 'date',
-                'placeholder': 'Fecha de entrega estimada'
-            }),
-            'precio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Precio'}),
-            'espacio_fisico': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Espacio físico'}),
-            'estado': forms.Select(attrs={'class': 'form-span form-control text-secondary', 'placeholder': 'Estado'}),
-            'tecnico': forms.Select(attrs={'class': 'form-control form-span text-secondary'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción'}),            'codigo_orden': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código de orden'}),
+            'precio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Precio'}),'espacio_fisico': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Espacio físico'}),
+            'estado': forms.Select(attrs={'class': 'form-span form-control text-secondary', 'placeholder': 'Estado', 'style': 'cursor: pointer;'}),
+            'tecnico': forms.Select(attrs={'class': 'form-control form-span text-secondary', 'style': 'cursor: pointer;'}),
+            'mantenimiento': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
     def clean_cliente(self):
         cliente = self.cleaned_data.get('cliente')
@@ -146,9 +159,7 @@ class ReparacionForm(forms.ModelForm):
             raise forms.ValidationError("El código de orden no puede tener más de 10 dígitos.")
         
         # Verificar si el código ya existe, excluyendo la instancia actual
-        existing_query = Reparacion.objects.filter(codigo_orden=codigo)
-        
-        # Si estamos editando una reparación existente, excluirla de la validación
+        existing_query = Reparacion.objects.filter(codigo_orden=codigo)        # Si estamos editando una reparación existente, excluirla de la validación
         if self.instance and self.instance.pk:
             existing_query = existing_query.exclude(pk=self.instance.pk)
         
@@ -156,13 +167,36 @@ class ReparacionForm(forms.ModelForm):
             raise forms.ValidationError("Este código de orden ya existe.")
         
         return codigo
-
+    
     def clean_fecha_entrega_estimada(self):
         fecha = self.cleaned_data.get('fecha_entrega_estimada')
+        
+        # Si ya es una fecha, solo validar
+        if isinstance(fecha, datetime.date):
+            if fecha < datetime.date.today():
+                raise forms.ValidationError("La fecha de entrega no puede ser anterior a hoy.")
+            return fecha
+            
+        # Si es string, intentar convertir desde diferentes formatos
+        if isinstance(fecha, str):
+            # Lista de formatos a probar en orden
+            formatos = ['%d/%m/%Y', '%Y-%m-%d', '%m/%d/%Y']
+            
+            for formato in formatos:
+                try:
+                    fecha_obj = datetime.datetime.strptime(fecha, formato).date()
+                    if fecha_obj < datetime.date.today():
+                        raise forms.ValidationError("La fecha de entrega no puede ser anterior a hoy.")
+                    return fecha_obj
+                except ValueError:
+                    continue
+            
+            # Si ningún formato funcionó
+            raise forms.ValidationError("Formato de fecha inválido. Use DD/MM/AAAA.")
+        
         if not fecha:
             raise forms.ValidationError("La fecha de entrega estimada es obligatoria.")
-        if fecha < datetime.date.today():
-            raise forms.ValidationError("La fecha de entrega no puede ser anterior a hoy.")
+            
         return fecha
 
     def clean_precio(self):
@@ -210,3 +244,28 @@ class ReparacionForm(forms.ModelForm):
             raise forms.ValidationError("Debe seleccionar un estado.")
 
         return cleaned_data
+    
+    def save(self, commit=True):
+        """
+        Sobrescribir save para asegurar que el campo fecha_entrega_estimada
+        se procese correctamente desde CharField a DateField del modelo
+        """
+        instance = super().save(commit=False)
+        
+        # Asegurar que la fecha se asigne correctamente
+        fecha_str = self.cleaned_data.get('fecha_entrega_estimada')
+        if fecha_str and isinstance(fecha_str, str):
+            # Si es string, convertir a fecha usando nuestro método clean
+            try:
+                fecha_obj = self.clean_fecha_entrega_estimada()
+                instance.fecha_entrega_estimada = fecha_obj
+            except (ValueError, ValidationError):
+                # Si falla, usar el valor tal como viene
+                instance.fecha_entrega_estimada = fecha_str
+        elif fecha_str:
+            # Si ya es una fecha, asignar directamente
+            instance.fecha_entrega_estimada = fecha_str
+        
+        if commit:
+            instance.save()
+        return instance

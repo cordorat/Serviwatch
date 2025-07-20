@@ -3,6 +3,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 
+MENSAJE_CAMPO_REQUERIDO = 'Este campo es obligatorio'
+MENSAJE_TAMAÑO_MINIMO = 'La contraseña debe tener al menos 8 caracteres'
+MENSAJE_TAMAÑO_MAXIMO = 'La contraseña no puede tener más de 16 caracteres'
+
 class PasswordChangeForm(forms.Form):
     """
     Formulario para cambiar la contraseña del usuario.
@@ -23,14 +27,15 @@ class PasswordChangeForm(forms.Form):
         min_length=8,
         max_length=16,
         widget=forms.PasswordInput(attrs={
+            'id': 'id_contraseña_actual',
             'class': 'form-control',
             'placeholder': 'Contraseña ACTUAL',
             'autocomplete': 'current-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': MENSAJE_CAMPO_REQUERIDO,
+            'min_length': MENSAJE_TAMAÑO_MINIMO,
+            'max_length': MENSAJE_TAMAÑO_MAXIMO,
         }
     )
     
@@ -39,14 +44,15 @@ class PasswordChangeForm(forms.Form):
         min_length=8,
         max_length=16,
         widget=forms.PasswordInput(attrs={
+            'id': 'id_contraseña_nueva',
             'class': 'form-control',
             'placeholder': 'Contraseña NUEVA',
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': MENSAJE_CAMPO_REQUERIDO,
+            'min_length': MENSAJE_TAMAÑO_MINIMO,
+            'max_length': MENSAJE_TAMAÑO_MAXIMO,
         }
     )
     
@@ -55,14 +61,15 @@ class PasswordChangeForm(forms.Form):
         min_length=8,
         max_length=16,
         widget=forms.PasswordInput(attrs={
+            'id': 'id_confirmacion_contraseña',
             'class': 'form-control',
             'placeholder': 'CONFIRMAR contraseña',
             'autocomplete': 'new-password'
         }),
         error_messages={
-            'required': 'Este campo es obligatorio',
-            'min_length': 'La contraseña debe tener al menos 8 caracteres',
-            'max_length': 'La contraseña no puede tener más de 16 caracteres',
+            'required': MENSAJE_CAMPO_REQUERIDO,
+            'min_length': MENSAJE_TAMAÑO_MINIMO,
+            'max_length': MENSAJE_TAMAÑO_MAXIMO,
         }
     )
 
@@ -108,6 +115,7 @@ class PasswordChangeForm(forms.Form):
             raise forms.ValidationError('Las contraseñas no coinciden')
         
         return confirmacion_contrasenia
+
 
     def clean(self):
         """
