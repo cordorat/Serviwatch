@@ -22,6 +22,8 @@ def confirmar_egreso_view(request):
             return _crear_egreso_y_responder(request, datos)
         
         elif 'editar' in request.POST:
+            # Marcar que venimos de editar para mantener los datos en el próximo acceso
+            request.session['egreso_from_form'] = True
             # Mantiene los datos en sesión y regresa al formulario
             return redirect('egreso')
 

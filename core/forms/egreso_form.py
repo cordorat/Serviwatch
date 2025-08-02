@@ -17,8 +17,7 @@ class EgresoForm(forms.ModelForm):
         if self.errors:
             for field in self.fields:
                 if field in self.errors:
-                     self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
-                     
+                    self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})  
     fecha = forms.DateField(
         input_formats=['%d/%m/%Y'],
         required=True,
@@ -87,7 +86,7 @@ class EgresoForm(forms.ModelForm):
         if fecha is None:
             raise forms.ValidationError("La fecha es obligatoria")
         
-        hoy = timezone.now().date()
+        hoy = date.today()
         hace_una_semana = hoy - timedelta(days=7)
 
         if fecha > hoy:

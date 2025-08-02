@@ -78,6 +78,8 @@ def _crear_egreso_y_responder(request, datos):
 
     #Limpia la sesión,
     del request.session['egreso_data']
+    if 'egreso_from_form' in request.session:
+        del request.session['egreso_from_form']
 
     #Maneja el tipo de respuesta según la solicitud,
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

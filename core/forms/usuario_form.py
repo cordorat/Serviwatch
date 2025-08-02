@@ -13,8 +13,8 @@ class FormularioRegistroUsuario(UserCreationForm):
         if self.errors:
             for field in self.fields:
                 if field in self.errors:
-                     self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
-                     
+                    self.fields[field].widget.attrs.update({'class': 'form-control is-invalid'})
+                    
     username = forms.CharField(
         label='Username:',
         required=True,
@@ -195,12 +195,22 @@ class FormularioRegistroUsuario(UserCreationForm):
 class FormularioEditarUsuario(forms.ModelForm):
     username = forms.CharField(
         label='Nombre de usuario',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Nombre de usuario' 
+        }),
+        help_text='El nombre de usuario puede contener letras, números y @/./+/-/_.',
         error_messages={
             'required': 'Este campo es obligatorio.'
         }
     )
     email = forms.EmailField(
         label='Correo electrónico',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Correo electrónico'
+        }),
+        help_text='El correo debe tener un @ y terminar en .com, .net, .org, etc.',
         error_messages={
             'required': 'Este campo es obligatorio.',
             'invalid': 'Ingrese un correo electrónico válido.'

@@ -59,11 +59,12 @@ def _process_valid_form(request, form, modo):
         # Mensaje de éxito según el modo
         if modo == 'editar':
             messages.success(request, 'Referencia de pila editada con exito.')
+            # Redirigir al formulario de edición con parámetro de éxito
+            return redirect(f"{reverse('pila_editar', kwargs={'id': pila_guardada.id})}?success=true")
         else:
             messages.success(request, 'Referencia de pila agregada con éxito')
-        
-        # Redirigir a la lista de pilas
-        return redirect('pilas_list')
+            # Redirigir al formulario de creación con parámetro de éxito
+            return redirect(f"{reverse('pilas_form')}?success=true")
         
     except Exception as e:
         # Manejo de excepciones del servicio

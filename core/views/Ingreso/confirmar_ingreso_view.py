@@ -37,6 +37,8 @@ def confirmar_ingreso_view(request):
             
             # Limpia la sesión
             del request.session['ingreso_data']
+            if 'ingreso_from_form' in request.session:
+                del request.session['ingreso_from_form']
             
             # Manejar solicitudes AJAX
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -49,6 +51,8 @@ def confirmar_ingreso_view(request):
             return redirect('ingreso')
         
         elif 'editar' in request.POST:
+            # Marcar que venimos de editar para mantener los datos en el próximo acceso
+            request.session['ingreso_from_form'] = True
             # Mantiene los datos en sesión y regresa al formulario
             return redirect('ingreso')
 

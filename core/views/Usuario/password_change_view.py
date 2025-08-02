@@ -10,7 +10,15 @@ from core.forms.password_change_form import PasswordChangeForm
 def password_change_view(request):
     url_cambiar_contrasenia = 'usuario/password_change.html'
     if request.method == 'GET':
-        return render(request, url_cambiar_contrasenia, {'form': PasswordChangeForm()})
+        # Verificar si viene con parámetro de éxito
+        success_param = request.GET.get('success')
+        context = {'form': PasswordChangeForm()}
+        
+        # Si hay parámetro de éxito, el JavaScript del template mostrará el modal
+        if success_param == 'true':
+            context['show_success_modal'] = True
+            
+        return render(request, url_cambiar_contrasenia, context)
 
     # Pasar el usuario y los datos POST al formulario
     form = PasswordChangeForm(request.POST, user=request.user)
@@ -39,11 +47,8 @@ def password_change_view(request):
         # Actualizar la sesión para evitar cerrarla al cambiar la contraseña
         update_session_auth_hash(request, request.user)
         
-        # Devolver el formulario limpio con mensaje de éxito
-        return render(request, url_cambiar_contrasenia, {
-            'form': PasswordChangeForm(),
-            'success': 'Su contraseña ha sido actualizada correctamente'
-        })
+        # Redireccionar con parámetro de éxito para mostrar el modal
+        return redirect(f'{request.path}?success=true')
     except Exception as e:
         form.add_error(None, f'Error al cambiar la contraseña: {str(e)}')
         return render(request, url_cambiar_contrasenia, {'form': form})
