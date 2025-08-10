@@ -121,8 +121,8 @@
 
 /* Botón agregar */
 .btn-add {
-    background-color: #C9DC4E;
-    border: 1px solid #626E15;
+    background-color: #D4E484;
+    border: 2px solid #626E15;
     justify-self: right;
     white-space: nowrap;
     font-family: "Montserrat", sans-serif;
@@ -130,8 +130,10 @@
 
 .btn-add:hover {
     background-color: #C9DC4E;
-    border: 1px solid #626E15;
+    border-color:#626E15;
     align-self: right;
+    font-family: "Montserrat", sans-serif;
+    color: inherit !important; 
 }
 
 /* Contenedor de tabla */
@@ -174,13 +176,16 @@
 }
 .btn-search {
     height: 38px;
-    background-color: #C9DC4E;
+    background-color: #D4E484 !important;
     border: 2px solid #626E15;
     border-radius: 4px !important;
 }
+
 .btn-search:hover {
-    background-color: #C9DC4E;
-    border: 2px solid #626E15;
+    background-color: #C9DC4E !important;
+    border-color:#626E15;
+    align-self: right;
+    color: inherit !important; 
 }
 
 /* Errores */

@@ -1,102 +1,4 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
-<div class="main-content">
-  <div class="header-icons">
-    <h2 class="titulo">PILAS</h2>
-    <a href="{% url 'pilas_form' %}" class="btn btn-add me-3">Agregar Pila</a>
-  </div>
-  <br />
-
-  <!-- Lista de pilas -->
-  <div class="table-container">
-    <table class="table align-middle custom-table">
-      <thead class="table-header">
-        <tr>
-          <th>Código</th>
-          <th>Stock</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for pila in pilas %}
-        <tr>
-          <td>{{ pila.codigo }}</td>
-          <td class="{% if pila.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">{{ pila.cantidad }}</td>
-          <td>
-            <a
-              href="{% url 'pila_editar' id=pila.id %}"
-              class="btn btn-sm btn-outline-primary"
-              title="Editar pila"
-            >
-              <i class="bi bi-pencil fs-4"></i>
-            </a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="4" class="text-center empty-class">No hay pilas registradas</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Paginación -->
-  {% if pilas.has_other_pages %}
-  <div class="custom-pagination-container">
-    <div class="custom-pagination">
-      <!-- Botón primera página -->
-      {% if pilas.has_previous %}
-      <a href="?page=1" class="pagination-btn pagination-arrow"> &lt;&lt; </a>
-      {% else %}
-      <span class="pagination-btn pagination-arrow disabled"> &lt;&lt; </span>
-      {% endif %}
-
-      <!-- Botón anterior -->
-      {% if pilas.has_previous %}
-      <a
-        href="?page={{ pilas.previous_page_number }}"
-        class="pagination-btn pagination-arrow"
-      >
-        &lt;
-      </a>
-      {% else %}
-      <span class="pagination-btn pagination-arrow disabled"> &lt; </span>
-      {% endif %}
-
-      <!-- Números de página -->
-      {% for i in pilas.paginator.page_range %} {% if pilas.number == i %}
-      <span class="pagination-btn active">{{ i }}</span>
-      {% else %}
-      <a href="?page={{ i }}" class="pagination-btn">{{ i }}</a>
-      {% endif %} {% endfor %}
-
-      <!-- Botón siguiente -->
-      {% if pilas.has_next %}
-      <a
-        href="?page={{ pilas.next_page_number }}"
-        class="pagination-btn pagination-arrow"
-      >
-        &gt;
-      </a>
-      {% else %}
-      <span class="pagination-btn pagination-arrow disabled"> &gt; </span>
-      {% endif %}
-
-      <!-- Botón última página -->
-      {% if pilas.has_next %}
-      <a
-        href="?page={{ pilas.paginator.num_pages }}"
-        class="pagination-btn pagination-arrow"
-      >
-        &gt;&gt;
-      </a>
-      {% else %}
-      <span class="pagination-btn pagination-arrow disabled"> &gt;&gt; </span>
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-</div>
 
 <style>
   .custom-pagination-container {
@@ -150,6 +52,90 @@
     font-size: 17px;
     margin: 6px;
   }
+
+  .custom-table-pilas th,
+  .custom-table-pilas td {
+    text-align: center;
+  }
+
+  .table-container {
+    width: 100%;
+  }
+
+  .custom-table-pilas {
+    width: 60% !important;
+    margin: 0 auto; 
+    display: table; 
+  }
 </style>
+
+
+<div class="main-content">
+  <div class="header-icons">
+    <h2 class="titulo">PILAS</h2>
+    {% if user.is_authenticated and not user.is_superuser %}
+    <a href="{% url 'pilas_form' %}" class="btn btn-add me-3">Agregar Pila</a>
+    {% endif %}
+  </div>
+  <br />
+
+  <!-- Lista de pilas -->
+  <div class="table-container">
+    <table class="table align-middle custom-table custom-table-pilas">
+      <thead class="table-header">
+        <tr>
+          <th>Código</th>
+          <th>Stock</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pila in pilas %}
+        <tr>
+          <td>{{ pila.codigo }}</td>
+          <td class="{% if pila.cantidad|add:" 0" <= 7 %}text-danger{% endif %} fw-bold">{{ pila.cantidad }}</td>
+          <td>
+            <a
+              href="{% url 'pila_editar' id=pila.id %}"
+              class="btn btn-sm btn-outline-primary"
+              title="Editar pila"
+            >
+              <i class="bi bi-pencil fs-4"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center empty-class">No hay pilas registradas</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  {% if pilas.has_other_pages %}
+    <nav aria-label="Page navigation" style="margin-top: 20px;">
+      <ul class="pagination">
+        <li class="page-item">
+          <a class="page-link" href="{% if pilas.has_previous %}?page={{ pilas.previous_page_number }}{% endif %}">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% for num in pilas.paginator.page_range %}
+        <li class="page-item {% if pilas.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item">
+          <a class="page-link" href="{% if pilas.has_next %}?page={{ pilas.next_page_number }}{% endif %}"
+            aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  {% endif %}
+</div>
 
 {% endblock %}

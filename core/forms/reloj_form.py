@@ -96,7 +96,8 @@ class RelojForm(forms.ModelForm):
         choices=[('NUEVO', 'Nuevo'), ('USADO', 'Usado'), ('SEMI', 'Seminuevo')],
         widget=forms.Select(attrs={
             'class': TEXT_CLASS,
-            'placeholder': 'Tipo'
+            'placeholder': 'Tipo',
+            'style': 'cursor: pointer;'
         }),
         error_messages={
             'required': 'El tipo es obligatorio',
@@ -108,7 +109,8 @@ class RelojForm(forms.ModelForm):
         choices=[('VENDIDO', 'Vendido'), ('DISPONIBLE', 'Disponible')],
         widget=forms.Select(attrs={
             'class': TEXT_CLASS,
-            'placeholder': 'Estado'
+            'placeholder': 'Estado',
+            'style': 'cursor: pointer;'
         }),
         error_messages={
             'required': 'El estado es obligatorio',
@@ -149,7 +151,8 @@ class RelojForm(forms.ModelForm):
         required=False,
         widget=forms.Select(attrs={
             'class': TEXT_CLASS,
-            'placeholder': 'Método de pago'
+            'placeholder': 'Método de pago',
+            'style': 'cursor: pointer;'
         })
     )
 

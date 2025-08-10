@@ -37,6 +37,8 @@ def confirmar_ingreso_view(request):
             
             # Limpia la sesión
             del request.session['ingreso_data']
+            if 'ingreso_from_form' in request.session:
+                del request.session['ingreso_from_form']
             
             # Manejar solicitudes AJAX
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

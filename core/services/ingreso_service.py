@@ -25,10 +25,23 @@ def crear_ingreso(datos):
             valor = int(datos['valor'])
         except ValueError:
             valor = 0        
-        # Validar la fecha
-        try:
-            fecha = datetime.strptime(datos['fecha'], FORMATO_FECHA).date()
-        except ValueError:
+            
+        # Validar y procesar la fecha
+        fecha_input = datos['fecha']
+        if isinstance(fecha_input, date):
+            # Si ya es un objeto date, usarlo directamente
+            fecha = fecha_input
+        elif isinstance(fecha_input, str):
+            # Si es string, intentar parsearlo
+            try:
+                fecha = datetime.strptime(fecha_input, FORMATO_FECHA).date()
+            except ValueError:
+                try:
+                    # Intentar formato ISO (YYYY-MM-DD)
+                    fecha = datetime.strptime(fecha_input, '%Y-%m-%d').date()
+                except ValueError:
+                    fecha = datetime.now().date()
+        else:
             fecha = datetime.now().date()
                     
         # Crear el ingreso
@@ -39,7 +52,8 @@ def crear_ingreso(datos):
         )
         ingreso.save()
         return ingreso
-    except Exception:
+    except Exception as e:
+        print(f"Error al crear ingreso: {str(e)}")  # Para debugging
         return None
     
     
@@ -161,7 +175,7 @@ def generar_pdf_ingresos(ingresos, fecha_inicio, fecha_fin, total, request=None)
     # Agregar cada ingreso a la tabla
     for ingreso in ingresos:
         table_data.append([
-            ingreso.fecha.strftime(FORMATO_FECHA),
+            ingreso.fecha.strftime(FORMATO_FECHA),  
             ingreso.descripcion,
             f"${ingreso.valor:,.2f}"
         ])

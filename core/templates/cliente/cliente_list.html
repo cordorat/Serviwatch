@@ -21,21 +21,43 @@
     margin: 6px;
   }
 
+  .custom-table-clientes th,
+  .custom-table-clientes td {
+    text-align: center;
+  }
+
+  .table-container {
+    width: 100%;
+  }
+
+  .custom-table-clientes {
+    width: 70% !important;
+    margin: 0 auto; 
+    display: table; 
+  }
+
+    .search-form .form-control {
+    width: 70%;
+    flex: none;
+  }
+
+  .search-form {
+    max-width: 350px;
+  }
+
 </style>
 
 <div class="main-content">
-  <div class="header-icons">
+  <div class="header-icons mb-3">
     <h2 class="titulo">CLIENTE</h2>
   </div>
-  <br>
 
   <!-- Campo de búsqueda simple sin dropdown -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <!-- Campo de búsqueda -->
     <form method="GET" action="{% url 'cliente_list' %}" class="search-form" id="search-form">
       <div class="search-container">
-        <div class="input-group gap-2" data-bs-toggle="tooltip" data-bs-placement="top"
-          title="Buscar cliente por nombre, apellido o teléfono">
+        <div class="input-group gap-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Buscar cliente por nombre, apellido o teléfono">
           <input type="text" id="search-cliente-cliente" name="term" class="form-control" placeholder="Buscar cliente" value="{{ search_term }}">
           <button id="btn-search" class="btn btn-search" type="submit">
             <i class="bi bi-search text-secondary"></i>
@@ -50,12 +72,7 @@
 
   <!-- Lista de clientes -->
   <div class="table-container">
-    {% if no_results %}
-    <div id="no-results-message" class="alert alert-info text-center">
-      <i class="bi bi-exclamation-circle me-2"></i> El cliente no existe
-    </div>
-    {% endif %}
-    <table class="table align-middle custom-table custom-table-usuario">
+    <table class="table align-middle custom-table custom-table-clientes">
       <thead class="table-header">
         <tr>
           <th>Nombre</th>
@@ -90,7 +107,7 @@
   </div>
   <!-- Paginación -->
   {% if is_paginated %}
-  <nav aria-label="Page navigation">
+  <nav aria-label="Page navigation" style="margin-top: 20px;">
     <ul class="pagination">
       <li class="page-item">
         <a class="page-link" href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% if search_term %}&term={{ search_term }}{% endif %}{% endif %}">

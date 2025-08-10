@@ -109,7 +109,7 @@
             <div class="form-group">
                 <label for="estado-select" class="form-label fw-bold">Estado:</label>
                 <select id="estado-select"
-                name="estado" class="form-select form-select-sm" onchange="this.form.submit()" data-bs-toggle="tooltip"
+                name="estado" class="form-select form-select-sm" style="cursor: pointer;" onchange="this.form.submit()" data-bs-toggle="tooltip"
                     data-bs-placement="top" title="Filtrar reparacion por estado">
                     {% for valor, texto in estados %}
                     <option value="{{ valor }}" {% if filtro_estado == valor %}selected{% endif %}>
@@ -121,7 +121,7 @@
             </form>
         </div>
         <div class="report-button-container">
-            {% if not user.is_authenticated or not user.is_staff or not user.is_superuser %}
+            {% if user.is_authenticated and not user.is_superuser %}
             <a href="{% url 'reparacion_create' %}" class="btn btn-add me-3">Agregar reparación</a>
             {% endif %}
             <a href="{% url 'reporte_reparaciones_pdf' %}?estado={{ filtro_estado }}&search={{ search|urlencode }}" class="btn btn-add btn-add-empleado me-3"

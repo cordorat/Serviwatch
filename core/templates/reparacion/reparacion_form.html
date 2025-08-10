@@ -29,19 +29,44 @@
   .form-check-input {
     width: 40px !important;
   }
+
+  .content {
+    display: flex;
+    justify-content: normal;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    background-color: #f7f7f7;
+  }
+
+  div.error-message {
+    padding-left: unset;
+  }
+
+  .btn-success {
+    background-color: #D4E484;
+    border: 2px solid #626E15;
+    font-family: "Montserrat", sans-serif;
+  }
+
+  .btn:hover.btn-success {
+    background-color: #C9DC4E !important; 
+    color: inherit !important; 
+    border-color: #626E15 !important; 
+  }
 </style>
 
-{% if editing %}
-<div class="container">
-  <div class="form-header">
-    <h2 class="titulo">Editar Reparación</h2>
+
+  <div class="form-header text-center">
+    <h2 class="titulo mb-3 mt-4">
+      {% if editing %}
+      EDITAR REPARACIÓN
+      {% else %}
+      AGREGAR REPARACIÓN
+      {% endif %}
+    </h2>
+    <h4>DATOS DE LA REPARACIÓN</h4>
   </div>
-  {% else %}
-  <div class="container">
-    <div class="form-header">
-      <h2 class="titulo">Nueva Reparación</h2>
-    </div>
-    {% endif %}
 
     <div class="form-content">
       <form
@@ -90,7 +115,7 @@
         <!-- Resto de campos del formulario -->
         <div class="row g-4">
           <div class="repair-form-column">
-            <div class="input-group">
+            <div class="input-group" data-bs-placement="top" title="Marca del reloj">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-watch fs-4 text-secondary"></i>
               </span>
@@ -104,7 +129,7 @@
               {% endif %}
             </div>
 
-            <div class="input-group mt-3">
+            <div class="input-group mt-3" data-bs-placement="top" title="Descripción del reloj">
               <span class="input-group-text form-span" id="basic-addon2">
                 <i class="bi bi-pencil-square fs-4 text-secondary"></i>
               </span>
@@ -118,7 +143,7 @@
               {% endif %}
             </div>
 
-            <div class="input-group mt-3">
+            <div class="input-group mt-3" data-bs-placement="top" title="Código de orden de reparación">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-hash fs-4 text-secondary"></i>
               </span>
@@ -132,7 +157,7 @@
               {% endif %}
             </div>
 
-            <div class="input-group mt-3">
+            <div class="input-group mt-3" data-bs-placement="top" title="Fecha de entrega estimada del reloj">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-calendar-date fs-4 text-secondary"></i>
               </span>
@@ -148,7 +173,7 @@
           </div>
 
           <div class="repair-form-column">
-            <div class="input-group">
+            <div class="input-group" data-bs-placement="top" title="Precio de la reparación">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-currency-dollar fs-4 text-secondary"></i>
               </span>
@@ -162,7 +187,7 @@
               {% endif %}
             </div>
 
-            <div class="input-group mt-3">
+            <div class="input-group mt-3" data-bs-placement="top" title="Caja donde se guarda el reloj">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-box-seam fs-4 text-secondary"></i>
               </span>
@@ -176,7 +201,7 @@
               {% endif %}
             </div>
 
-            <div class="input-group mt-3">
+            <div class="input-group mt-3" data-bs-placement="top" title="Estado de la reparación">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-smartwatch fs-4 text-secondary"></i>
               </span>
@@ -190,7 +215,7 @@
               {% endif %}
             </div>
 
-            <div class="input-group mt-3">
+            <div class="input-group mt-3" data-bs-placement="top" title="Técnico encargado de la reparación">
               <span class="input-group-text form-span" id="basic-addon1">
                 <i class="bi bi-person-fill fs-4 text-secondary"></i>
               </span>
@@ -205,21 +230,21 @@
             </div>
 
             <div class="form-check form-switch mt-3">
-              <input class="form-check-input custom-switch" type="checkbox" id="mantenimiento" name="mantenimiento" {% if form.mantenimiento.value %}checked{% endif %}>
+              <input class="form-check-input custom-switch" type="checkbox" id="mantenimiento" name="mantenimiento" {% if form.mantenimiento.value %}checked{% endif %} style="cursor: pointer;">
               <label class="form-check-label ms-2 mt-1" for="mantenimiento">Matenimiento</label>
             </div>
           </div>
         </div>
 
-        <div class="form-buttons">
-          <button class="btn save" id="btnGuardar">GUARDAR</button>
+        <div class="form-group text-center mt-5 ms-2">
+          <button class="btn save me-3" id="btnGuardar">GUARDAR</button>
           <a href="{% url 'reparacion_list' %}">
             <button type="button" class="btn cancel">CANCELAR</button>
           </a>
         </div>
       </form>
     </div>
-  </div>
+  
 
   <!-- Modal de confirmación simplificado -->
   <div
@@ -852,4 +877,4 @@
     });
   </script>
   {% endblock %}
-</div>
+

@@ -87,7 +87,7 @@ class IngresoForm(forms.ModelForm):
         if fecha is None:
             raise forms.ValidationError("La fecha es obligatoria")
         
-        hoy = timezone.now().date()
+        hoy = date.today()  # Obtiene la fecha actual sin hora
         hace_una_semana = hoy - timedelta(days=7)
 
         if fecha > hoy:

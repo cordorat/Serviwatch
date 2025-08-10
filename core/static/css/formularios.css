@@ -71,12 +71,16 @@ form {
 .save {
   background-color: #D4E484;
   border: 2px solid #626E15;
+  font-family: "Montserrat", sans-serif;
+
 
 }
 
 .cancel {
   background-color: #C7C7C7;
   border: 2px solid #626E15;
+  font-family: "Montserrat", sans-serif;
+
   
 }
 
