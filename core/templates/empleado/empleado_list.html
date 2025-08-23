@@ -4,6 +4,10 @@
 {% block content %}
 
 <style>
+    .main-content {
+        overflow-y: auto;
+    }
+
     .header-icons-empleado {
         gap: 0px;
         justify-content: start;
@@ -72,7 +76,7 @@
                 <input type="text" name="search" class="form-control form-control-empleado"
                     placeholder="Buscar empleado" value="{{ request.GET.search }}">
                 <button class="btn btn-search" type="submit">
-                    <i class="bi bi-search"></i>
+                    <i class="fa fa-search"></i>
                 </button>
             </div>
         </form>

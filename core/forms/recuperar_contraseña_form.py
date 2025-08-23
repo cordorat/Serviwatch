@@ -24,12 +24,6 @@ class RecuperarContrasenaForm(forms.Form):
         })
     )
 
-    def clean_usuario(self):
-        usuario = self.cleaned_data.get('usuario')
-        if not usuario.isalpha():
-            raise forms.ValidationError('El usuario debe contener solo letras.')
-        return usuario
-
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if not re.search(r'@', email):

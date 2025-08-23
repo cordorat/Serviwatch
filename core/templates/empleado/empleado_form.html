@@ -58,7 +58,7 @@
                     <!-- Cedula -->
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Cédula del empleado">
                         <span class="input-group-text form-span" id="basic-addon1">
-                            <i class="bi bi-person-vcard fs-4 text-secondary"></i>
+                            <i class="bi bi-person-vcard-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.cedula }}
                     </div>
@@ -72,7 +72,7 @@
                     <!-- Nombre -->
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del empleado">
                         <span class="input-group-text form-span" id="basic-addon1">
-                            <i class="bi bi-person fs-4 text-secondary"></i>
+                            <i class="bi bi-person-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.nombre }}
                     </div>
@@ -87,7 +87,7 @@
                     <!-- Apellidos -->
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Apellidos del empleado">
                         <span class="input-group-text form-span" id="basic-addon2">
-                            <i class="bi bi-person fs-4 text-secondary"></i>
+                            <i class="bi bi-person-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.apellidos }}
                     </div>
@@ -102,7 +102,7 @@
                     <!-- Telefono -->
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Celular del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
-                            <i class="bi bi-telephone fs-4 text-secondary"></i>
+                            <i class="bi bi-telephone-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.celular }}
                     </div>
@@ -135,7 +135,7 @@
                     <!-- Fecha Nacimiento -->
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de nacimiento del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
-                            <i class="bi bi-calendar-check fs-4 text-secondary"></i>
+                            <i class="bi bi-calendar-date fs-4 text-secondary"></i>
                         </span>
                         {{ form.fecha_nacimiento }}
                     </div>
@@ -151,7 +151,7 @@
                     <!-- Cargo -->
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Cargo del empleado">
                         <span class="input-group-text form-span" id="basic-addon3">
-                            <i class="bi bi-briefcase fs-4 text-secondary"></i>
+                            <i class="bi bi-briefcase-fill fs-4 text-secondary"></i>
                         </span>
                         {{ form.cargo }}
                     </div>
@@ -182,6 +182,7 @@
                     </div>
 
                     <!-- Estado -->
+                     {% if modo == 'editar' %}
                     <div class="input-group mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Estado del empleado">
                         <span class="input-group-text form-span" id="basic-addon5">
                             <i class="bi bi-building-check fs-4 text-secondary"></i>
@@ -195,6 +196,7 @@
                         {% endfor %}
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
 

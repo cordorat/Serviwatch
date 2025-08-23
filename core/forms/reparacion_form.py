@@ -99,7 +99,7 @@ class ReparacionForm(forms.ModelForm):
                 'required': 'El precio es obligatorio',
                 'invalid': 'Por favor ingrese un número válido',
                 'min_value': 'El precio debe ser mayor a 0',
-                'max_value': 'El precio no puede ser mayor a 1,000,000'
+                'max_value': 'El precio no puede ser mayor a 100,000,000'
             },
             'espacio_fisico': {
                 'required': 'El espacio físico es obligatorio',
@@ -205,8 +205,8 @@ class ReparacionForm(forms.ModelForm):
             raise forms.ValidationError("El precio es obligatorio.")
         if precio <= 0:
             raise forms.ValidationError("El precio debe ser mayor a 0.")
-        if precio > 1000000:
-            raise forms.ValidationError("El precio no puede ser mayor a 1,000,000.")
+        if precio > 100000000:
+            raise forms.ValidationError("El precio no puede ser mayor a 100,000,000.")
         return precio
 
     def clean_espacio_fisico(self):
