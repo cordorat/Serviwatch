@@ -1,0 +1,394 @@
+###############################################################################
+# API REST - EMPLEADOS
+# Serviwatch
+###############################################################################
+
+@baseUrl = http://localhost:8000
+@username = cordorat
+@password = cordorat
+
+# Pega aquí tu access token después de hacer login
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyMzIxNTI3LCJpYXQiOjE3NjIzMTc5MjcsImp0aSI6IjNmZTFkMDU2YWU3YzQ0OThiODZlYTA1ZjM1MWUzNTllIiwidXNlcl9pZCI6IjE5In0.NoyknkObGRBvug84W0SDxMFbkjLoV2fyQ7KIRUH72t0
+
+# ID del empleado para pruebas
+@empleadoId = 1
+
+
+###############################################################################
+# 🔐 AUTENTICACIÓN
+###############################################################################
+
+### Login - Obtener Token
+# @name login
+POST {{baseUrl}}/api/token/
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+
+###############################################################################
+# 👨‍💼 EMPLEADOS - CRUD Básico
+###############################################################################
+
+### Listar todos los empleados
+GET {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+
+
+### Listar empleados - Página 2
+GET {{baseUrl}}/api/empleados/?page=2
+Authorization: Bearer {{accessToken}}
+
+
+### Obtener empleado específico por ID
+GET {{baseUrl}}/api/empleados/{{empleadoId}}/
+Authorization: Bearer {{accessToken}}
+
+
+### Crear nuevo empleado
+# @name createEmpleado
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "1234567890",
+  "nombre": "Carlos",
+  "apellidos": "Rodríguez García",
+  "fecha_ingreso": "2024-01-15",
+  "fecha_nacimiento": "1990-05-20",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "2500000",
+  "estado": "Activo"
+}
+
+
+### Crear otro empleado (Secretario/a)
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "9876543210",
+  "nombre": "María",
+  "apellidos": "López Martínez",
+  "fecha_ingreso": "2024-02-01",
+  "fecha_nacimiento": "1995-08-15",
+  "celular": "3109876543",
+  "cargo": "Secretario/a",
+  "salario": "2000000",
+  "estado": "Activo"
+}
+
+
+### Actualizar empleado completo (PUT)
+PUT {{baseUrl}}/api/empleados/{{empleadoId}}/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "1234567890",
+  "nombre": "Carlos Eduardo",
+  "apellidos": "Rodríguez García",
+  "fecha_ingreso": "2024-01-15",
+  "fecha_nacimiento": "1990-05-20",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "2800000",
+  "estado": "Activo"
+}
+
+
+### Actualizar empleado parcialmente (PATCH) - Solo salario
+PATCH {{baseUrl}}/api/empleados/{{empleadoId}}/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "salario": "3000000"
+}
+
+
+### Eliminar empleado (marca como inactivo)
+DELETE {{baseUrl}}/api/empleados/{{empleadoId}}/
+Authorization: Bearer {{accessToken}}
+
+
+###############################################################################
+# 🔍 BÚSQUEDA Y FILTROS
+###############################################################################
+
+### Buscar empleados por término (nombre, apellidos, cédula, celular)
+GET {{baseUrl}}/api/empleados/?term=Carlos
+Authorization: Bearer {{accessToken}}
+
+
+### Buscar por cédula
+GET {{baseUrl}}/api/empleados/?term=123456
+Authorization: Bearer {{accessToken}}
+
+
+### Filtrar por estado
+GET {{baseUrl}}/api/empleados/?estado=Activo
+Authorization: Bearer {{accessToken}}
+
+
+### Filtrar por cargo
+GET {{baseUrl}}/api/empleados/?cargo=Técnico
+Authorization: Bearer {{accessToken}}
+
+
+### Filtrar por estado y cargo
+GET {{baseUrl}}/api/empleados/?estado=Activo&cargo=Técnico
+Authorization: Bearer {{accessToken}}
+
+
+### Endpoint de búsqueda especializado
+GET {{baseUrl}}/api/empleados/buscar/?term=María
+Authorization: Bearer {{accessToken}}
+
+
+###############################################################################
+# 🎯 ENDPOINTS PERSONALIZADOS
+###############################################################################
+
+### Listar solo empleados activos
+GET {{baseUrl}}/api/empleados/activos/
+Authorization: Bearer {{accessToken}}
+
+
+### Listar solo técnicos activos
+GET {{baseUrl}}/api/empleados/tecnicos/
+Authorization: Bearer {{accessToken}}
+
+
+### Cambiar estado de empleado (Activo ↔ Inactivo)
+PATCH {{baseUrl}}/api/empleados/{{empleadoId}}/cambiar-estado/
+Authorization: Bearer {{accessToken}}
+
+
+### Obtener estadísticas de empleados
+GET {{baseUrl}}/api/empleados/estadisticas/
+Authorization: Bearer {{accessToken}}
+
+
+###############################################################################
+# ⚠️ VALIDACIONES Y ERRORES
+###############################################################################
+
+### Error: Cédula duplicada
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "1234567890",
+  "nombre": "Pedro",
+  "apellidos": "Sánchez",
+  "fecha_ingreso": "2024-03-01",
+  "fecha_nacimiento": "1992-01-01",
+  "celular": "3151234567",
+  "cargo": "Técnico",
+  "salario": "2200000",
+  "estado": "Activo"
+}
+
+
+### Error: Cédula con letras
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "ABC123456",
+  "nombre": "Test",
+  "apellidos": "Error",
+  "fecha_ingreso": "2024-01-01",
+  "fecha_nacimiento": "1990-01-01",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "2000000",
+  "estado": "Activo"
+}
+
+
+### Error: Celular que no empieza con 3
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "1111111111",
+  "nombre": "Test",
+  "apellidos": "Error",
+  "fecha_ingreso": "2024-01-01",
+  "fecha_nacimiento": "1990-01-01",
+  "celular": "4001234567",
+  "cargo": "Técnico",
+  "salario": "2000000",
+  "estado": "Activo"
+}
+
+
+### Error: Salario no numérico
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "2222222222",
+  "nombre": "Test",
+  "apellidos": "Error",
+  "fecha_ingreso": "2024-01-01",
+  "fecha_nacimiento": "1990-01-01",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "DOS MILLONES",
+  "estado": "Activo"
+}
+
+
+### Error: Fecha de nacimiento futura
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "3333333333",
+  "nombre": "Test",
+  "apellidos": "Error",
+  "fecha_ingreso": "2024-01-01",
+  "fecha_nacimiento": "2030-01-01",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "2000000",
+  "estado": "Activo"
+}
+
+
+### Error: Empleado menor de 18 años
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "4444444444",
+  "nombre": "Test",
+  "apellidos": "Error",
+  "fecha_ingreso": "2024-01-01",
+  "fecha_nacimiento": "2010-01-01",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "2000000",
+  "estado": "Activo"
+}
+
+
+### Error: Fecha de ingreso antes de nacer
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "5555555555",
+  "nombre": "Test",
+  "apellidos": "Error",
+  "fecha_ingreso": "1980-01-01",
+  "fecha_nacimiento": "1990-01-01",
+  "celular": "3001234567",
+  "cargo": "Técnico",
+  "salario": "2000000",
+  "estado": "Activo"
+}
+
+
+### Error: Campos faltantes
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "6666666666",
+  "nombre": "Test"
+}
+
+
+###############################################################################
+# 📊 DATOS DE PRUEBA
+###############################################################################
+
+### Crear múltiples empleados de prueba
+
+###
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "1111111111",
+  "nombre": "Ana",
+  "apellidos": "Fernández Ruiz",
+  "fecha_ingreso": "2023-06-01",
+  "fecha_nacimiento": "1988-03-15",
+  "celular": "3201234567",
+  "cargo": "Técnico",
+  "salario": "2700000",
+  "estado": "Activo"
+}
+
+###
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "2222222222",
+  "nombre": "Luis",
+  "apellidos": "Gómez Pérez",
+  "fecha_ingreso": "2023-09-15",
+  "fecha_nacimiento": "1992-07-20",
+  "celular": "3151234567",
+  "cargo": "Secretario/a",
+  "salario": "2100000",
+  "estado": "Activo"
+}
+
+###
+POST {{baseUrl}}/api/empleados/
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "cedula": "3333333333",
+  "nombre": "Patricia",
+  "apellidos": "Ramírez Santos",
+  "fecha_ingreso": "2022-01-10",
+  "fecha_nacimiento": "1985-11-05",
+  "celular": "3181234567",
+  "cargo": "Técnico",
+  "salario": "3200000",
+  "estado": "Activo"
+}
+
+
+###############################################################################
+# 📝 NOTAS
+###############################################################################
+
+# Campos calculados automáticamente:
+# - nombre_completo: Concatena nombre + apellidos
+# - edad: Calcula edad actual del empleado
+# - anios_servicio: Calcula años desde fecha de ingreso
+# - cargo_display: Muestra el nombre legible del cargo
+# - estado_display: Muestra el nombre legible del estado
+#
+# Validaciones:
+# - Cédula: Solo números, máximo 10 dígitos, única
+# - Celular: Solo números, 10 dígitos, debe empezar con 3
+# - Salario: Solo números, mayor a 0
+# - Fecha nacimiento: No futura, debe tener al menos 18 años
+# - Fecha ingreso: No futura, empleado debe tener al menos 18 años al ingresar

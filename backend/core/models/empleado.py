@@ -38,7 +38,7 @@ class Empleado(models.Model):
         ]
     )
     cargo = models.CharField(max_length=20, choices=CARGO_CHOICES)
-    salario = models.CharField()
+    salario = models.CharField(max_length=20)
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='Activo')
 
     def __str__(self):

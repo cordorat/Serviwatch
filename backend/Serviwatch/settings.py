@@ -43,10 +43,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'core',
+    'rest_framework', 
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Debe ir antes de CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -138,3 +141,89 @@ EMAIL_PORT = 587  # Puerto para conexiones TLS
 EMAIL_USE_TLS = True  # Usa TLS (seguro)
 EMAIL_HOST_USER = 'serviwatch73@gmail.com'  # Tu correo de envío
 EMAIL_HOST_PASSWORD = 'htcltrdepclgsvnh'  # Tu contraseña o app password
+
+
+# ============================================
+# Configuración de Django REST Framework
+# ============================================
+REST_FRAMEWORK = {
+    # Autenticación: Sesión (para navegador) y JWT (para apps)
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    # Permisos por defecto: usuario autenticado
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # Paginación por defecto (cambia PAGE_SIZE al número que necesites)
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,  # Número de elementos por página por defecto
+    # Formato de fecha
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
+    'DATE_FORMAT': '%Y-%m-%d',
+    # Filtrado y búsqueda
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    # Formato de respuesta por defecto
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  # Para explorar API en navegador
+    ],
+}
+
+
+# ============================================
+# Configuración de CORS (para React)
+# ============================================
+# En desarrollo: permitir todos los orígenes
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # React development server
+    'http://localhost:5173',  # Vite development server
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+]
+
+# Permitir credenciales (cookies, auth headers)
+CORS_ALLOW_CREDENTIALS = True
+
+# Headers adicionales permitidos
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+
+# ============================================
+# Configuración de JWT (Simple JWT)
+# ============================================
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    # Duración del token de acceso: 1 hora
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    # Duración del token de refresh: 7 días
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # Rotar refresh token al usarlo
+    'ROTATE_REFRESH_TOKENS': True,
+    # Blacklist de tokens viejos
+    'BLACKLIST_AFTER_ROTATION': True,
+    # Algoritmo de encriptación
+    'ALGORITHM': 'HS256',
+    # Clave de firma (usa SECRET_KEY)
+    'SIGNING_KEY': SECRET_KEY,
+    # Prefijo en header de autorización
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    # Campo de identificación de usuario
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
