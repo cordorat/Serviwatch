@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main  # Cambia por tu rama si es otra
+      - main  
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up SSH key
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # Asegúrate de tener este secreto
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  
 
       - name: Deploy to EC2
         run: |
