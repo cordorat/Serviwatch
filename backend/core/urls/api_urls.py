@@ -2,6 +2,13 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from core.views.Cliente.cliente_viewset import ClienteViewSet
 from core.views.Empleado.empleado_viewset import EmpleadoViewSet
+from core.views.Pilas.pilas_viewset import PilasViewSet
+from core.views.Pilas.venta_pila_viewset import VentaPilaViewSet
+from core.views.Ingreso.ingreso_viewset import IngresoViewSet
+from core.views.Egreso.egreso_viewset import EgresoViewSet
+from core.views.Reloj.reloj_viewset import RelojViewSet
+from core.views.Reloj.abono_viewset import AbonoViewSet
+from core.views.Reparacion.reparacion_viewset import ReparacionViewSet
 
 # Router de DRF - genera automáticamente las URLs para ViewSets
 router = DefaultRouter()
@@ -9,6 +16,13 @@ router = DefaultRouter()
 # Registrar ViewSets
 router.register(r'clientes', ClienteViewSet, basename='api-cliente')
 router.register(r'empleados', EmpleadoViewSet, basename='api-empleado')
+router.register(r'pilas', PilasViewSet, basename='api-pilas')
+router.register(r'ventas-pilas', VentaPilaViewSet, basename='api-venta-pila')
+router.register(r'ingresos', IngresoViewSet, basename='api-ingreso')
+router.register(r'egresos', EgresoViewSet, basename='api-egreso')
+router.register(r'relojes', RelojViewSet, basename='api-reloj')
+router.register(r'abonos', AbonoViewSet, basename='api-abono')
+router.register(r'reparaciones', ReparacionViewSet, basename='api-reparacion')
 
 # URLs de la API
 urlpatterns = [

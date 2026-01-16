@@ -1,0 +1,118 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### 1. Login (obtener token de sesión)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar token (ejecutar después del login)
+@token = {{login.response.body.token}}
+
+###############################################
+# PILAS - Tests
+###############################################
+# NOTA: Usa el token obtenido del login en cada request
+
+### 1. Listar todas las pilas
+GET {{api_url}}/pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+### 2. Obtener una pila específica (cambiar el ID según tu BD)
+GET {{api_url}}/pilas/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Crear una nueva pila
+POST {{api_url}}/pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "codigo": "TEST-001",
+  "precio": "5000",
+  "cantidad": "50"
+}
+
+### 4. Actualizar una pila completa (PUT - cambiar ID)
+PUT {{api_url}}/pilas/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "codigo": "TEST-001-UPDATED",
+  "precio": "6000",
+  "cantidad": "45"
+}
+
+### 5. Actualizar parcialmente una pila (PATCH - cambiar ID)
+PATCH {{api_url}}/pilas/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cantidad": "40"
+}
+
+### 6. Eliminar una pila (cambiar ID)
+DELETE {{api_url}}/pilas/1/
+Authorization: Bearer {{token}}
+
+### 7. Buscar pilas por código
+GET {{api_url}}/pilas/?search=TEST
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 8. Obtener pilas con bajo stock
+GET {{api_url}}/pilas/bajo_stock/?minimo=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Actualizar solo el stock de una pila (cambiar ID)
+PATCH {{api_url}}/pilas/1/actualizar_stock/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cantidad": "100"
+}
+
+### 10. Ordenar pilas por precio
+GET {{api_url}}/pilas/?ordering=precio
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Ordenar pilas por código descendente
+GET {{api_url}}/pilas/?ordering=-codigo
+Content-Type: application/json
+Authorization: Bearer {{token}}

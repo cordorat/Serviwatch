@@ -1,0 +1,143 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# GU\u00cdA DE AUTENTICACI\u00d3N - SERVIWATCH API
+###############################################
+
+# Django REST Framework soporta m\u00faltiples m\u00e9todos de autenticaci\u00f3n.
+# Elige el que est\u00e9 configurado en tu backend.
+
+###############################################
+# OPCI\u00d3N 1: Session Authentication (Cookies)
+###############################################
+
+### 1.1. Login con Session (m\u00e1s com\u00fan en desarrollo)
+# @name loginSession
+POST {{base_url}}/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Despu\u00e9s de este login, la cookie de sesi\u00f3n se guarda autom\u00e1ticamente
+# Los siguientes requests usar\u00e1n la cookie autom\u00e1ticamente
+
+### 1.2. Ejemplo de request con sesi\u00f3n activa
+GET {{api_url}}/clientes/
+Content-Type: application/json
+# No necesita Authorization header si usas cookies
+
+
+###############################################
+# OPCI\u00d3N 2: Token Authentication
+###############################################
+
+### 2.1. Obtener token (si tu backend usa TokenAuthentication)
+# @name loginToken
+POST {{base_url}}/api-token-auth/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### 2.2. Guardar token en variable
+@token = {{loginToken.response.body.token}}
+
+### 2.3. Ejemplo de request con token
+GET {{api_url}}/clientes/
+Content-Type: application/json
+Authorization: Token {{token}}
+
+
+###############################################
+# OPCI\u00d3N 3: JWT Authentication (si est\u00e1 instalado)
+###############################################
+
+### 3.1. Obtener JWT token
+# @name loginJWT
+POST {{base_url}}/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### 3.2. Guardar access token
+@access_token = {{loginJWT.response.body.access}}
+@refresh_token = {{loginJWT.response.body.refresh}}
+
+### 3.3. Ejemplo de request con JWT
+GET {{api_url}}/clientes/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+### 3.4. Renovar token JWT (cuando expira)
+POST {{base_url}}/login/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "{{refresh_token}}"
+}
+
+
+###############################################
+# OPCI\u00d3N 4: Basic Authentication (no recomendado para producci\u00f3n)
+###############################################
+
+### 4.1. Request con Basic Auth (username:password en base64)
+GET {{api_url}}/clientes/
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+# YWRtaW46YWRtaW4= = base64("admin:admin")
+
+
+###############################################
+# CONFIGURACI\u00d3N RECOMENDADA PARA TUS TESTS
+###############################################
+
+# Para desarrollo local, la forma m\u00e1s simple es:
+# 1. Hacer login con session
+# 2. Usar los endpoints sin headers adicionales (cookies autom\u00e1ticas)
+
+### Login recomendado para desarrollo
+# @name devLogin
+POST {{base_url}}/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Verificar autenticaci\u00f3n
+GET {{api_url}}/clientes/
+Content-Type: application/json
+
+### Logout (si lo necesitas)
+POST {{base_url}}/logout/
+Content-Type: application/json
+
+
+###############################################
+# TROUBLESHOOTING
+###############################################
+
+# Si recibes error 403 "Authentication credentials were not provided":
+# 1. Verifica que hiciste login primero
+# 2. Verifica el m\u00e9todo de autenticaci\u00f3n configurado en settings.py
+# 3. Aseg\u00farate de incluir el header correcto (Token, Bearer, etc.)
+# 4. Verifica que el usuario existe y tiene permisos
+
+# Para ver qu\u00e9 m\u00e9todo usa tu backend, revisa:
+# backend/Serviwatch/settings.py -> REST_FRAMEWORK -> DEFAULT_AUTHENTICATION_CLASSES
+
+### Test de diagn\u00f3stico (sin autenticaci\u00f3n)
+GET {{base_url}}/api/
+# Este endpoint generalmente es p\u00fablico y muestra la API root

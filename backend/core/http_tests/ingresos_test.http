@@ -1,0 +1,123 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### Login (Session Authentication)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Despu\u00e9s del login, la cookie de sesi\u00f3n se mantiene autom\u00e1ticamente
+
+###############################################
+# INGRESOS - Tests
+###############################################
+
+### 1. Listar todos los ingresos
+GET {{api_url}}/ingresos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 2. Obtener un ingreso específico (cambiar el ID según tu BD)
+GET {{api_url}}/ingresos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Crear un nuevo ingreso
+POST {{api_url}}/ingresos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fecha": "2026-01-15",
+  "valor": 50000,
+  "descripcion": "Venta de reloj usado"
+}
+
+### 4. Actualizar un ingreso completo (PUT - cambiar ID)
+PUT {{api_url}}/ingresos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fecha": "2026-01-15",
+  "valor": 55000,
+  "descripcion": "Venta de reloj usado - actualizado"
+}
+
+### 5. Actualizar parcialmente un ingreso (PATCH - cambiar ID)
+PATCH {{api_url}}/ingresos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "descripcion": "Venta de reloj usado - modificado"
+}
+
+### 6. Eliminar un ingreso (cambiar ID)
+DELETE {{api_url}}/ingresos/1/
+Authorization: Bearer {{token}}
+
+### 7. Buscar ingresos por descripción
+GET {{api_url}}/ingresos/?search=reloj
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 8. Obtener ingresos del mes actual
+GET {{api_url}}/ingresos/mes_actual/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Obtener total de ingresos del mes
+GET {{api_url}}/ingresos/total_mes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Obtener ingresos por rango de fechas
+GET {{api_url}}/ingresos/por_rango/?fecha_inicio=2026-01-01&fecha_fin=2026-01-31
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Ordenar ingresos por fecha (descendente)
+GET {{api_url}}/ingresos/?ordering=-fecha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 12. Ordenar ingresos por valor (ascendente)
+GET {{api_url}}/ingresos/?ordering=valor
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 13. Filtrar ingresos por fecha específica
+GET {{api_url}}/ingresos/?fecha=2026-01-15
+Content-Type: application/json
+Authorization: Bearer {{token}}

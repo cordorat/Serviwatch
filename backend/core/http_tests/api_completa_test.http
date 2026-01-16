@@ -1,0 +1,323 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+###############################################
+
+### Login (Session Authentication)
+# IMPORTANTE: Ejecuta este request ANTES de probar cualquier endpoint
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Después del login, la cookie de sesión se mantiene automáticamente
+# para todos los requests siguientes en esta sesión de VS Code
+
+###############################################
+# GUÍA COMPLETA DE ENDPOINTS API - SERVIWATCH
+###############################################
+
+# IMPORTANTE: 
+# - Reemplaza los IDs en los ejemplos con los IDs reales de tu base de datos
+# - La base de datos ya está poblada, así que puedes probar GET inmediatamente
+# - Ten cuidado con DELETE y POST para no afectar datos importantes
+# - Usa PATCH para actualizaciones parciales cuando sea posible
+
+###############################################
+# 📋 RESUMEN DE ENDPOINTS DISPONIBLES
+###############################################
+
+# CLIENTES (Ya existente)
+# - GET    /api/clientes/
+# - POST   /api/clientes/
+# - GET    /api/clientes/{id}/
+# - PUT    /api/clientes/{id}/
+# - PATCH  /api/clientes/{id}/
+# - DELETE /api/clientes/{id}/
+
+# EMPLEADOS (Ya existente)
+# - GET    /api/empleados/
+# - POST   /api/empleados/
+# - GET    /api/empleados/{id}/
+# - PUT    /api/empleados/{id}/
+# - PATCH  /api/empleados/{id}/
+# - DELETE /api/empleados/{id}/
+# - GET    /api/empleados/activos/
+# - GET    /api/empleados/tecnicos/
+
+# PILAS (Nuevo)
+# - GET    /api/pilas/
+# - POST   /api/pilas/
+# - GET    /api/pilas/{id}/
+# - PUT    /api/pilas/{id}/
+# - PATCH  /api/pilas/{id}/
+# - DELETE /api/pilas/{id}/
+# - GET    /api/pilas/bajo_stock/?minimo=10
+# - PATCH  /api/pilas/{id}/actualizar_stock/
+
+# VENTAS DE PILAS (Nuevo)
+# - GET    /api/ventas-pilas/
+# - POST   /api/ventas-pilas/
+# - GET    /api/ventas-pilas/{id}/
+# - PUT    /api/ventas-pilas/{id}/
+# - PATCH  /api/ventas-pilas/{id}/
+# - DELETE /api/ventas-pilas/{id}/
+# - GET    /api/ventas-pilas/mes_actual/
+# - GET    /api/ventas-pilas/total_vendido/
+# - GET    /api/ventas-pilas/por_pila/?pila_id=1
+
+# INGRESOS (Nuevo)
+# - GET    /api/ingresos/
+# - POST   /api/ingresos/
+# - GET    /api/ingresos/{id}/
+# - PUT    /api/ingresos/{id}/
+# - PATCH  /api/ingresos/{id}/
+# - DELETE /api/ingresos/{id}/
+# - GET    /api/ingresos/mes_actual/
+# - GET    /api/ingresos/total_mes/
+# - GET    /api/ingresos/por_rango/?fecha_inicio=2026-01-01&fecha_fin=2026-01-31
+
+# EGRESOS (Nuevo)
+# - GET    /api/egresos/
+# - POST   /api/egresos/
+# - GET    /api/egresos/{id}/
+# - PUT    /api/egresos/{id}/
+# - PATCH  /api/egresos/{id}/
+# - DELETE /api/egresos/{id}/
+# - GET    /api/egresos/mes_actual/
+# - GET    /api/egresos/total_mes/
+# - GET    /api/egresos/por_rango/?fecha_inicio=2026-01-01&fecha_fin=2026-01-31
+
+# RELOJES (Nuevo)
+# - GET    /api/relojes/
+# - POST   /api/relojes/
+# - GET    /api/relojes/{id}/
+# - PUT    /api/relojes/{id}/
+# - PATCH  /api/relojes/{id}/
+# - DELETE /api/relojes/{id}/
+# - GET    /api/relojes/disponibles/
+# - GET    /api/relojes/vendidos/
+# - GET    /api/relojes/pendientes_pago/
+# - GET    /api/relojes/{id}/historial_abonos/
+# - PATCH  /api/relojes/{id}/marcar_vendido/
+
+# ABONOS (Nuevo)
+# - GET    /api/abonos/
+# - POST   /api/abonos/
+# - GET    /api/abonos/{id}/
+# - PUT    /api/abonos/{id}/
+# - PATCH  /api/abonos/{id}/
+# - DELETE /api/abonos/{id}/
+# - GET    /api/abonos/por_reloj/?reloj_id=1
+# - GET    /api/abonos/mes_actual/
+
+# REPARACIONES (Nuevo)
+# - GET    /api/reparaciones/
+# - POST   /api/reparaciones/
+# - GET    /api/reparaciones/{id}/
+# - PUT    /api/reparaciones/{id}/
+# - PATCH  /api/reparaciones/{id}/
+# - DELETE /api/reparaciones/{id}/
+# - GET    /api/reparaciones/pendientes/
+# - GET    /api/reparaciones/retrasadas/
+# - GET    /api/reparaciones/por_tecnico/?tecnico_id=1
+# - GET    /api/reparaciones/por_estado/
+# - PATCH  /api/reparaciones/{id}/cambiar_estado/
+# - PATCH  /api/reparaciones/{id}/asignar_tecnico/
+
+###############################################
+# 🚀 PRUEBAS RÁPIDAS PARA VERIFICAR
+###############################################
+
+### 1. Verificar que la API está funcionando
+GET {{base_url}}/api/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 2. Listar todos los clientes (debe mostrar datos de tu BD)
+GET {{api_url}}/clientes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Listar todos los empleados (debe mostrar datos de tu BD)
+GET {{api_url}}/empleados/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 4. Listar todas las pilas (debe mostrar datos de tu BD)
+GET {{api_url}}/pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 5. Listar todos los relojes (debe mostrar datos de tu BD)
+GET {{api_url}}/relojes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 6. Listar todas las reparaciones (debe mostrar datos de tu BD)
+GET {{api_url}}/reparaciones/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 7. Listar todos los ingresos (debe mostrar datos de tu BD)
+GET {{api_url}}/ingresos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 8. Listar todos los egresos (debe mostrar datos de tu BD)
+GET {{api_url}}/egresos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Listar todas las ventas de pilas (debe mostrar datos de tu BD)
+GET {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Listar todos los abonos (debe mostrar datos de tu BD)
+GET {{api_url}}/abonos/?page=2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###############################################
+# 📊 ENDPOINTS ÚTILES PARA DASHBOARDS
+###############################################
+
+### Obtener técnicos activos
+GET {{api_url}}/empleados/tecnicos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener reparaciones pendientes
+GET {{api_url}}/reparaciones/pendientes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener reparaciones retrasadas
+GET {{api_url}}/reparaciones/retrasadas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener relojes disponibles
+GET {{api_url}}/relojes/disponibles/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener relojes con saldo pendiente
+GET {{api_url}}/relojes/pendientes_pago/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener pilas con bajo stock
+GET {{api_url}}/pilas/bajo_stock/?minimo=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener total de ingresos del mes
+GET {{api_url}}/ingresos/total_mes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener total de egresos del mes
+GET {{api_url}}/egresos/total_mes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Obtener estadísticas de reparaciones por estado
+GET {{api_url}}/reparaciones/por_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###############################################
+# 🔍 BÚSQUEDAS Y FILTROS
+###############################################
+
+### Buscar clientes por nombre
+GET {{api_url}}/clientes/?search=Juan
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Buscar reparaciones por código
+GET {{api_url}}/reparaciones/?search=ORD-
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Filtrar reparaciones por estado
+GET {{api_url}}/reparaciones/?estado=Reparación
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Buscar relojes por marca
+GET {{api_url}}/relojes/?search=Rolex
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Filtrar relojes disponibles
+GET {{api_url}}/relojes/?estado=DISPONIBLE
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###############################################
+# 📝 NOTAS IMPORTANTES
+###############################################
+
+# 1. AUTENTICACIÓN
+#    Actualmente la API no requiere autenticación.
+#    Cuando implementes el frontend separado, considera agregar JWT.
+
+# 2. PAGINACIÓN
+#    DRF incluye paginación por defecto. Verifica settings.py
+#    para configurar el tamaño de página.
+
+# 3. CORS
+#    Ya tienes corsheaders instalado. Configura CORS_ALLOWED_ORIGINS
+#    en settings.py para tu frontend.
+
+# 4. VALIDACIONES
+#    Todos los serializers incluyen validaciones robustas.
+#    Los errores retornan código 400 con detalles del error.
+
+# 5. RELACIONES
+#    Los endpoints incluyen datos anidados para lectura (GET)
+#    y aceptan solo IDs para escritura (POST/PUT/PATCH).
+
+# 6. CAMPOS CALCULADOS
+#    Muchos modelos incluyen campos calculados como:
+#    - precio_total en VentaPila
+#    - dias_desde_ingreso en Reparacion
+#    - porcentaje_pagado en Reloj
+#    Estos son de solo lectura.
+
+# 7. ARCHIVOS DE PRUEBA
+#    Revisa los archivos individuales para tests detallados:
+#    - pilas_test.http
+#    - ingresos_test.http
+#    - egresos_test.http
+#    - relojes_test.http
+#    - abonos_test.http
+#    - reparaciones_test.http
+#    - ventas_pilas_test.http

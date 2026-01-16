@@ -1,0 +1,123 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### Login (Session Authentication)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Después del login, la cookie de sesión se mantiene automáticamente
+
+###############################################
+# EGRESOS - Tests
+###############################################
+
+### 1. Listar todos los egresos
+GET {{api_url}}/egresos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 2. Obtener un egreso específico (cambiar el ID según tu BD)
+GET {{api_url}}/egresos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Crear un nuevo egreso
+POST {{api_url}}/egresos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fecha": "2026-01-15",
+  "valor": 30000,
+  "descripcion": "Compra de herramientas"
+}
+
+### 4. Actualizar un egreso completo (PUT - cambiar ID)
+PUT {{api_url}}/egresos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fecha": "2026-01-15",
+  "valor": 35000,
+  "descripcion": "Compra de herramientas - actualizado"
+}
+
+### 5. Actualizar parcialmente un egreso (PATCH - cambiar ID)
+PATCH {{api_url}}/egresos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "descripcion": "Compra de herramientas - modificado"
+}
+
+### 6. Eliminar un egreso (cambiar ID)
+DELETE {{api_url}}/egresos/1/
+Authorization: Bearer {{token}}
+
+### 7. Buscar egresos por descripción
+GET {{api_url}}/egresos/?search=herramientas
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 8. Obtener egresos del mes actual
+GET {{api_url}}/egresos/mes_actual/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Obtener total de egresos del mes
+GET {{api_url}}/egresos/total_mes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Obtener egresos por rango de fechas
+GET {{api_url}}/egresos/por_rango/?fecha_inicio=2026-01-01&fecha_fin=2026-01-31
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Ordenar egresos por fecha (descendente)
+GET {{api_url}}/egresos/?ordering=-fecha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 12. Ordenar egresos por valor (ascendente)
+GET {{api_url}}/egresos/?ordering=valor
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 13. Filtrar egresos por fecha específica
+GET {{api_url}}/egresos/?fecha=2026-01-15
+Content-Type: application/json
+Authorization: Bearer {{token}}

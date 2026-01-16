@@ -1,0 +1,156 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### 1. Login (obtener token de sesión)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+
+###############################################
+# ABONOS - Tests
+###############################################
+# NOTA: Usa el token obtenido del login en cada request
+
+### 1. Listar todos los abonos
+GET {{api_url}}/abonos/
+Content-Type: application/jsonAuthorization: Bearer {{token}}Authorization: Token {{token}}
+
+### 2. Obtener un abono específico (cambiar el ID según tu BD)
+GET {{api_url}}/abonos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+### 3. Crear un nuevo abono (cambiar reloj ID según tu BD)
+POST {{api_url}}/abonos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reloj": 1,
+  "monto": "500000",
+  "descripcion": "Primer abono del cliente"
+}
+
+### 4. Crear otro abono
+POST {{api_url}}/abonos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reloj": 1,
+  "monto": "300000",
+  "descripcion": "Segundo abono del cliente"
+}
+
+### 5. Actualizar un abono completo (PUT - cambiar ID)
+# Nota: Generalmente no se actualizan abonos, pero el endpoint está disponible
+PUT {{api_url}}/abonos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reloj": 1,
+  "monto": "550000",
+  "descripcion": "Primer abono del cliente - actualizado"
+}
+
+### 6. Actualizar parcialmente un abono (PATCH - cambiar ID)
+PATCH {{api_url}}/abonos/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "descripcion": "Primer abono - modificado"
+}
+
+### 7. Eliminar un abono (cambiar ID)
+# Nota: Ten cuidado al eliminar abonos, afecta el saldo del reloj
+DELETE {{api_url}}/abonos/1/
+Authorization: Bearer {{token}}
+
+### 8. Buscar abonos por marca de reloj
+GET {{api_url}}/abonos/?search=Rolex
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Filtrar abonos por reloj específico (cambiar reloj ID)
+GET {{api_url}}/abonos/?reloj=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Obtener abonos de un reloj (endpoint personalizado - cambiar reloj_id)
+GET {{api_url}}/abonos/por_reloj/?reloj_id=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Obtener abonos del mes actual
+GET {{api_url}}/abonos/mes_actual/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 12. Ordenar abonos por fecha (descendente)
+GET {{api_url}}/abonos/?ordering=-fecha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 13. Ordenar abonos por monto (ascendente)
+GET {{api_url}}/abonos/?ordering=monto
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 14. Filtrar abonos por fecha específica
+GET {{api_url}}/abonos/?fecha=2026-01-15
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 15. Intentar crear abono mayor al saldo (debe fallar)
+POST {{api_url}}/abonos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reloj": 1,
+  "monto": "999999999",
+  "descripcion": "Intento de abono excesivo"
+}
+
+### 16. Intentar crear abono en reloj ya pagado (debe fallar)
+POST {{api_url}}/abonos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reloj": 999,
+  "monto": "100000",
+  "descripcion": "Intento en reloj pagado"
+}

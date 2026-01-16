@@ -1,0 +1,260 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### Login (Session Authentication)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Después del login, la cookie de sesión se mantiene automáticamente
+
+###############################################
+# REPARACIONES - Tests
+###############################################
+
+### 1. Listar todas las reparaciones
+GET {{api_url}}/reparaciones/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 2. Obtener una reparación específica (cambiar el ID según tu BD)
+GET {{api_url}}/reparaciones/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Crear una nueva reparación (cambiar cliente ID según tu BD)
+POST {{api_url}}/reparaciones/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cliente": 1,
+  "marca_reloj": "Casio",
+  "descripcion": "Reparación de corona y cambio de pila",
+  "codigo_orden": "ORD-2026-001",
+  "fecha_entrega_estimada": "2026-01-25",
+  "precio": 45000,
+  "espacio_fisico": "Estante A-3",
+  "estado": "Cotización",
+  "mantenimiento": false
+}
+
+### 4. Crear reparación con técnico asignado (cambiar cliente y tecnico ID)
+POST {{api_url}}/reparaciones/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cliente": 1,
+  "tecnico": 1,
+  "marca_reloj": "Rolex",
+  "descripcion": "Mantenimiento completo del mecanismo",
+  "codigo_orden": "ORD-2026-002",
+  "fecha_entrega_estimada": "2026-01-30",
+  "precio": 500000,
+  "espacio_fisico": "Estante B-1",
+  "estado": "Reparación",
+  "mantenimiento": true
+}
+
+### 5. Actualizar una reparación completa (PUT - cambiar ID)
+PUT {{api_url}}/reparaciones/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cliente": 1,
+  "tecnico": 1,
+  "marca_reloj": "Casio G-Shock",
+  "descripcion": "Reparación de corona, cambio de pila y limpieza",
+  "codigo_orden": "ORD-2026-001",
+  "fecha_entrega_estimada": "2026-01-25",
+  "precio": 50000,
+  "espacio_fisico": "Estante A-3",
+  "estado": "Reparación",
+  "mantenimiento": false
+}
+
+### 6. Actualizar parcialmente una reparación (PATCH - cambiar ID)
+PATCH {{api_url}}/reparaciones/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "precio": 55000,
+  "descripcion": "Reparación de corona, cambio de pila, limpieza y pulido"
+}
+
+### 7. Eliminar una reparación (cambiar ID)
+DELETE {{api_url}}/reparaciones/1/
+Authorization: Bearer {{token}}
+
+### 8. Buscar reparaciones por código de orden
+GET {{api_url}}/reparaciones/?search=ORD-2026
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Buscar reparaciones por marca de reloj
+GET {{api_url}}/reparaciones/?search=Rolex
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Buscar reparaciones por nombre de cliente
+GET {{api_url}}/reparaciones/?search=Juan
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Filtrar reparaciones por estado
+GET {{api_url}}/reparaciones/?estado=Cotización
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 12. Filtrar reparaciones por técnico (cambiar tecnico ID)
+GET {{api_url}}/reparaciones/?tecnico=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 13. Filtrar reparaciones por cliente (cambiar cliente ID)
+GET {{api_url}}/reparaciones/?cliente=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 14. Filtrar solo mantenimientos
+GET {{api_url}}/reparaciones/?mantenimiento=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 15. Obtener reparaciones pendientes (no entregadas)
+GET {{api_url}}/reparaciones/pendientes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 16. Obtener reparaciones retrasadas
+GET {{api_url}}/reparaciones/retrasadas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 17. Obtener reparaciones de un técnico específico (cambiar tecnico_id)
+GET {{api_url}}/reparaciones/por_tecnico/?tecnico_id=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 18. Obtener estadísticas por estado
+GET {{api_url}}/reparaciones/por_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 19. Cambiar estado de una reparación (cambiar ID y tecnico si es necesario)
+PATCH {{api_url}}/reparaciones/1/cambiar_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "estado": "Reparación",
+  "tecnico": 1
+}
+
+### 20. Cambiar estado a "En prueba"
+PATCH {{api_url}}/reparaciones/1/cambiar_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "estado": "Prueba"
+}
+
+### 21. Cambiar estado a "Listo para entrega"
+PATCH {{api_url}}/reparaciones/1/cambiar_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "estado": "Listo"
+}
+
+### 22. Cambiar estado a "Entregado"
+PATCH {{api_url}}/reparaciones/1/cambiar_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "estado": "Entregado"
+}
+
+### 23. Asignar técnico a una reparación (cambiar ID y tecnico)
+PATCH {{api_url}}/reparaciones/1/asignar_tecnico/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tecnico": 1
+}
+
+### 24. Ordenar reparaciones por fecha de ingreso (descendente)
+GET {{api_url}}/reparaciones/?ordering=-fecha_ingreso
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 25. Ordenar reparaciones por fecha de entrega estimada
+GET {{api_url}}/reparaciones/?ordering=fecha_entrega_estimada
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 26. Ordenar reparaciones por precio (descendente)
+GET {{api_url}}/reparaciones/?ordering=-precio
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 27. Intentar crear reparación sin cliente (debe fallar)
+POST {{api_url}}/reparaciones/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "marca_reloj": "Test",
+  "descripcion": "Test sin cliente",
+  "codigo_orden": "TEST-001",
+  "fecha_entrega_estimada": "2026-01-25",
+  "precio": 10000,
+  "espacio_fisico": "Test",
+  "estado": "Cotización"
+}
+
+### 28. Intentar cambiar a estado que requiere técnico sin tenerlo (debe fallar)
+PATCH {{api_url}}/reparaciones/999/cambiar_estado/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "estado": "Reparación"
+}

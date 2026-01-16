@@ -1,0 +1,180 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### Login (Session Authentication)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Después del login, la cookie de sesión se mantiene automáticamente
+
+###############################################
+# VENTAS DE PILAS - Tests
+###############################################
+
+### 1. Listar todas las ventas de pilas
+GET {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 2. Obtener una venta específica (cambiar el ID según tu BD)
+GET {{api_url}}/ventas-pilas/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Crear una nueva venta de pila (cambiar pila ID según tu BD)
+POST {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pila": 1,
+  "cantidad": 5,
+  "precio_unitario": 5000
+}
+
+### 4. Crear venta sin especificar precio (toma el de la pila)
+POST {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pila": 1,
+  "cantidad": 3
+}
+
+### 5. Actualizar una venta completa (PUT - cambiar ID)
+PUT {{api_url}}/ventas-pilas/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pila": 1,
+  "cantidad": 7,
+  "precio_unitario": 5500
+}
+
+### 6. Actualizar parcialmente una venta (PATCH - cambiar ID)
+PATCH {{api_url}}/ventas-pilas/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cantidad": 6
+}
+
+### 7. Eliminar una venta (cambiar ID)
+# Nota: Al eliminar una venta, deberías revertir el stock manualmente
+DELETE {{api_url}}/ventas-pilas/1/
+Authorization: Bearer {{token}}
+
+### 8. Buscar ventas por código de pila
+GET {{api_url}}/ventas-pilas/?search=TEST
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Filtrar ventas por pila específica (cambiar pila ID)
+GET {{api_url}}/ventas-pilas/?pila=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Obtener ventas del mes actual
+GET {{api_url}}/ventas-pilas/mes_actual/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Obtener total vendido en un período
+GET {{api_url}}/ventas-pilas/total_vendido/?fecha_inicio=2026-01-01&fecha_fin=2026-01-31
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 12. Obtener total vendido sin filtro de fechas
+GET {{api_url}}/ventas-pilas/total_vendido/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 13. Obtener ventas de una pila específica con estadísticas (cambiar pila_id)
+GET {{api_url}}/ventas-pilas/por_pila/?pila_id=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 14. Ordenar ventas por fecha (descendente)
+GET {{api_url}}/ventas-pilas/?ordering=-fecha_venta
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 15. Ordenar ventas por cantidad (ascendente)
+GET {{api_url}}/ventas-pilas/?ordering=cantidad
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 16. Ordenar ventas por precio unitario (descendente)
+GET {{api_url}}/ventas-pilas/?ordering=-precio_unitario
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 17. Filtrar ventas por fecha específica
+GET {{api_url}}/ventas-pilas/?fecha_venta=2026-01-15
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 18. Intentar vender más pilas de las que hay en stock (debe fallar)
+POST {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pila": 1,
+  "cantidad": 999999
+}
+
+### 19. Intentar crear venta con cantidad cero o negativa (debe fallar)
+POST {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pila": 1,
+  "cantidad": 0
+}
+
+### 20. Intentar crear venta con precio negativo (debe fallar)
+POST {{api_url}}/ventas-pilas/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pila": 1,
+  "cantidad": 1,
+  "precio_unitario": -5000
+}

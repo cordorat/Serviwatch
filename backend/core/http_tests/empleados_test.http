@@ -1,3 +1,27 @@
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
 ###############################################################################
 # API REST - EMPLEADOS
 # Serviwatch
@@ -7,7 +31,20 @@
 @username = cordorat
 @password = cordorat
 
-# Pega aquí tu access token después de hacer login
+###############################################
+
+### Login (Session Authentication)
+# @name login
+POST {{baseUrl}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+# Después del login, la cookie de sesión se mantiene automáticamente
 @accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyMzIxNTI3LCJpYXQiOjE3NjIzMTc5MjcsImp0aSI6IjNmZTFkMDU2YWU3YzQ0OThiODZlYTA1ZjM1MWUzNTllIiwidXNlcl9pZCI6IjE5In0.NoyknkObGRBvug84W0SDxMFbkjLoV2fyQ7KIRUH72t0
 
 # ID del empleado para pruebas
@@ -22,6 +59,7 @@
 # @name login
 POST {{baseUrl}}/api/token/
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "username": "{{username}}",

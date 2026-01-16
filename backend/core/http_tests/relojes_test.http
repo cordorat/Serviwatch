@@ -1,0 +1,172 @@
+### Variables
+@base_url = http://localhost:8000
+@api_url = {{base_url}}/api
+
+###############################################
+# AUTENTICACIÓN (EJECUTA ESTO PRIMERO)
+###############################################
+
+### Obtener Token JWT
+# @name login
+# Ejecuta este request primero para obtener el token de autenticación.
+# Cambia el username y password según tu usuario.
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Guardar el token (se usa automáticamente en los siguientes requests)
+@token = {{login.response.body.access}}
+
+
+###############################################
+
+### Login (Session Authentication)
+# @name login
+POST {{base_url}}/login/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+# Después del login, la cookie de sesión se mantiene automáticamente
+
+###############################################
+# RELOJES - Tests
+###############################################
+
+### 1. Listar todos los relojes
+GET {{api_url}}/relojes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 2. Obtener un reloj específico (cambiar el ID según tu BD)
+GET {{api_url}}/relojes/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 3. Crear un nuevo reloj
+POST {{api_url}}/relojes/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "marca": "Rolex",
+  "referencia": "GMT-MASTER-II",
+  "precio": "15000000",
+  "tiene_comision": true,
+  "dueno": "Juan Pérez",
+  "descripcion": "Reloj deportivo de lujo",
+  "tipo": "USADO",
+  "estado": "DISPONIBLE",
+  "metodo_pago": "ABONO",
+  "saldo_pendiente": "15000000"
+}
+
+### 4. Actualizar un reloj completo (PUT - cambiar ID)
+PUT {{api_url}}/relojes/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "marca": "Rolex",
+  "referencia": "GMT-MASTER-II-Updated",
+  "precio": "16000000",
+  "tiene_comision": true,
+  "dueno": "Juan Pérez",
+  "descripcion": "Reloj deportivo de lujo - actualizado",
+  "tipo": "USADO",
+  "estado": "DISPONIBLE",
+  "metodo_pago": "ABONO",
+  "saldo_pendiente": "16000000"
+}
+
+### 5. Actualizar parcialmente un reloj (PATCH - cambiar ID)
+PATCH {{api_url}}/relojes/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "descripcion": "Reloj deportivo de lujo - modificado"
+}
+
+### 6. Eliminar un reloj (cambiar ID)
+DELETE {{api_url}}/relojes/1/
+Authorization: Bearer {{token}}
+
+### 7. Buscar relojes por marca
+GET {{api_url}}/relojes/?search=Rolex
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 8. Filtrar relojes por tipo
+GET {{api_url}}/relojes/?tipo=USADO
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 9. Filtrar relojes por estado
+GET {{api_url}}/relojes/?estado=DISPONIBLE
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 10. Obtener relojes disponibles para venta
+GET {{api_url}}/relojes/disponibles/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 11. Obtener relojes vendidos
+GET {{api_url}}/relojes/vendidos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 12. Obtener relojes con saldo pendiente
+GET {{api_url}}/relojes/pendientes_pago/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 13. Ver historial de abonos de un reloj (cambiar ID)
+GET {{api_url}}/relojes/1/historial_abonos/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 14. Marcar reloj como vendido (cambiar ID y cliente_id)
+PATCH {{api_url}}/relojes/1/marcar_vendido/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cliente": 1,
+  "metodo_pago": "CONTADO"
+}
+
+### 15. Marcar reloj como vendido con abonos (cambiar ID y cliente_id)
+PATCH {{api_url}}/relojes/1/marcar_vendido/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cliente": 1,
+  "metodo_pago": "ABONO"
+}
+
+### 16. Ordenar relojes por precio (descendente)
+GET {{api_url}}/relojes/?ordering=-precio
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 17. Filtrar relojes con comisión
+GET {{api_url}}/relojes/?tiene_comision=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 18. Filtrar relojes pagados completamente
+GET {{api_url}}/relojes/?pagado=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
